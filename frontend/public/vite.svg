@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- 背景円 -->
+  <circle cx="256" cy="256" r="256" fill="#0ea5e9"/>
+  
+  <!-- 中央の花形（気晴らしを表現） -->
+  <g transform="translate(256, 256)">
+    <!-- 花びら -->
+    <path d="M0,-80 Q-30,-80 -40,-50 Q-40,-20 0,-20 Q40,-20 40,-50 Q30,-80 0,-80" fill="#ffffff" transform="rotate(0)"/>
+    <path d="M0,-80 Q-30,-80 -40,-50 Q-40,-20 0,-20 Q40,-20 40,-50 Q30,-80 0,-80" fill="#ffffff" transform="rotate(72)"/>
+    <path d="M0,-80 Q-30,-80 -40,-50 Q-40,-20 0,-20 Q40,-20 40,-50 Q30,-80 0,-80" fill="#ffffff" transform="rotate(144)"/>
+    <path d="M0,-80 Q-30,-80 -40,-50 Q-40,-20 0,-20 Q40,-20 40,-50 Q30,-80 0,-80" fill="#ffffff" transform="rotate(216)"/>
+    <path d="M0,-80 Q-30,-80 -40,-50 Q-40,-20 0,-20 Q40,-20 40,-50 Q30,-80 0,-80" fill="#ffffff" transform="rotate(288)"/>
+    
+    <!-- 中心円 -->
+    <circle cx="0" cy="0" r="30" fill="#fbbf24"/>
+  </g>
+  
+  <!-- 5分を表す「5」の文字 -->
+  <text x="256" y="350" font-family="Arial, sans-serif" font-size="120" font-weight="bold" text-anchor="middle" fill="#ffffff">5</text>
+</svg>

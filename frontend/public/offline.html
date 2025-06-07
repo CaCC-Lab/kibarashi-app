@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オフライン - 5分気晴らし</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans JP', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #075985;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 400px;
+        }
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            opacity: 0.6;
+        }
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #0c4a6e;
+            margin-bottom: 1.5rem;
+        }
+        .suggestions {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+        .suggestions h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: #0369a1;
+        }
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+        .suggestions li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e0f2fe;
+        }
+        .suggestions li:last-child {
+            border-bottom: none;
+        }
+        .retry-button {
+            display: inline-block;
+            background: #0ea5e9;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: background 0.2s;
+        }
+        .retry-button:hover {
+            background: #0284c7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            <path d="M18.364 5.636l-2.828 2.828m0 0l2.828 2.828m-2.828-2.828L12.707 11.293m0 0l-2.828 2.828m2.828-2.828l2.829 2.828"/>
+        </svg>
+        
+        <h1>オフラインです</h1>
+        <p>
+            インターネット接続がありません。<br>
+            接続が回復するまで、以下の気晴らし方法をお試しください。
+        </p>
+
+        <div class="suggestions">
+            <h2>オフラインでできる気晴らし</h2>
+            <ul>
+                <li>🧘 深呼吸を3回行う（4秒吸って、6秒吐く）</li>
+                <li>🤸 軽いストレッチで体をほぐす</li>
+                <li>📝 今の気持ちを紙に書き出す</li>
+                <li>👀 窓の外の景色を1分間眺める</li>
+                <li>💭 今日の良かったことを3つ思い出す</li>
+            </ul>
+        </div>
+
+        <a href="/" class="retry-button">接続を再試行</a>
+    </div>
+
+    <script>
+        // オンラインに戻ったら自動的にリロード
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

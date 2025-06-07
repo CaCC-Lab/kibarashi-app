@@ -4,54 +4,54 @@
 
 ### 🔴 最優先タスク（プロジェクト基盤）
 
-- [ ] **プロジェクト初期セットアップ**
-  - [ ] Gitリポジトリの初期化
-  - [ ] .gitignoreファイルの作成
-  - [ ] プロジェクトのディレクトリ構造作成（frontend/, backend/, infrastructure/, docs/）
-  - [ ] README.mdの作成（基本的なプロジェクト説明）
+- [x] **プロジェクト初期セットアップ**
+  - [x] Gitリポジトリの初期化
+  - [x] .gitignoreファイルの作成
+  - [x] プロジェクトのディレクトリ構造作成（frontend/, backend/, infrastructure/, docs/）
+  - [x] README.mdの作成（基本的なプロジェクト説明）
 
-- [ ] **技術スタック定義ファイルの作成**
-  - [ ] technologystack.mdの作成（使用技術・バージョン固定）
-  - [ ] directorystructure.mdの作成（ディレクトリ構成ルール）
+- [x] **技術スタック定義ファイルの作成**
+  - [x] technologystack.mdの作成（使用技術・バージョン固定）
+  - [x] directorystructure.mdの作成（ディレクトリ構成ルール）
 
-- [ ] **開発環境構築**
-  - [ ] Docker設定ファイルの作成（docker-compose.yml）
-  - [ ] 環境変数管理の設定（.env.example）
-  - [ ] VSCode推奨設定（.vscode/settings.json）
+- [x] **開発環境構築**
+  - [x] Docker設定ファイルの作成（docker-compose.yml）
+  - [x] 環境変数管理の設定（.env.example）
+  - [x] VSCode推奨設定（.vscode/settings.json）
 
 ### 🟡 高優先度タスク（フロントエンド基盤）
 
-- [ ] **Reactアプリケーション初期化**
-  - [ ] Create React App with TypeScript テンプレート
-  - [ ] 不要なファイルの削除とクリーンアップ
-  - [ ] Tailwind CSS の設定
-  - [ ] ESLint/Prettier の設定
+- [x] **Reactアプリケーション初期化**
+  - [x] Vite + React + TypeScript の初期設定
+  - [x] 基本的なApp.tsxの作成
+  - [x] Tailwind CSS の設定
+  - [x] ESLint/Prettier の設定
 
-- [ ] **PWA基本設定**
-  - [ ] manifest.jsonの作成
-  - [ ] Service Workerの基本実装
-  - [ ] アイコンセットの準備（各サイズ）
-  - [ ] オフライン対応の基礎実装
+- [x] **PWA基本設定**
+  - [x] manifest.jsonの作成
+  - [x] Service Workerの基本実装（vite-plugin-pwa）
+  - [x] アイコンセットの準備（生成ツール作成）
+  - [x] オフライン対応の基礎実装
 
-- [ ] **基本UIコンポーネント作成**
-  - [ ] レイアウトコンポーネント（Header, Main, Footer）
-  - [ ] 状況選択コンポーネント（職場・家・外出）
-  - [ ] 時間選択コンポーネント（5分・15分・30分）
-  - [ ] 提案表示コンポーネント（3つの提案カード）
-  - [ ] ローディング/エラー表示コンポーネント
+- [x] **基本UIコンポーネント作成**
+  - [x] レイアウトコンポーネント（Header, Main, Footer）
+  - [x] 状況選択コンポーネント（職場・家・外出）
+  - [x] 時間選択コンポーネント（5分・15分・30分）
+  - [x] 提案表示コンポーネント（3つの提案カード）
+  - [x] ローディング/エラー表示コンポーネント
 
 ### 🟢 中優先度タスク（バックエンド基盤）
 
-- [ ] **Node.js/Expressサーバー初期化**
-  - [ ] TypeScript設定
-  - [ ] 基本的なミドルウェア設定（CORS, body-parser等）
-  - [ ] エラーハンドリングミドルウェア
-  - [ ] ヘルスチェックエンドポイント
+- [x] **Node.js/Expressサーバー初期化**
+  - [x] TypeScript設定
+  - [x] 基本的なミドルウェア設定（CORS, helmet, compression等）
+  - [x] エラーハンドリングミドルウェア
+  - [x] ヘルスチェックエンドポイント
 
-- [ ] **API実装（Phase 1）**
-  - [ ] GET /api/v1/suggestions エンドポイント
-  - [ ] 静的な提案データの準備（Gemini API統合前）
-  - [ ] レスポンス形式の実装（TypeScript型定義）
+- [x] **API実装（Phase 1）**
+  - [x] GET /api/v1/suggestions エンドポイント
+  - [x] 静的な提案データの準備（Gemini API統合前）
+  - [x] レスポンス形式の実装（TypeScript型定義）
 
 - [ ] **Google Cloud設定**
   - [ ] GCPプロジェクトの作成

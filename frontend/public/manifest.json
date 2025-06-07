@@ -1,0 +1,70 @@
+{
+  "name": "5分気晴らし - 音声ガイド付きストレス解消アプリ",
+  "short_name": "5分気晴らし",
+  "description": "職場のストレスを5分で解消。音声ガイド付きの気晴らし提案アプリ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0ea5e9",
+  "background_color": "#ffffff",
+  "lang": "ja",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/pwa-64x64.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/maskable-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "職場で気晴らし",
+      "short_name": "職場",
+      "description": "職場での気晴らし方法を提案",
+      "url": "/?situation=workplace",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "家で気晴らし",
+      "short_name": "家",
+      "description": "家での気晴らし方法を提案",
+      "url": "/?situation=home",
+      "icons": [{ "src": "/pwa-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["health", "lifestyle", "productivity"],
+  "screenshots": [
+    {
+      "src": "/screenshot-1.png",
+      "type": "image/png",
+      "sizes": "1080x1920",
+      "label": "ホーム画面"
+    },
+    {
+      "src": "/screenshot-2.png",
+      "type": "image/png",
+      "sizes": "1080x1920",
+      "label": "提案画面"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
