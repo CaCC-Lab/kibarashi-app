@@ -1,0 +1,47 @@
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import compression from 'compression';
+import morgan from 'morgan';
+import dotenv from 'dotenv';
+import { errorHandler } from './api/middleware/errorHandler.js';
+import { rateLimiter } from './api/middleware/rateLimit.js';
+import { logger } from './utils/logger.js';
+import routes from './api/routes/index.js';
+
+// 環境変数の読み込み
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 8080;
+
+// ミドルウェアの設定
+app.use(helmet());
+app.use(compression());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true,
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+
+// レート制限
+app.use('/api/', rateLimiter);
+
+// ルーティング
+app.use('/api/v1', routes);
+
+// ヘルスチェック
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// エラーハンドリング
+app.use(errorHandler);
+
+// サーバー起動
+app.listen(PORT, () => {
+  logger.info(`Server is running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV}`);
+});

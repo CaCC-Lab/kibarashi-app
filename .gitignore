@@ -1,0 +1,148 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+*.coverage
+*.lcov
+.nyc_output/
+
+# Production
+build/
+dist/
+out/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+.docker/
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Cache
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+.eslintcache
+.stylelintcache
+
+# TypeScript
+*.tsbuildinfo
+.tsc-cache/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional stylelint cache
+.stylelintcache
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Google Cloud
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!manifest.json
+gcp-credentials/
+
+# Firebase
+.firebase/
+.firebaserc
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Service Worker
+sw.js
+workbox-*.js
+
+# PWA
+precache-manifest.*
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Redis dump
+dump.rdb
+
+# Certificates
+*.pem
+*.key
+*.crt
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Misc
+.sass-cache/
+.connect.lock
+.lock-wscript
