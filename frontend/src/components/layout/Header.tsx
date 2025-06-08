@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Header: React.FC = () => {
+  const [showMessage, setShowMessage] = useState(false);
+
+  const handleSettingsClick = () => {
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 3000); // 3秒後に自動で非表示
+  };
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-100">
       <div className="container mx-auto px-4 py-4">
@@ -15,10 +22,12 @@ const Header: React.FC = () => {
             </div>
           </div>
           
-          <button
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            aria-label="設定"
-          >
+          <div className="relative">
+            <button
+              onClick={handleSettingsClick}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              aria-label="設定"
+            >
             <svg
               className="w-6 h-6 text-gray-600"
               fill="none"
@@ -38,7 +47,18 @@ const Header: React.FC = () => {
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               />
             </svg>
-          </button>
+            </button>
+            
+            {/* 設定機能の実装予定メッセージ */}
+            {showMessage && (
+              <div className="absolute right-0 top-full mt-2 z-50">
+                <div className="bg-gray-800 text-white text-sm px-4 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                  <div className="absolute -top-2 right-3 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-gray-800"></div>
+                  設定機能は今後実装予定です
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>
