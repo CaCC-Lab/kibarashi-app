@@ -3,15 +3,15 @@ import MainLayout from './components/layout/MainLayout';
 import SituationSelector from './features/situation/SituationSelector';
 import DurationSelector from './features/duration/DurationSelector';
 import SuggestionList from './features/suggestion/SuggestionList';
-import { useSituation } from './features/situation/useSituation';
-import { useDuration } from './features/duration/useDuration';
 
 type Step = 'situation' | 'duration' | 'suggestions';
+type Situation = 'workplace' | 'home' | 'outside' | null;
+type Duration = 5 | 15 | 30 | null;
 
 function App() {
   const [currentStep, setCurrentStep] = useState<Step>('situation');
-  const { situation, setSituation, resetSituation } = useSituation();
-  const { duration, setDuration, resetDuration } = useDuration();
+  const [situation, setSituation] = useState<Situation>(null);
+  const [duration, setDuration] = useState<Duration>(null);
 
   const handleSituationSelect = (selected: 'workplace' | 'home' | 'outside') => {
     setSituation(selected);
@@ -24,17 +24,17 @@ function App() {
   };
 
   const handleReset = () => {
-    resetSituation();
-    resetDuration();
+    setSituation(null);
+    setDuration(null);
     setCurrentStep('situation');
   };
 
   const renderStep = () => {
     switch (currentStep) {
       case 'situation':
-        return <SituationSelector />;
+        return <SituationSelector selected={situation} onSelect={handleSituationSelect} />;
       case 'duration':
-        return <DurationSelector />;
+        return <DurationSelector selected={duration} onSelect={handleDurationSelect} />;
       case 'suggestions':
         if (situation && duration) {
           return <SuggestionList situation={situation} duration={duration} />;
@@ -96,19 +96,6 @@ function App() {
       </button>
     </div>
   );
-
-  // hookの値を直接使用する代わりに、関数でラップ
-  React.useEffect(() => {
-    if (situation) {
-      handleSituationSelect(situation);
-    }
-  }, [situation]);
-
-  React.useEffect(() => {
-    if (duration) {
-      handleDurationSelect(duration);
-    }
-  }, [duration]);
 
   return (
     <MainLayout>

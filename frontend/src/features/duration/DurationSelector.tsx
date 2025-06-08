@@ -1,11 +1,15 @@
 import React from 'react';
-import { useDuration } from './useDuration';
 
 interface DurationOption {
   id: 5 | 15 | 30;
   label: string;
   description: string;
   color: string;
+}
+
+interface DurationSelectorProps {
+  selected: 5 | 15 | 30 | null;
+  onSelect: (duration: 5 | 15 | 30) => void;
 }
 
 const durations: DurationOption[] = [
@@ -29,9 +33,7 @@ const durations: DurationOption[] = [
   },
 ];
 
-const DurationSelector: React.FC = () => {
-  const { duration, setDuration } = useDuration();
-
+const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect }) => {
   return (
     <div className="w-full">
       <h2 className="text-xl font-bold text-gray-800 mb-2">どのくらい時間がありますか？</h2>
@@ -41,11 +43,11 @@ const DurationSelector: React.FC = () => {
         {durations.map((option) => (
           <button
             key={option.id}
-            onClick={() => setDuration(option.id)}
+            onClick={() => onSelect(option.id)}
             className={`
               relative overflow-hidden rounded-xl border-2 transition-all duration-200
               ${
-                duration === option.id
+                selected === option.id
                   ? 'border-primary-500 shadow-lg transform scale-105'
                   : 'border-gray-200 hover:border-primary-300 hover:shadow-md'
               }
@@ -53,14 +55,14 @@ const DurationSelector: React.FC = () => {
           >
             <div className={`
               absolute inset-0 opacity-10 bg-gradient-to-br ${option.color}
-              ${duration === option.id ? 'opacity-20' : ''}
+              ${selected === option.id ? 'opacity-20' : ''}
             `} />
             
             <div className="relative p-6 bg-white bg-opacity-95">
               <div className="flex flex-col items-center space-y-2">
                 <div className={`
                   text-3xl font-bold
-                  ${duration === option.id ? 'text-primary-600' : 'text-gray-700'}
+                  ${selected === option.id ? 'text-primary-600' : 'text-gray-700'}
                 `}>
                   {option.label}
                 </div>
@@ -72,7 +74,7 @@ const DurationSelector: React.FC = () => {
                       key={i}
                       className={`
                         w-2 h-2 rounded-full
-                        ${duration === option.id ? 'bg-primary-500' : 'bg-gray-300'}
+                        ${selected === option.id ? 'bg-primary-500' : 'bg-gray-300'}
                       `}
                     />
                   ))}
@@ -80,7 +82,7 @@ const DurationSelector: React.FC = () => {
               </div>
             </div>
             
-            {duration === option.id && (
+            {selected === option.id && (
               <div className="absolute top-3 right-3">
                 <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">

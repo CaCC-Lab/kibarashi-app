@@ -8,6 +8,7 @@ export interface Suggestion {
   duration: number;
   category: '認知的' | '行動的';
   steps?: string[];
+  guide?: string;
 }
 
 export const useSuggestions = (

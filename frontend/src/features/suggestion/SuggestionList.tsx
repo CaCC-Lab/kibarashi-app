@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SuggestionCard from './SuggestionCard';
+import SuggestionDetail from './SuggestionDetail';
 import { useSuggestions } from './useSuggestions';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
@@ -11,6 +12,7 @@ interface SuggestionListProps {
 
 const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) => {
   const { suggestions, loading, error, refetch } = useSuggestions(situation, duration);
+  const [selectedSuggestion, setSelectedSuggestion] = useState<any>(null);
 
   if (loading) {
     return <Loading message="気晴らし方法を探しています..." />;
@@ -39,6 +41,16 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
     );
   }
 
+  // Show detail view if a suggestion is selected
+  if (selectedSuggestion) {
+    return (
+      <SuggestionDetail
+        {...selectedSuggestion}
+        onBack={() => setSelectedSuggestion(null)}
+      />
+    );
+  }
+
   return (
     <div className="w-full">
       <div className="mb-6">
@@ -58,10 +70,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
           <SuggestionCard
             key={suggestion.id}
             {...suggestion}
-            onStart={() => {
-              // TODO: 音声ガイド開始処理
-              console.log('Start suggestion:', suggestion.id);
-            }}
+            onStart={() => setSelectedSuggestion(suggestion)}
           />
         ))}
       </div>

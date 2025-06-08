@@ -1,11 +1,15 @@
 import React from 'react';
-import { useSituation } from './useSituation';
 
 interface SituationOption {
   id: 'workplace' | 'home' | 'outside';
   label: string;
   icon: React.ReactNode;
   description: string;
+}
+
+interface SituationSelectorProps {
+  selected: 'workplace' | 'home' | 'outside' | null;
+  onSelect: (situation: 'workplace' | 'home' | 'outside') => void;
 }
 
 const situations: SituationOption[] = [
@@ -46,9 +50,7 @@ const situations: SituationOption[] = [
   },
 ];
 
-const SituationSelector: React.FC = () => {
-  const { situation, setSituation } = useSituation();
-
+const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelect }) => {
   return (
     <div className="w-full">
       <h2 className="text-xl font-bold text-gray-800 mb-2">どこにいますか？</h2>
@@ -58,11 +60,11 @@ const SituationSelector: React.FC = () => {
         {situations.map((option) => (
           <button
             key={option.id}
-            onClick={() => setSituation(option.id)}
+            onClick={() => onSelect(option.id)}
             className={`
               relative p-6 rounded-xl border-2 transition-all duration-200
               ${
-                situation === option.id
+                selected === option.id
                   ? 'border-primary-500 bg-primary-50 shadow-lg transform scale-105'
                   : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md'
               }
@@ -70,7 +72,7 @@ const SituationSelector: React.FC = () => {
           >
             <div className={`
               flex flex-col items-center space-y-3
-              ${situation === option.id ? 'text-primary-600' : 'text-gray-600'}
+              ${selected === option.id ? 'text-primary-600' : 'text-gray-600'}
             `}>
               {option.icon}
               <div className="text-center">
@@ -79,7 +81,7 @@ const SituationSelector: React.FC = () => {
               </div>
             </div>
             
-            {situation === option.id && (
+            {selected === option.id && (
               <div className="absolute top-3 right-3">
                 <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
