@@ -8,9 +8,12 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary-50 to-primary-100">
+    <div className="min-h-screen flex flex-col">
+      {/* アクセシビリティ: スキップリンク */}
+      <a href="#main-content" className="skip-link">メインコンテンツにスキップ</a>
+      
       <Header />
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main id="main-content" className="flex-1 container mx-auto px-4 py-8 animate-fadeIn">
         {children}
       </main>
       <Footer />

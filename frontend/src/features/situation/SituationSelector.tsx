@@ -53,22 +53,26 @@ const situations: SituationOption[] = [
 const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelect }) => {
   return (
     <div className="w-full">
-      <h2 className="text-xl font-bold text-gray-800 mb-2">どこにいますか？</h2>
-      <p className="text-gray-600 mb-6">今いる場所を選んでください</p>
+      <h2 className="text-xl font-bold text-gray-800 mb-2 animate-fadeIn">どこにいますか？</h2>
+      <p className="text-gray-600 mb-6 animate-fadeIn animation-delay-100">今いる場所を選んでください</p>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {situations.map((option) => (
+        {situations.map((option, index) => (
           <button
             key={option.id}
             onClick={() => onSelect(option.id)}
             className={`
-              relative p-6 rounded-xl border-2 transition-all duration-200
+              relative p-6 rounded-xl border-2 transition-all duration-200 
+              animate-slideIn hover-lift focus-ring
               ${
                 selected === option.id
                   ? 'border-primary-500 bg-primary-50 shadow-lg transform scale-105'
                   : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md'
               }
             `}
+            style={{ animationDelay: `${index * 100}ms` }}
+            aria-pressed={selected === option.id}
+            aria-describedby={`situation-${option.id}-desc`}
           >
             <div className={`
               flex flex-col items-center space-y-3
@@ -77,14 +81,14 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
               {option.icon}
               <div className="text-center">
                 <h3 className="font-semibold text-lg">{option.label}</h3>
-                <p className="text-sm opacity-80">{option.description}</p>
+                <p id={`situation-${option.id}-desc`} className="text-sm opacity-80">{option.description}</p>
               </div>
             </div>
             
             {selected === option.id && (
-              <div className="absolute top-3 right-3">
+              <div className="absolute top-3 right-3 animate-scaleIn">
                 <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>

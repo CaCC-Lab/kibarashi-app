@@ -71,7 +71,7 @@ class ApiClient {
   async post<T>(
     endpoint: string,
     data: unknown,
-    options?: RequestOptions
+    options?: RequestOptions & { responseType?: 'json' | 'blob' }
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     
@@ -91,6 +91,11 @@ class ApiClient {
         throw new Error(
           errorData.error?.message || `HTTPエラー: ${response.status}`
         );
+      }
+
+      // responseTypeが'blob'の場合はBlobとして返す
+      if (options?.responseType === 'blob') {
+        return await response.blob() as T;
       }
 
       return await response.json();

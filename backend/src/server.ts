@@ -12,6 +12,11 @@ import routes from './api/routes/index.js';
 // 環境変数の読み込み
 dotenv.config();
 
+// Gemini APIキーの確認
+if (!process.env.GEMINI_API_KEY) {
+  logger.warn('GEMINI_API_KEY is not set. Using fallback suggestions.');
+}
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -19,7 +24,7 @@ const PORT = process.env.PORT || 8080;
 app.use(helmet());
 app.use(compression());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
 }));
 app.use(express.json());
@@ -34,7 +39,11 @@ app.use('/api/v1', routes);
 
 // ヘルスチェック
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    ttsEnabled: process.env.GCP_TTS_ENABLED === 'true'
+  });
 });
 
 // エラーハンドリング
@@ -44,4 +53,6 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV}`);
+  logger.info(`Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured (using fallback)'}`);
+  logger.info(`TTS API: ${process.env.GCP_TTS_ENABLED === 'true' ? 'Enabled' : 'Disabled'}`);
 });

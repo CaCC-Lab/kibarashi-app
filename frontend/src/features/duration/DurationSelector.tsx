@@ -36,22 +36,26 @@ const durations: DurationOption[] = [
 const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect }) => {
   return (
     <div className="w-full">
-      <h2 className="text-xl font-bold text-gray-800 mb-2">どのくらい時間がありますか？</h2>
-      <p className="text-gray-600 mb-6">気晴らしに使える時間を選んでください</p>
+      <h2 className="text-xl font-bold text-gray-800 mb-2 animate-fadeIn">どのくらい時間がありますか？</h2>
+      <p className="text-gray-600 mb-6 animate-fadeIn animation-delay-100">気晴らしに使える時間を選んでください</p>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {durations.map((option) => (
+        {durations.map((option, index) => (
           <button
             key={option.id}
             onClick={() => onSelect(option.id)}
             className={`
               relative overflow-hidden rounded-xl border-2 transition-all duration-200
+              animate-slideIn hover-lift focus-ring
               ${
                 selected === option.id
                   ? 'border-primary-500 shadow-lg transform scale-105'
                   : 'border-gray-200 hover:border-primary-300 hover:shadow-md'
               }
             `}
+            style={{ animationDelay: `${index * 100}ms` }}
+            aria-pressed={selected === option.id}
+            aria-describedby={`duration-${option.id}-desc`}
           >
             <div className={`
               absolute inset-0 opacity-10 bg-gradient-to-br ${option.color}
@@ -66,7 +70,7 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
                 `}>
                   {option.label}
                 </div>
-                <p className="text-sm text-gray-600">{option.description}</p>
+                <p id={`duration-${option.id}-desc`} className="text-sm text-gray-600">{option.description}</p>
                 
                 <div className="flex items-center space-x-1 mt-2">
                   {[...Array(option.id / 5)].map((_, i) => (
@@ -83,9 +87,9 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
             </div>
             
             {selected === option.id && (
-              <div className="absolute top-3 right-3">
+              <div className="absolute top-3 right-3 animate-scaleIn">
                 <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>

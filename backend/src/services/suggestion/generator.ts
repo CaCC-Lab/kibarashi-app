@@ -1,5 +1,6 @@
 import { logger } from '../../utils/logger.js';
 import { getFallbackSuggestions } from './fallbackData.js';
+import { geminiClient } from '../gemini/geminiClient.js';
 
 export interface Suggestion {
   id: string;
@@ -16,16 +17,19 @@ export async function generateSuggestions(
   duration: number
 ): Promise<Suggestion[]> {
   try {
-    // TODO: Gemini APIを使用した提案生成
-    // 現時点ではフォールバックデータを使用
-    logger.info('Using fallback suggestions (Gemini API not yet implemented)');
+    // Gemini APIが有効な場合は使用
+    if (process.env.GEMINI_API_KEY) {
+      logger.info('Generating suggestions with Gemini API', { situation, duration });
+      const suggestions = await geminiClient.generateSuggestions(situation, duration);
+      return suggestions.slice(0, 3);
+    }
     
+    // APIキーがない場合はフォールバック
+    logger.info('Using fallback suggestions (Gemini API key not configured)');
     const suggestions = getFallbackSuggestions(situation, duration);
-    
-    // 3つの提案を返す
     return suggestions.slice(0, 3);
   } catch (error) {
-    logger.error('Error generating suggestions:', error);
+    logger.error('Error generating suggestions, falling back to static data:', error);
     // エラー時もフォールバックデータを返す
     return getFallbackSuggestions(situation, duration).slice(0, 3);
   }

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DarkModeToggle from '../common/DarkModeToggle';
 
 const Header: React.FC = () => {
   const [showMessage, setShowMessage] = useState(false);
@@ -9,7 +10,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-100">
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-100 dark:border-gray-700 transition-colors">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
@@ -17,23 +18,26 @@ const Header: React.FC = () => {
               <span className="text-white font-bold text-lg">5</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">5分気晴らし</h1>
-              <p className="text-sm text-gray-600">音声ガイド付きストレス解消</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">5分気晴らし</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-300">音声ガイド付きストレス解消</p>
             </div>
           </div>
           
-          <div className="relative">
-            <button
-              onClick={handleSettingsClick}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              aria-label="設定"
-            >
-            <svg
-              className="w-6 h-6 text-gray-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+          <div className="flex items-center space-x-3">
+            <DarkModeToggle />
+            
+            <div className="relative">
+              <button
+                onClick={handleSettingsClick}
+                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus-ring"
+                aria-label="設定"
+              >
+              <svg
+                className="w-6 h-6 text-gray-600 dark:text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -46,18 +50,19 @@ const Header: React.FC = () => {
                 strokeWidth={2}
                 d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
               />
-            </svg>
-            </button>
+              </svg>
+              </button>
             
-            {/* 設定機能の実装予定メッセージ */}
-            {showMessage && (
-              <div className="absolute right-0 top-full mt-2 z-50">
-                <div className="bg-gray-800 text-white text-sm px-4 py-2 rounded-lg shadow-lg whitespace-nowrap">
-                  <div className="absolute -top-2 right-3 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-gray-800"></div>
-                  設定機能は今後実装予定です
+              {/* 設定機能の実装予定メッセージ */}
+              {showMessage && (
+                <div className="absolute right-0 top-full mt-2 z-50 animate-fadeIn">
+                  <div className="bg-gray-800 text-white text-sm px-4 py-2 rounded-lg shadow-lg whitespace-nowrap">
+                    <div className="absolute -top-2 right-3 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-b-[8px] border-b-gray-800"></div>
+                    設定機能は今後実装予定です
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -5,9 +5,54 @@
 @layer base {
   html {
     font-family: 'Noto Sans JP', system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
   
   body {
-    @apply antialiased;
+    @apply antialiased bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800;
+    transition: background-color 0.3s ease;
+  }
+}
+
+/* スクリーンリーダー専用スタイル */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* キーボードフォーカススタイル */
+*:focus {
+  outline: 2px solid theme('colors.primary.500');
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* モーションを好まないユーザー向け */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ハイコントラストモード対応 */
+@media (prefers-contrast: high) {
+  .focus-ring:focus {
+    outline: 3px solid;
+    outline-color: Highlight;
   }
 }

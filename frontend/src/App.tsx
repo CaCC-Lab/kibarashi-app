@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import MainLayout from './components/layout/MainLayout';
 import SituationSelector from './features/situation/SituationSelector';
 import DurationSelector from './features/duration/DurationSelector';

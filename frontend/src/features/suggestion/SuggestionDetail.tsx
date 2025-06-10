@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import AudioPlayer from '../../components/audio/AudioPlayer';
+import { ttsService } from '../../services/api/tts';
 
 interface SuggestionDetailProps {
   id: string;
@@ -19,6 +21,10 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
   const [timeRemaining, setTimeRemaining] = useState(duration * 60); // seconds
   const [isRunning, setIsRunning] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -39,14 +45,61 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
     return () => clearInterval(interval);
   }, [isRunning, timeRemaining]);
 
+  // コンポーネントがアンマウントされたときに音声URLを解放
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        ttsService.revokeAudioUrl(audioUrl);
+      }
+    };
+  }, [audioUrl]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStart = () => {
+  const handleStart = async () => {
     setIsRunning(true);
+    
+    // 音声ガイドが有効な場合、音声を生成
+    if (showAudioPlayer && !audioUrl) {
+      await generateAudio();
+    }
+  };
+
+  const generateAudio = async () => {
+    setIsLoadingAudio(true);
+    setAudioError(null);
+    
+    try {
+      const audioBlob = await ttsService.synthesizeSpeech({
+        text: guide,
+        voiceSettings: {
+          gender: 'FEMALE',
+          speed: 1.0,
+        }
+      });
+      
+      const url = ttsService.createAudioUrl(audioBlob);
+      setAudioUrl(url);
+    } catch (error) {
+      console.error('Audio generation failed:', error);
+      if (error instanceof Error) {
+        if (error.message.includes('503') || error.message.includes('TTS_DISABLED')) {
+          setAudioError('音声機能は現在無効になっています');
+        } else if (error.message.includes('timeout')) {
+          setAudioError('音声生成がタイムアウトしました。しばらくしてから再度お試しください');
+        } else {
+          setAudioError('音声の生成に失敗しました。ネットワーク接続を確認してください');
+        }
+      } else {
+        setAudioError('音声の生成に失敗しました');
+      }
+    } finally {
+      setIsLoadingAudio(false);
+    }
   };
 
   const handlePause = () => {
@@ -143,6 +196,41 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
             <span>ガイド</span>
           </h3>
           <p className="text-gray-700 whitespace-pre-line">{guide}</p>
+          
+          {/* 音声ガイドオプション */}
+          <div className="mt-4">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={showAudioPlayer}
+                onChange={(e) => setShowAudioPlayer(e.target.checked)}
+                className="rounded text-primary-600 focus:ring-primary-500"
+              />
+              <span className="text-sm text-gray-700">音声ガイドを使用する</span>
+            </label>
+            
+            {showAudioPlayer && (
+              <div className="mt-3">
+                {isLoadingAudio ? (
+                  <div className="text-sm text-gray-600">
+                    <span className="animate-pulse">音声を生成中...</span>
+                  </div>
+                ) : audioError ? (
+                  <div className="text-sm text-red-600">{audioError}</div>
+                ) : audioUrl ? (
+                  <AudioPlayer
+                    audioUrl={audioUrl}
+                    autoPlay={isRunning}
+                    className="mt-2"
+                  />
+                ) : (
+                  <div className="text-sm text-gray-600">
+                    「開始」ボタンを押すと音声ガイドが開始されます
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Progress Bar */}

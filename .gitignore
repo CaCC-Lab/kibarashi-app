@@ -77,6 +77,7 @@ pids
 .tern-port
 .eslintcache
 .stylelintcache
+cache/
 
 # TypeScript
 *.tsbuildinfo

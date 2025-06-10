@@ -48,7 +48,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   const style = categoryStyles[category];
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn">
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -88,7 +88,9 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
           <div className="mb-4">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center space-x-1 text-sm text-primary-600 hover:text-primary-700"
+              className="flex items-center space-x-1 text-sm text-primary-600 hover:text-primary-700 focus-ring transition-colors"
+              aria-expanded={isExpanded}
+              aria-controls={`steps-${title.replace(/\s+/g, '-').toLowerCase()}`}
             >
               <span>{isExpanded ? '手順を隠す' : '手順を見る'}</span>
               <svg 
@@ -102,9 +104,9 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
             </button>
             
             {isExpanded && (
-              <ol className="mt-3 space-y-2">
+              <ol id={`steps-${title.replace(/\s+/g, '-').toLowerCase()}`} className="mt-3 space-y-2 animate-fadeIn">
                 {steps.map((step, index) => (
-                  <li key={index} className="flex items-start space-x-3 text-sm text-gray-600">
+                  <li key={index} className="flex items-start space-x-3 text-sm text-gray-600 animate-slideIn" style={{ animationDelay: `${index * 50}ms` }}>
                     <span className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-medium">
                       {index + 1}
                     </span>
@@ -118,7 +120,8 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
 
         <button
           onClick={onStart}
-          className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+          className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 hover-scale focus-ring"
+          aria-label={`${title}の気晴らしを開始`}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
