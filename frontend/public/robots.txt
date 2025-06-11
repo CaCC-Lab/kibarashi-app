@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://kibarashi-app.com/sitemap.xml
+# PWA assets
+Allow: /pwa-*.png
+Allow: /manifest.json
+Allow: /sw.js
+Allow: /registerSW.js
+Allow: /workbox-*.js
+
+Sitemap: https://kibarashi-app.web.app/sitemap.xml

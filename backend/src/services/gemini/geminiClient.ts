@@ -26,7 +26,7 @@ class GeminiClient {
       const text = response.text();
       
       // JSON形式のレスポンスをパース
-      const suggestions = this.parseResponse(text);
+      const suggestions = this.parseResponse(text, duration);
       logger.info('Gemini API response received', { 
         situation, 
         duration, 
@@ -57,12 +57,15 @@ class GeminiClient {
 
 要件：
 1. 具体的で実行可能な提案
-2. 認知的気晴らし（頭の中で行う）と行動的気晴らし（体を動かす）をバランスよく含める
-3. 各提案には以下を含める：
+2. ${duration}分間でちょうど完了できる内容にする
+3. 認知的気晴らし（頭の中で行う）と行動的気晴らし（体を動かす）をバランスよく含める
+4. 各提案には以下を含める：
    - タイトル（20文字以内）
    - 説明（100文字程度）
    - カテゴリ（"認知的" または "行動的"）
    - 具体的な手順（3-5ステップ）
+   - ガイド（実行時の詳しい案内文、200文字程度）
+   - duration（実行時間: ${duration}）
 
 以下のJSON形式で回答してください：
 [
@@ -70,14 +73,16 @@ class GeminiClient {
     "title": "提案のタイトル",
     "description": "提案の説明",
     "category": "認知的",
-    "steps": ["ステップ1", "ステップ2", "ステップ3"]
+    "steps": ["ステップ1", "ステップ2", "ステップ3"],
+    "guide": "この気晴らし方法の詳しい実行方法と注意点を説明する案内文",
+    "duration": ${duration}
   }
 ]
 
 JSON形式のみを返し、他の説明文は不要です。`;
   }
 
-  private parseResponse(text: string): any[] {
+  private parseResponse(text: string, duration: number): any[] {
     try {
       // JSONの部分を抽出（前後の説明文を除去）
       const jsonMatch = text.match(/\[[\s\S]*\]/);
@@ -96,7 +101,7 @@ JSON形式のみを返し、他の説明文は不要です。`;
       return suggestions.map((suggestion: any, index: number) => ({
         id: `gemini-${Date.now()}-${index}`,
         ...suggestion,
-        duration: suggestion.duration || 5 // デフォルト5分
+        duration: suggestion.duration || duration // パラメータからdurationを取得
       }));
     } catch (error) {
       logger.error('Failed to parse Gemini response', { error, text });

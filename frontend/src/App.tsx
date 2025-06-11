@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import MainLayout from './components/layout/MainLayout';
-import SituationSelector from './features/situation/SituationSelector';
-import DurationSelector from './features/duration/DurationSelector';
-import SuggestionList from './features/suggestion/SuggestionList';
+import Loading from './components/common/Loading';
+
+// コンポーネントの遅延読み込み
+const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
+const DurationSelector = lazy(() => import('./features/duration/DurationSelector'));
+const SuggestionList = lazy(() => import('./features/suggestion/SuggestionList'));
 
 type Step = 'situation' | 'duration' | 'suggestions';
 type Situation = 'workplace' | 'home' | 'outside' | null;
@@ -103,7 +106,9 @@ function App() {
         {renderBreadcrumb()}
         
         <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-          {renderStep()}
+          <Suspense fallback={<Loading />}>
+            {renderStep()}
+          </Suspense>
         </div>
 
         {currentStep === 'suggestions' && (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchSuggestions } from '../../services/api/suggestions';
 
 export interface Suggestion {
@@ -18,8 +18,53 @@ export const useSuggestions = (
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const fetchData = useCallback(async () => {
+  useEffect(() => {
+    // 前回のリクエストをキャンセル
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    // 新しいAbortControllerを作成
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+    
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const data = await fetchSuggestions(situation, duration);
+        
+        // リクエストがキャンセルされていない場合のみ状態を更新
+        if (!abortController.signal.aborted) {
+          setSuggestions(data.suggestions);
+        }
+      } catch (err) {
+        // リクエストがキャンセルされた場合はエラーを無視
+        if (!abortController.signal.aborted) {
+          setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
+          setSuggestions([]);
+        }
+      } finally {
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    // クリーンアップ関数
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [situation, duration]);
+
+  const refetch = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -34,14 +79,10 @@ export const useSuggestions = (
     }
   }, [situation, duration]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
   return {
     suggestions,
     loading,
     error,
-    refetch: fetchData,
+    refetch,
   };
 };

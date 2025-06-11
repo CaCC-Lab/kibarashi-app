@@ -56,3 +56,42 @@
     outline-color: Highlight;
   }
 }
+
+/* アクセシビリティ: スキップリンク */
+.skip-link {
+  @apply absolute left-0 top-0 bg-primary-600 text-white px-4 py-2 rounded-md transform -translate-y-full focus:translate-y-0 z-50 transition-transform;
+}
+
+@media (prefers-contrast: high) {
+  .skip-link {
+    @apply bg-black text-white;
+  }
+}
+
+/* 共通のアニメーション設定 */
+:root {
+  --animation-duration: 200ms;
+  --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --animation-duration: 0.01ms;
+  }
+}
+
+.transition-custom {
+  transition-property: all;
+  transition-duration: var(--animation-duration);
+  transition-timing-function: var(--animation-easing);
+}
+
+/* より大きなタップターゲット */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  [role="button"],
+  a {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}

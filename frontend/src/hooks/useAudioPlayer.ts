@@ -100,13 +100,15 @@ export function useAudioPlayer(audioUrl?: string | null): UseAudioPlayerReturn {
   }, []);
 
   const stop = useCallback(() => {
+    console.log('useAudioPlayer stop called', { hasAudio: !!audioRef.current, isPlaying });
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       setIsPlaying(false);
       setCurrentTime(0);
+      console.log('Audio stopped successfully');
     }
-  }, []);
+  }, [isPlaying]);
 
   const setVolume = useCallback((newVolume: number) => {
     const clampedVolume = Math.max(0, Math.min(1, newVolume));

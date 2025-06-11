@@ -48,8 +48,8 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   const style = categoryStyles[category];
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn">
-      <div className="p-6">
+    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col">
+      <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
@@ -84,39 +84,50 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
           </div>
         </div>
 
-        {steps && steps.length > 0 && (
-          <div className="mb-4">
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="flex items-center space-x-1 text-sm text-primary-600 hover:text-primary-700 focus-ring transition-colors"
-              aria-expanded={isExpanded}
-              aria-controls={`steps-${title.replace(/\s+/g, '-').toLowerCase()}`}
-            >
-              <span>{isExpanded ? '手順を隠す' : '手順を見る'}</span>
-              <svg 
-                className={`w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
+        <div className="flex-1">
+          {steps && steps.length > 0 && (
+            <div className="mb-4">
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="group flex items-center gap-2 text-sm transition-colors"
+                aria-expanded={isExpanded}
+                aria-controls={`steps-${title.replace(/\s+/g, '-').toLowerCase()}`}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            
-            {isExpanded && (
-              <ol id={`steps-${title.replace(/\s+/g, '-').toLowerCase()}`} className="mt-3 space-y-2 animate-fadeIn">
-                {steps.map((step, index) => (
-                  <li key={index} className="flex items-start space-x-3 text-sm text-gray-600 animate-slideIn" style={{ animationDelay: `${index * 50}ms` }}>
-                    <span className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-medium">
-                      {index + 1}
-                    </span>
-                    <span>{step}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-        )}
+                <div className={`
+                  p-1 rounded-full transition-colors
+                  ${isExpanded ? 'bg-primary-100' : 'bg-gray-100 group-hover:bg-gray-200'}
+                `}>
+                  <svg 
+                    className={`w-4 h-4 transform transition-transform ${
+                      isExpanded ? 'rotate-180 text-primary-600' : 'text-gray-600'
+                    }`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+                <span className={`font-medium ${isExpanded ? 'text-primary-700' : 'text-gray-700'}`}>
+                  {isExpanded ? '手順を隠す' : `${steps.length}つの手順を見る`}
+                </span>
+              </button>
+              
+              {isExpanded && (
+                <ol id={`steps-${title.replace(/\s+/g, '-').toLowerCase()}`} className="mt-3 space-y-2 animate-fadeIn">
+                  {steps.map((step, index) => (
+                    <li key={index} className="flex items-start space-x-3 text-sm text-gray-600 animate-slideIn" style={{ animationDelay: `${index * 50}ms` }}>
+                      <span className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-medium">
+                        {index + 1}
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={onStart}

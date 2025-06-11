@@ -5,6 +5,7 @@ interface DurationOption {
   label: string;
   description: string;
   color: string;
+  examples: string;
 }
 
 interface DurationSelectorProps {
@@ -18,18 +19,21 @@ const durations: DurationOption[] = [
     label: '5分',
     description: 'ちょっとした気分転換に',
     color: 'from-green-400 to-green-600',
+    examples: '深呼吸、軽いストレッチ',
   },
   {
     id: 15,
     label: '15分',
     description: 'しっかりリフレッシュ',
     color: 'from-blue-400 to-blue-600',
+    examples: '瞑想、散歩、読書',
   },
   {
     id: 30,
     label: '30分',
     description: 'じっくり気晴らし',
     color: 'from-purple-400 to-purple-600',
+    examples: '運動、料理、創作活動',
   },
 ];
 
@@ -43,14 +47,19 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
         {durations.map((option, index) => (
           <button
             key={option.id}
-            onClick={() => onSelect(option.id)}
+            onClick={() => {
+              if ('vibrate' in navigator) {
+                navigator.vibrate(30);
+              }
+              onSelect(option.id);
+            }}
             className={`
               relative overflow-hidden rounded-xl border-2 transition-all duration-200
-              animate-slideIn hover-lift focus-ring
+              animate-slideIn hover-lift focus-ring min-h-[180px] md:min-h-[200px]
               ${
                 selected === option.id
                   ? 'border-primary-500 shadow-lg transform scale-105'
-                  : 'border-gray-200 hover:border-primary-300 hover:shadow-md'
+                  : 'border-gray-200 hover:border-primary-300 hover:shadow-md hover:scale-[1.02]'
               }
             `}
             style={{ animationDelay: `${index * 100}ms` }}
@@ -63,25 +72,44 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
             `} />
             
             <div className="relative p-6 bg-white bg-opacity-95">
-              <div className="flex flex-col items-center space-y-2">
-                <div className={`
-                  text-3xl font-bold
-                  ${selected === option.id ? 'text-primary-600' : 'text-gray-700'}
-                `}>
-                  {option.label}
-                </div>
-                <p id={`duration-${option.id}-desc`} className="text-sm text-gray-600">{option.description}</p>
-                
-                <div className="flex items-center space-x-1 mt-2">
-                  {[...Array(option.id / 5)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`
-                        w-2 h-2 rounded-full
-                        ${selected === option.id ? 'bg-primary-500' : 'bg-gray-300'}
-                      `}
+              <div className="flex flex-col items-center space-y-3">
+                <div className="relative w-16 h-16">
+                  <svg className="transform -rotate-90 w-16 h-16">
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      stroke="#e5e7eb"
+                      strokeWidth="4"
+                      fill="none"
                     />
-                  ))}
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      stroke={selected === option.id ? '#0ea5e9' : '#9ca3af'}
+                      strokeWidth="4"
+                      fill="none"
+                      strokeDasharray={`${(option.id / 30) * 176} 176`}
+                      className="transition-all duration-300"
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className={`text-xl font-bold ${
+                      selected === option.id ? 'text-primary-600' : 'text-gray-700'
+                    }`}>{option.id}</span>
+                  </div>
+                </div>
+                
+                <div className="text-center">
+                  <div className={`
+                    text-lg font-semibold mb-1
+                    ${selected === option.id ? 'text-primary-600' : 'text-gray-700'}
+                  `}>
+                    {option.label}
+                  </div>
+                  <p id={`duration-${option.id}-desc`} className="text-sm text-gray-600">{option.description}</p>
+                  <p className="text-xs text-gray-500 mt-1">{option.examples}</p>
                 </div>
               </div>
             </div>

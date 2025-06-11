@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 
 interface AudioPlayerProps {
@@ -8,12 +8,18 @@ interface AudioPlayerProps {
   className?: string;
 }
 
-export default function AudioPlayer({ 
+export interface AudioPlayerHandle {
+  stop: () => void;
+  pause: () => void;
+  play: () => void;
+}
+
+const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({ 
   audioUrl, 
   autoPlay = false,
   onEnded,
   className = ''
-}: AudioPlayerProps) {
+}, ref) => {
   const {
     isPlaying,
     isLoading,
@@ -27,6 +33,13 @@ export default function AudioPlayer({
     setVolume,
     seek,
   } = useAudioPlayer(audioUrl);
+
+  // refを通じてメソッドを公開
+  useImperativeHandle(ref, () => ({
+    stop,
+    pause,
+    play
+  }), [stop, pause, play]);
 
   // 自動再生
   useEffect(() => {
@@ -140,4 +153,8 @@ export default function AudioPlayer({
       </div>
     </div>
   );
-}
+});
+
+AudioPlayer.displayName = 'AudioPlayer';
+
+export default AudioPlayer;

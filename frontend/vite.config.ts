@@ -5,6 +5,29 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    // バンドルサイズ最適化
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          utils: ['web-vitals'],
+        },
+      },
+    },
+    // 圧縮設定
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
+    // アセット最適化
+    assetsInlineLimit: 4096,
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 500,
+  },
   plugins: [
     react(),
     VitePWA({

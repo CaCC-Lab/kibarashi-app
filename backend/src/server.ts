@@ -21,12 +21,35 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // ミドルウェアの設定
-app.use(helmet());
-app.use(compression());
+// CORSを最初に設定（helmetよりも前）
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://localhost:3001'],
+  origin: function(origin, callback) {
+    // 開発環境では全てのオリジンを許可
+    if (process.env.NODE_ENV === 'development' || !origin) {
+      callback(null, true);
+    } else {
+      const allowedOrigins = process.env.CORS_ORIGIN ? 
+        process.env.CORS_ORIGIN.split(',') : 
+        ['http://localhost:3000', 'http://localhost:3001'];
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+app.use(helmet({
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+  crossOriginEmbedderPolicy: false,
+}));
+app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PWAアイコン生成（最適化版）</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .icon-preview { display: inline-block; margin: 10px; text-align: center; }
+    .icon-preview canvas { border: 1px solid #ddd; display: block; }
+    button { margin: 20px 0; padding: 10px 20px; font-size: 16px; }
+    .instructions { background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>PWAアイコン生成ツール（最適化版）</h1>
+  
+  <div class="instructions">
+    <h3>使い方：</h3>
+    <ol>
+      <li>「すべてのアイコンを生成」ボタンをクリック</li>
+      <li>各アイコンを右クリックして「名前を付けて画像を保存」</li>
+      <li>指定されたファイル名で/public/フォルダに保存</li>
+    </ol>
+  </div>
+
+  <button onclick="generateAllIcons()">すべてのアイコンを生成</button>
+  
+  <div id="icons"></div>
+
+  <script>
+    function generateIcon(size, maskable = false) {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      
+      // 背景
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#06b6d4'); // cyan-500
+      gradient.addColorStop(1, '#0284c7'); // sky-600
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // maskableの場合は余白を確保
+      const padding = maskable ? size * 0.1 : size * 0.05;
+      const iconSize = size - (padding * 2);
+      
+      // 円形の背景
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, iconSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // テキスト
+      ctx.fillStyle = '#0284c7';
+      ctx.font = `bold ${iconSize * 0.45}px "Noto Sans JP", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('5分', size / 2, size / 2);
+      
+      // 時計の針（装飾）
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = size * 0.02;
+      ctx.lineCap = 'round';
+      
+      // 時計の中心
+      const centerX = size / 2;
+      const centerY = size / 2;
+      const radius = iconSize * 0.35;
+      
+      // 12時の位置
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(centerX, centerY - radius * 0.7);
+      ctx.stroke();
+      
+      // 1時の位置（5分）
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(
+        centerX + radius * 0.5 * Math.sin(Math.PI / 6),
+        centerY - radius * 0.5 * Math.cos(Math.PI / 6)
+      );
+      ctx.stroke();
+      
+      return canvas;
+    }
+
+    function downloadCanvas(canvas, filename) {
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    }
+
+    function generateAllIcons() {
+      const container = document.getElementById('icons');
+      container.innerHTML = '';
+      
+      const icons = [
+        { size: 64, name: 'pwa-64x64.png' },
+        { size: 192, name: 'pwa-192x192.png' },
+        { size: 512, name: 'pwa-512x512.png' },
+        { size: 512, name: 'maskable-icon-512x512.png', maskable: true },
+        { size: 180, name: 'apple-touch-icon.png' }
+      ];
+      
+      icons.forEach(icon => {
+        const div = document.createElement('div');
+        div.className = 'icon-preview';
+        
+        const canvas = generateIcon(icon.size, icon.maskable);
+        div.appendChild(canvas);
+        
+        const label = document.createElement('div');
+        label.textContent = icon.name;
+        div.appendChild(label);
+        
+        const button = document.createElement('button');
+        button.textContent = 'ダウンロード';
+        button.onclick = () => downloadCanvas(canvas, icon.name);
+        div.appendChild(button);
+        
+        container.appendChild(div);
+      });
+      
+      // faviconも生成
+      const faviconDiv = document.createElement('div');
+      faviconDiv.className = 'icon-preview';
+      
+      const faviconCanvas = generateIcon(32);
+      faviconDiv.appendChild(faviconCanvas);
+      
+      const faviconLabel = document.createElement('div');
+      faviconLabel.textContent = 'favicon.ico (32x32として保存)';
+      faviconDiv.appendChild(faviconLabel);
+      
+      const faviconButton = document.createElement('button');
+      faviconButton.textContent = 'ダウンロード';
+      faviconButton.onclick = () => downloadCanvas(faviconCanvas, 'favicon.png');
+      faviconDiv.appendChild(faviconButton);
+      
+      container.appendChild(faviconDiv);
+    }
+    
+    // 自動生成
+    window.onload = function() {
+      generateAllIcons();
+    };
+  </script>
+</body>
+</html>

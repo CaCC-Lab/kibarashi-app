@@ -15,7 +15,7 @@ export async function fetchSuggestions(
   duration: 5 | 15 | 30
 ): Promise<SuggestionsResponse> {
   const response = await apiClient.get<SuggestionsResponse>(
-    `/suggestions?situation=${situation}&duration=${duration}`
+    `/api/v1/suggestions?situation=${situation}&duration=${duration}`
   );
   
   return response;

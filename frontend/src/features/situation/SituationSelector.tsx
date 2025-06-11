@@ -60,14 +60,20 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
         {situations.map((option, index) => (
           <button
             key={option.id}
-            onClick={() => onSelect(option.id)}
+            onClick={() => {
+              if ('vibrate' in navigator) {
+                navigator.vibrate(30);
+              }
+              onSelect(option.id);
+            }}
             className={`
-              relative p-6 rounded-xl border-2 transition-all duration-200 
+              relative p-6 md:p-8 min-h-[120px] md:min-h-[140px] w-full
+              rounded-xl border-2 transition-all duration-200 
               animate-slideIn hover-lift focus-ring
               ${
                 selected === option.id
                   ? 'border-primary-500 bg-primary-50 shadow-lg transform scale-105'
-                  : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md'
+                  : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md hover:scale-[1.02]'
               }
             `}
             style={{ animationDelay: `${index * 100}ms` }}
@@ -78,7 +84,11 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
               flex flex-col items-center space-y-3
               ${selected === option.id ? 'text-primary-600' : 'text-gray-600'}
             `}>
-              {option.icon}
+              <div className={`transition-transform duration-200 ${
+                selected === option.id ? 'scale-110' : 'scale-100'
+              }`}>
+                {option.icon}
+              </div>
               <div className="text-center">
                 <h3 className="font-semibold text-lg">{option.label}</h3>
                 <p id={`situation-${option.id}-desc`} className="text-sm opacity-80">{option.description}</p>

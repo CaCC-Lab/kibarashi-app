@@ -14,11 +14,12 @@ export const ttsService = {
    * テキストを音声に変換
    */
   async synthesizeSpeech(options: TTSOptions): Promise<Blob> {
-    return await apiClient.post<Blob>('/tts', options, {
+    return await apiClient.post<Blob>('/api/v1/tts', options, {
       responseType: 'blob',
       headers: {
         'Accept': 'audio/mpeg',
       },
+      timeout: 30000, // 30秒のタイムアウト（音声生成には時間がかかる場合がある）
     });
   },
 
