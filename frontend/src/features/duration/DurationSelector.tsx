@@ -48,7 +48,7 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
           <button
             key={option.id}
             onClick={() => {
-              if ('vibrate' in navigator) {
+              if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
                 navigator.vibrate(30);
               }
               onSelect(option.id);

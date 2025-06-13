@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import suggestionsRouter from './suggestions.js';
-import ttsRouter from './tts.js';
+import suggestionsRouter from './suggestions';
+import ttsRouter from './tts';
 
 const router = Router();
 

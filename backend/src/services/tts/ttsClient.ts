@@ -1,5 +1,5 @@
-import textToSpeech from '@google-cloud/text-to-speech';
-import { logger } from '../../utils/logger.js';
+import * as textToSpeech from '@google-cloud/text-to-speech';
+import { logger } from '../../utils/logger';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { logger } from '../../utils/logger.js';
-import { generateSuggestions } from '../../services/suggestion/generator.js';
+import { logger } from '../../utils/logger';
+import { generateSuggestions } from '../../services/suggestion/generator';
 
 // リクエストパラメータのバリデーションスキーマ
 const suggestionsQuerySchema = z.object({
@@ -13,7 +13,7 @@ export const getSuggestions = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<Response | void> => {
   try {
     // パラメータのバリデーション
     const validatedQuery = suggestionsQuerySchema.parse(req.query);
@@ -34,12 +34,11 @@ export const getSuggestions = async (
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        error: {
-          message: 'Invalid request parameters',
-          details: error.errors,
-        },
-      });
+      // エラーハンドラーで処理するために、AppError形式のエラーを作成
+      const appError = new Error('Invalid request parameters');
+      (appError as any).statusCode = 400;
+      (appError as any).details = error.errors;
+      return next(appError);
     }
     next(error);
   }

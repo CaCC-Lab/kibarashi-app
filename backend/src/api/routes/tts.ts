@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { convertTextToSpeech } from '../controllers/ttsController.js';
+import { convertTextToSpeech } from '../controllers/ttsController';
 
 const router = Router();
 

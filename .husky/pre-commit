@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 モック使用チェック中..."
+
+# テストファイルでモック関連のキーワードを検索
+MOCK_PATTERNS="jest\.mock\|vi\.mock\|mockResolvedValue\|mockRejectedValue\|mockImplementation\|mockReturnValue\|jest\.fn\|vi\.fn"
+
+# ステージングされたテストファイルをチェック
+STAGED_TEST_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E "\.(test|spec)\.(ts|tsx|js|jsx)$")
+
+if [ ! -z "$STAGED_TEST_FILES" ]; then
+  for FILE in $STAGED_TEST_FILES; do
+    if grep -E "$MOCK_PATTERNS" "$FILE" > /dev/null; then
+      echo "❌ エラー: モックの使用が検出されました: $FILE"
+      echo "📖 開発規約によりモックの使用は禁止されています。"
+      echo "📝 TEST_GUIDELINES.md を参照してください。"
+      exit 1
+    fi
+  done
+fi
+
+echo "✅ モックチェック完了"
+
+# その他のリント処理
+npm run lint:staged

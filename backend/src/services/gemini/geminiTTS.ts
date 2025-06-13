@@ -1,4 +1,4 @@
-import { logger } from '../../utils/logger.js';
+import { logger } from '../../utils/logger';
 import fetch from 'node-fetch';
 import { exec } from 'child_process';
 import { promisify } from 'util';

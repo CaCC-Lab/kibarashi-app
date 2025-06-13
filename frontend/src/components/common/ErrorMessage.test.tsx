@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ErrorMessage from './ErrorMessage';
 
@@ -24,7 +24,8 @@ describe('ErrorMessage', () => {
   });
 
   it('onRetryが渡されている場合、再試行ボタンを表示する', () => {
-    const onRetry = vi.fn();
+    let retryCount = 0;
+    const onRetry = () => { retryCount++; };
     render(<ErrorMessage message="エラー" onRetry={onRetry} />);
     
     const retryButton = screen.getByText('もう一度試す');
@@ -32,13 +33,14 @@ describe('ErrorMessage', () => {
   });
 
   it('再試行ボタンをクリックするとonRetryが呼ばれる', () => {
-    const onRetry = vi.fn();
+    let retryCount = 0;
+    const onRetry = () => { retryCount++; };
     render(<ErrorMessage message="エラー" onRetry={onRetry} />);
     
     const retryButton = screen.getByText('もう一度試す');
     fireEvent.click(retryButton);
     
-    expect(onRetry).toHaveBeenCalledTimes(1);
+    expect(retryCount).toBe(1);
   });
 
   it('onRetryが渡されていない場合、再試行ボタンを表示しない', () => {
@@ -50,13 +52,13 @@ describe('ErrorMessage', () => {
   it('ネットワークエラーの場合、適切な提案を表示する', () => {
     render(<ErrorMessage message="ネットワークエラー" />);
     
-    expect(screen.getByText('💡 インターネット接続を確認してください')).toBeInTheDocument();
+    expect(screen.getByText('💡 Wi-Fiまたはモバイルデータ通信の接続状況を確認し、再度お試しください。')).toBeInTheDocument();
   });
 
   it('タイムアウトエラーの場合、適切な提案を表示する', () => {
     render(<ErrorMessage message="タイムアウトしました" />);
     
-    expect(screen.getByText('💡 接続が不安定な可能性があります。時間をおいて再度お試しください')).toBeInTheDocument();
+    expect(screen.getByText('💡 ネットワークが不安定な可能性があります。時間をおいてから再度アクセスしてください。')).toBeInTheDocument();
   });
 
   it('エラーアイコン（！）を表示する', () => {

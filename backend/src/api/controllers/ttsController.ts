@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { logger } from '../../utils/logger.js';
-import { ttsClient } from '../../services/tts/ttsClient.js';
-import { geminiTTS } from '../../services/gemini/geminiTTS.js';
+import { logger } from '../../utils/logger';
+import { ttsClient } from '../../services/tts/ttsClient';
+import { geminiTTS } from '../../services/gemini/geminiTTS';
 
 // リクエストボディのバリデーションスキーマ
 const ttsRequestSchema = z.object({
@@ -18,7 +18,7 @@ export const convertTextToSpeech = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<Response | void> => {
   try {
     // リクエストボディのバリデーション
     const validatedBody = ttsRequestSchema.parse(req.body);

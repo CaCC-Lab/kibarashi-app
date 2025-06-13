@@ -1,5 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { logger } from '../../utils/logger.js';
+import { logger } from '../../utils/logger';
 
 class GeminiClient {
   private genAI: GoogleGenerativeAI;

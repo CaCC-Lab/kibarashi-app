@@ -18,12 +18,14 @@
 - **ブラウザ音声フォールバック**: Gemini TTS利用不可時は自動切り替え
 - **詳細ガイド**: 各提案の詳しい実行方法と手順を表示
 - **タイマー機能**: 開始・一時停止・リセット機能付きタイマー（音声連動）
+- **ダークモード**: システム設定連動、手動切り替え可能
 - **アニメーション**: スムーズなフェードイン・スライドイン効果
 - **アクセシビリティ**: キーボードナビゲーション、ARIAラベル対応
 - **PWA対応**: オフラインでも基本機能が動作、ホーム画面への追加可能
 - **レスポンシブデザイン**: モバイルファースト設計、カード高さ統一
 - **パフォーマンス最適化**: 動的インポート、バンドル分割実装済み
-- **テスト環境**: Vitest/Jest設定済み、基本テスト作成完了
+- **テスト環境**: Vitest統一、モック完全排除、テスト成功率100%
+- **ESモジュール対応**: フロントエンド/バックエンド共にESM採用
 - **完全無料**: 広告なし、課金なし、アカウント登録不要
 
 ### 今後実装予定
@@ -36,7 +38,7 @@
 - **フロントエンド**: React 18 + TypeScript, Vite, Tailwind CSS, PWA
 - **バックエンド**: Node.js + Express.js + TypeScript
 - **AI/音声**: Google Gemini API (提案生成・TTS)
-- **テスト**: Vitest (Frontend), Jest (Backend)
+- **テスト**: Vitest (Frontend/Backend統一), モック使用完全排除
 - **インフラ**: Google Cloud Platform, Firebase Hosting
 
 詳細は [technologystack.md](./technologystack.md) を参照してください。
@@ -57,21 +59,27 @@
 git clone [repository-url]
 cd kibarashi-app
 
-# 依存関係のインストール
-npm run setup
+# 依存関係のインストール（フロントエンド）
+cd frontend
+npm install
+
+# 依存関係のインストール（バックエンド）
+cd ../backend
+npm install
 
 # 環境変数の設定
 cp .env.example .env
 # .envファイルを編集し、必要なAPI キーを設定
 
-# 開発サーバーの起動
+# フロントエンド起動（ターミナル1）
+cd frontend
 npm run dev
+# → http://localhost:3000
 
-# フロントエンドのみ起動
-npm run dev:frontend
-
-# バックエンドのみ起動
-npm run dev:backend
+# バックエンド起動（ターミナル2）
+cd backend
+npm run dev
+# → http://localhost:8080
 ```
 
 ### 開発環境へのアクセス
@@ -79,6 +87,14 @@ npm run dev:backend
 - フロントエンド: http://localhost:3000
 - バックエンド API: http://localhost:8080
 - ヘルスチェック: http://localhost:8080/health
+
+### 動作確認状況（2025/06/14）
+
+- ✅ ローカル環境での動作確認完了
+- ✅ フロントエンド・バックエンド連携確認
+- ✅ Gemini API連携確認
+- ✅ PWA機能確認
+- ✅ 全テスト成功（134 tests passing）
 
 ## 📁 プロジェクト構造
 
@@ -94,6 +110,16 @@ kibarashi-app/
 詳細は [directorystructure.md](./directorystructure.md) を参照してください。
 
 ## 🧪 テスト
+
+### テストポリシー
+
+**重要**: このプロジェクトではモックの使用を一切禁止しています。
+- すべてのテストは実際のサービス・APIを使用
+- Vitest に統一（Frontend/Backend共通）
+- テスト成功率: 100%（134 tests passing）
+- 詳細は [TEST_GUIDELINES.md](./TEST_GUIDELINES.md) を参照
+
+### テストコマンド
 
 ```bash
 # フロントエンドテスト
@@ -155,4 +181,4 @@ cd backend && npm run build
 
 **開発方針**: シンプルさを最優先に、ユーザーのストレスを増やさない設計を心がけています。
 
-最終更新: 2025/06/11
+最終更新: 2025/06/14

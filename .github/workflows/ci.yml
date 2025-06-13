@@ -1,0 +1,118 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: |
+          npm run lint:frontend
+          npm run lint:backend
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Frontend Tests with Coverage
+        run: npm run test:frontend -- --run --coverage
+        env:
+          CI: true
+
+      - name: Run Backend Tests with Coverage
+        run: npm run test:backend -- --coverage --passWithNoTests
+        env:
+          CI: true
+
+      - name: Upload Frontend Coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
+        continue-on-error: true
+
+      - name: Upload Backend Coverage
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-coverage
+          path: backend/coverage
+        continue-on-error: true
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Frontend
+        run: npm run build:frontend
+        env:
+          VITE_API_URL: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.VITE_API_URL || 'http://localhost:8080' }}
+
+      - name: Build Backend
+        run: npm run build:backend
+
+      - name: Upload Frontend Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-dist
+          path: frontend/dist
+
+      - name: Upload Backend Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-dist
+          path: backend/dist
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run npm audit
+        run: |
+          npm audit --audit-level=moderate || true
+          cd frontend && npm audit --audit-level=moderate || true
+          cd ../backend && npm audit --audit-level=moderate || true

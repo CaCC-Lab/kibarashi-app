@@ -4,10 +4,10 @@ import helmet from 'helmet';
 import compression from 'compression';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { errorHandler } from './api/middleware/errorHandler.js';
-import { rateLimiter } from './api/middleware/rateLimit.js';
-import { logger } from './utils/logger.js';
-import routes from './api/routes/index.js';
+import { errorHandler } from './api/middleware/errorHandler';
+import { rateLimiter } from './api/middleware/rateLimit';
+import { logger } from './utils/logger';
+import routes from './api/routes/index';
 
 // 環境変数の読み込み
 dotenv.config();
@@ -73,9 +73,13 @@ app.get('/health', (_req, res) => {
 app.use(errorHandler);
 
 // サーバー起動
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   logger.info(`Server is running on port ${PORT}`);
   logger.info(`Environment: ${process.env.NODE_ENV}`);
   logger.info(`Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured (using fallback)'}`);
   logger.info(`TTS API: ${process.env.GCP_TTS_ENABLED === 'true' ? 'Enabled' : 'Disabled'}`);
 });
+
+// エクスポート（テスト用）
+export default server;
+export { app };

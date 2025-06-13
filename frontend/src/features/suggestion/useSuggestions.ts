@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { fetchSuggestions } from '../../services/api/suggestions';
 
 export interface Suggestion {
@@ -11,16 +11,16 @@ export interface Suggestion {
   guide?: string;
 }
 
-export const useSuggestions = (
-  situation: 'workplace' | 'home' | 'outside',
-  duration: 5 | 15 | 30
-) => {
+export const useSuggestions = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  useEffect(() => {
+  const fetchSuggestionsHandler = useCallback(async (
+    situation: 'workplace' | 'home' | 'outside',
+    duration: 5 | 15 | 30
+  ) => {
     // 前回のリクエストをキャンセル
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -30,59 +30,33 @@ export const useSuggestions = (
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
     
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        const data = await fetchSuggestions(situation, duration);
-        
-        // リクエストがキャンセルされていない場合のみ状態を更新
-        if (!abortController.signal.aborted) {
-          setSuggestions(data.suggestions);
-        }
-      } catch (err) {
-        // リクエストがキャンセルされた場合はエラーを無視
-        if (!abortController.signal.aborted) {
-          setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
-          setSuggestions([]);
-        }
-      } finally {
-        if (!abortController.signal.aborted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchData();
-
-    // クリーンアップ関数
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [situation, duration]);
-
-  const refetch = useCallback(async () => {
     setLoading(true);
     setError(null);
     
     try {
       const data = await fetchSuggestions(situation, duration);
-      setSuggestions(data.suggestions);
+      
+      // リクエストがキャンセルされていない場合のみ状態を更新
+      if (!abortController.signal.aborted) {
+        setSuggestions(data.suggestions);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
-      setSuggestions([]);
+      // リクエストがキャンセルされた場合はエラーを無視
+      if (!abortController.signal.aborted) {
+        setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
+        setSuggestions([]);
+      }
     } finally {
-      setLoading(false);
+      if (!abortController.signal.aborted) {
+        setLoading(false);
+      }
     }
-  }, [situation, duration]);
+  }, []);
 
   return {
     suggestions,
     loading,
     error,
-    refetch,
+    fetchSuggestions: fetchSuggestionsHandler,
   };
 };

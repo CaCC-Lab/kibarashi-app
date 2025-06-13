@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getSuggestions } from '../controllers/suggestionController.js';
+import { getSuggestions } from '../controllers/suggestionController';
 
 const router = Router();
 
