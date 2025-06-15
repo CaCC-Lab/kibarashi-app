@@ -6,6 +6,7 @@ interface MainLayoutProps {
   children: React.ReactNode;
   onFavoritesClick?: () => void;
   onHistoryClick?: () => void;
+  onSettingsClick?: () => void;
   showFavoritesButton?: boolean;
   showHistoryButton?: boolean;
 }
@@ -14,6 +15,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   children, 
   onFavoritesClick, 
   onHistoryClick,
+  onSettingsClick,
   showFavoritesButton = true,
   showHistoryButton = true
 }) => {
@@ -25,6 +27,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       <Header 
         onFavoritesClick={onFavoritesClick} 
         onHistoryClick={onHistoryClick}
+        onSettingsClick={onSettingsClick}
         showFavoritesButton={showFavoritesButton}
         showHistoryButton={showHistoryButton}
       />

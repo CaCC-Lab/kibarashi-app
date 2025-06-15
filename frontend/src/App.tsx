@@ -8,8 +8,9 @@ const DurationSelector = lazy(() => import('./features/duration/DurationSelector
 const SuggestionList = lazy(() => import('./features/suggestion/SuggestionList'));
 const FavoritesList = lazy(() => import('./features/favorites/FavoritesList'));
 const HistoryList = lazy(() => import('./features/history/HistoryList'));
+const Settings = lazy(() => import('./features/settings/Settings'));
 
-type Step = 'situation' | 'duration' | 'suggestions' | 'favorites' | 'history';
+type Step = 'situation' | 'duration' | 'suggestions' | 'favorites' | 'history' | 'settings';
 type Situation = 'workplace' | 'home' | 'outside' | null;
 type Duration = 5 | 15 | 30 | null;
 
@@ -42,6 +43,10 @@ function App() {
     setCurrentStep('history');
   };
 
+  const handleSettingsClick = () => {
+    setCurrentStep('settings');
+  };
+
   const handleBackToMain = () => {
     setCurrentStep('situation');
   };
@@ -61,6 +66,8 @@ function App() {
         return <FavoritesList />;
       case 'history':
         return <HistoryList />;
+      case 'settings':
+        return <Settings onBack={handleBackToMain} />;
       default:
         return null;
     }
@@ -119,11 +126,11 @@ function App() {
   );
 
   return (
-    <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick}>
+    <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick} onSettingsClick={handleSettingsClick}>
       <div className="max-w-4xl mx-auto">
-        {currentStep !== 'favorites' && currentStep !== 'history' && renderBreadcrumb()}
+        {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && renderBreadcrumb()}
         
-        {currentStep === 'history' ? (
+        {currentStep === 'history' || currentStep === 'settings' ? (
           <Suspense fallback={<Loading />}>
             {renderStep()}
           </Suspense>
@@ -146,7 +153,7 @@ function App() {
           </div>
         )}
         
-        {(currentStep === 'favorites' || currentStep === 'history') && (
+        {(currentStep === 'favorites' || currentStep === 'history' || currentStep === 'settings') && (
           <div className="mt-6 text-center">
             <button
               onClick={handleBackToMain}

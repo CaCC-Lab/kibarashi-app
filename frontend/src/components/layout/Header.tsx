@@ -4,6 +4,7 @@ import DarkModeToggle from '../common/DarkModeToggle';
 interface HeaderProps {
   onFavoritesClick?: () => void;
   onHistoryClick?: () => void;
+  onSettingsClick?: () => void;
   showFavoritesButton?: boolean;
   showHistoryButton?: boolean;
 }
@@ -11,14 +12,19 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ 
   onFavoritesClick, 
   onHistoryClick,
+  onSettingsClick,
   showFavoritesButton = true,
   showHistoryButton = true
 }) => {
   const [showMessage, setShowMessage] = useState(false);
 
   const handleSettingsClick = () => {
-    setShowMessage(true);
-    setTimeout(() => setShowMessage(false), 3000); // 3秒後に自動で非表示
+    if (onSettingsClick) {
+      onSettingsClick();
+    } else {
+      setShowMessage(true);
+      setTimeout(() => setShowMessage(false), 3000); // 3秒後に自動で非表示
+    }
   };
 
   return (

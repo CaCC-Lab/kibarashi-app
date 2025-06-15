@@ -409,6 +409,74 @@ describe('App', () => {
     });
   });
 
+  describe('ナビゲーション機能', () => {
+    it('ヘッダーのお気に入りボタンが機能する', async () => {
+      render(<App />);
+      
+      // お気に入りボタンをクリック
+      const favoriteButton = screen.getByLabelText('お気に入り');
+      fireEvent.click(favoriteButton);
+      
+      // お気に入り画面が表示される
+      await waitFor(() => {
+        expect(screen.getByText('お気に入りリスト')).toBeInTheDocument();
+      });
+      
+      // 戻るボタンで気晴らし選択に戻る
+      const backButton = screen.getByText('気晴らし選択に戻る');
+      fireEvent.click(backButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      });
+    });
+
+    it('ヘッダーの履歴ボタンが機能する', async () => {
+      render(<App />);
+      
+      // 履歴ボタンをクリック
+      const historyButton = screen.getByLabelText('履歴');
+      fireEvent.click(historyButton);
+      
+      // 履歴画面が表示される
+      await waitFor(() => {
+        expect(screen.getByText('実行履歴')).toBeInTheDocument();
+      });
+      
+      // 戻るボタンで気晴らし選択に戻る
+      const backButton = screen.getByText('気晴らし選択に戻る');
+      fireEvent.click(backButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      });
+    });
+
+    it('ヘッダーの設定ボタンが機能する', async () => {
+      render(<App />);
+      
+      // 設定ボタンをクリック
+      const settingsButton = screen.getByLabelText('設定');
+      fireEvent.click(settingsButton);
+      
+      // 設定画面が表示される
+      await waitFor(() => {
+        expect(screen.getByText('設定')).toBeInTheDocument();
+        expect(screen.getByText('アプリ設定')).toBeInTheDocument();
+        expect(screen.getByText('データ管理')).toBeInTheDocument();
+        expect(screen.getByText('アプリ情報')).toBeInTheDocument();
+      });
+      
+      // 戻るボタンで気晴らし選択に戻る
+      const backButton = screen.getByText('戻る');
+      fireEvent.click(backButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('レスポンシブデザイン', () => {
     it('メインコンテンツが適切にパディングされている', () => {
       render(<App />);
