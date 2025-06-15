@@ -417,9 +417,9 @@ describe('App', () => {
       const favoriteButton = screen.getByLabelText('お気に入り');
       fireEvent.click(favoriteButton);
       
-      // お気に入り画面が表示される
+      // お気に入り画面が表示される（お気に入りがない場合のメッセージ）
       await waitFor(() => {
-        expect(screen.getByText('お気に入りリスト')).toBeInTheDocument();
+        expect(screen.getByText('お気に入りがありません')).toBeInTheDocument();
       });
       
       // 戻るボタンで気晴らし選択に戻る

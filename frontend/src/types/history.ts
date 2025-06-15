@@ -42,4 +42,18 @@ export interface HistoryStats {
     home: number;
     outside: number;
   };
+  // 時間帯別の利用パターン（0-23時）
+  hourlyPattern: {
+    [hour: number]: number;
+  };
+  // 曜日別の利用パターン（0:日曜日 - 6:土曜日）
+  weeklyPattern: {
+    [day: number]: number;
+  };
+  // 月別トレンド（最近12ヶ月）
+  monthlyTrend: {
+    month: string; // YYYY-MM形式
+    count: number;
+    completed: number;
+  }[];
 }

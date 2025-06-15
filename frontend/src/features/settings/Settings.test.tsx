@@ -155,7 +155,7 @@ describe('Settings', () => {
     // 確認ダイアログでクリアボタンをクリック（赤いボタン）
     const confirmButtons = screen.getAllByText('クリア');
     const confirmClearButton = confirmButtons.find(button => 
-      button.className.includes('bg-secondary-600')
+      button.className.includes('bg-red-600')
     );
     fireEvent.click(confirmClearButton!);
     

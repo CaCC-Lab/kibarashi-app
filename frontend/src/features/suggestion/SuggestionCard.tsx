@@ -35,9 +35,9 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
 
   const categoryStyles = {
     認知的: {
-      bg: 'bg-blue-50',
-      border: 'border-blue-200',
-      text: 'text-blue-700',
+      bg: 'bg-blue-50 dark:bg-blue-900/30',
+      border: 'border-blue-200 dark:border-blue-700',
+      text: 'text-blue-700 dark:text-blue-300',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -46,9 +46,9 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
       ),
     },
     行動的: {
-      bg: 'bg-green-50',
-      border: 'border-green-200',
-      text: 'text-green-700',
+      bg: 'bg-green-50 dark:bg-green-900/30',
+      border: 'border-green-200 dark:border-green-700',
+      text: 'text-green-700 dark:text-green-300',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -61,7 +61,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   const style = categoryStyles[category];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col">
+    <div className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col">
       <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -69,7 +69,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex-1 pr-2">{title}</h3>
               <FavoriteButton suggestion={suggestion} className="flex-shrink-0" />
             </div>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">{description}</p>
+            <p className="text-gray-600 dark:text-gray-100 text-sm">{description}</p>
           </div>
           <div className={`ml-4 px-3 py-1 rounded-full ${style.bg} ${style.border} border`}>
             <div className={`flex items-center space-x-1 ${style.text}`}>
@@ -80,7 +80,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
         </div>
 
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4 text-sm text-gray-500">
+          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-300">
             <div className="flex items-center space-x-1">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
@@ -111,11 +111,11 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
               >
                 <div className={`
                   p-1 rounded-full transition-colors
-                  ${isExpanded ? 'bg-primary-100' : 'bg-gray-100 group-hover:bg-gray-200'}
+                  ${isExpanded ? 'bg-primary-100 dark:bg-primary-800' : 'bg-gray-100 dark:bg-gray-600 group-hover:bg-gray-200 dark:group-hover:bg-gray-500'}
                 `}>
                   <svg 
                     className={`w-4 h-4 transform transition-transform ${
-                      isExpanded ? 'rotate-180 text-primary-600' : 'text-gray-600'
+                      isExpanded ? 'rotate-180 text-primary-600 dark:text-primary-300' : 'text-gray-600 dark:text-gray-300'
                     }`} 
                     fill="none" 
                     stroke="currentColor" 
@@ -124,7 +124,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <span className={`font-medium transition-colors duration-200 ${isExpanded ? 'text-primary-700' : 'text-text-primary'}`}>
+                <span className={`font-medium transition-colors duration-200 ${isExpanded ? 'text-primary-700 dark:text-primary-300' : 'text-text-primary dark:text-white'}`}>
                   {isExpanded ? '手順を隠す' : `${steps.length}つの手順を見る`}
                 </span>
               </button>
@@ -132,8 +132,8 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
               {isExpanded && (
                 <ol id={`steps-${title.replace(/\s+/g, '-').toLowerCase()}`} className="mt-3 space-y-2 animate-fadeIn">
                   {steps.map((step, index) => (
-                    <li key={index} className="flex items-start space-x-3 text-sm text-text-secondary animate-slideIn" style={{ animationDelay: `${index * 50}ms` }}>
-                      <span className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-medium">
+                    <li key={index} className="flex items-start space-x-3 text-sm text-text-secondary dark:text-gray-200 animate-slideIn" style={{ animationDelay: `${index * 50}ms` }}>
+                      <span className="flex-shrink-0 w-6 h-6 bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-300 rounded-full flex items-center justify-center text-xs font-medium">
                         {index + 1}
                       </span>
                       <span>{step}</span>

@@ -159,6 +159,7 @@ export class HistoryStorage {
    * なぜこの実装か：
    * - 統計機能の基礎データを提供
    * - 履歴から有用な情報を抽出
+   * - 時間帯・曜日・月別のパターンを分析
    */
   static getStats(): HistoryStats {
     const data = this.getHistory();
@@ -187,6 +188,53 @@ export class HistoryStorage {
       home: history.filter(item => item.situation === 'home').length,
       outside: history.filter(item => item.situation === 'outside').length,
     };
+
+    // 時間帯別の利用パターンを計算（0-23時）
+    const hourlyPattern: { [hour: number]: number } = {};
+    for (let hour = 0; hour < 24; hour++) {
+      hourlyPattern[hour] = 0;
+    }
+    
+    history.forEach(item => {
+      const startDate = new Date(item.startedAt);
+      const hour = startDate.getHours();
+      hourlyPattern[hour]++;
+    });
+
+    // 曜日別の利用パターンを計算（0:日曜日 - 6:土曜日）
+    const weeklyPattern: { [day: number]: number } = {};
+    for (let day = 0; day < 7; day++) {
+      weeklyPattern[day] = 0;
+    }
+    
+    history.forEach(item => {
+      const startDate = new Date(item.startedAt);
+      const day = startDate.getDay();
+      weeklyPattern[day]++;
+    });
+
+    // 月別トレンド計算（最近12ヶ月）
+    const now = new Date();
+    const monthlyTrend = [];
+    
+    for (let i = 11; i >= 0; i--) {
+      const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}`;
+      
+      const monthItems = history.filter(item => {
+        const itemDate = new Date(item.startedAt);
+        return itemDate.getFullYear() === targetDate.getFullYear() &&
+               itemDate.getMonth() === targetDate.getMonth();
+      });
+      
+      const monthCompleted = monthItems.filter(item => item.completed).length;
+      
+      monthlyTrend.push({
+        month: monthKey,
+        count: monthItems.length,
+        completed: monthCompleted
+      });
+    }
     
     return {
       totalCount: history.length,
@@ -195,6 +243,9 @@ export class HistoryStorage {
       averageRating,
       categoryCounts,
       situationCounts,
+      hourlyPattern,
+      weeklyPattern,
+      monthlyTrend,
     };
   }
 

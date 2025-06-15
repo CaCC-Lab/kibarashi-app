@@ -7,8 +7,10 @@ interface MainLayoutProps {
   onFavoritesClick?: () => void;
   onHistoryClick?: () => void;
   onSettingsClick?: () => void;
+  onCustomClick?: () => void;
   showFavoritesButton?: boolean;
   showHistoryButton?: boolean;
+  showCustomButton?: boolean;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ 
@@ -16,8 +18,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   onFavoritesClick, 
   onHistoryClick,
   onSettingsClick,
+  onCustomClick,
   showFavoritesButton = true,
-  showHistoryButton = true
+  showHistoryButton = true,
+  showCustomButton = true
 }) => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -28,8 +32,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         onFavoritesClick={onFavoritesClick} 
         onHistoryClick={onHistoryClick}
         onSettingsClick={onSettingsClick}
+        onCustomClick={onCustomClick}
         showFavoritesButton={showFavoritesButton}
         showHistoryButton={showHistoryButton}
+        showCustomButton={showCustomButton}
       />
       <main id="main-content" className="flex-1 container mx-auto px-4 py-8 animate-fadeIn">
         {children}

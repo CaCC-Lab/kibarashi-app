@@ -9,8 +9,9 @@ const SuggestionList = lazy(() => import('./features/suggestion/SuggestionList')
 const FavoritesList = lazy(() => import('./features/favorites/FavoritesList'));
 const HistoryList = lazy(() => import('./features/history/HistoryList'));
 const Settings = lazy(() => import('./features/settings/Settings'));
+const CustomSuggestionList = lazy(() => import('./features/custom/CustomSuggestionList'));
 
-type Step = 'situation' | 'duration' | 'suggestions' | 'favorites' | 'history' | 'settings';
+type Step = 'situation' | 'duration' | 'suggestions' | 'favorites' | 'history' | 'settings' | 'custom';
 type Situation = 'workplace' | 'home' | 'outside' | null;
 type Duration = 5 | 15 | 30 | null;
 
@@ -47,6 +48,10 @@ function App() {
     setCurrentStep('settings');
   };
 
+  const handleCustomClick = () => {
+    setCurrentStep('custom');
+  };
+
   const handleBackToMain = () => {
     setCurrentStep('situation');
   };
@@ -68,6 +73,8 @@ function App() {
         return <HistoryList />;
       case 'settings':
         return <Settings onBack={handleBackToMain} />;
+      case 'custom':
+        return <CustomSuggestionList />;
       default:
         return null;
     }
@@ -126,11 +133,11 @@ function App() {
   );
 
   return (
-    <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick} onSettingsClick={handleSettingsClick}>
+    <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick} onSettingsClick={handleSettingsClick} onCustomClick={handleCustomClick}>
       <div className="max-w-4xl mx-auto">
-        {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && renderBreadcrumb()}
+        {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && currentStep !== 'custom' && renderBreadcrumb()}
         
-        {currentStep === 'history' || currentStep === 'settings' ? (
+        {currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom' ? (
           <Suspense fallback={<Loading />}>
             {renderStep()}
           </Suspense>
@@ -153,7 +160,7 @@ function App() {
           </div>
         )}
         
-        {(currentStep === 'favorites' || currentStep === 'history' || currentStep === 'settings') && (
+        {(currentStep === 'favorites' || currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom') && (
           <div className="mt-6 text-center">
             <button
               onClick={handleBackToMain}

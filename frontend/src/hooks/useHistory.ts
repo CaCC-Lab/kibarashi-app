@@ -28,6 +28,9 @@ export function useHistory() {
       home: 0,
       outside: 0,
     },
+    hourlyPattern: {},
+    weeklyPattern: {},
+    monthlyTrend: [],
   });
 
   // 履歴データを読み込む

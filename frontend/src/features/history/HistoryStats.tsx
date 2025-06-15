@@ -1,5 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { HistoryStats as HistoryStatsType } from '../../types/history';
+import HourlyPatternChart from '../../components/charts/HourlyPatternChart';
+import WeeklyPatternChart from '../../components/charts/WeeklyPatternChart';
+import MonthlyTrendChart from '../../components/charts/MonthlyTrendChart';
+import CategoryDistributionChart from '../../components/charts/CategoryDistributionChart';
 
 interface HistoryStatsProps {
   stats: HistoryStatsType;
@@ -12,8 +16,10 @@ interface HistoryStatsProps {
  * - 実行履歴から有用な統計情報を視覚的に表示
  * - ユーザーの利用パターンを把握しやすくする
  * - 成果を数値で確認できることでモチベーション向上
+ * - グラフによる可視化で傾向を直感的に理解
  */
 const HistoryStats: React.FC<HistoryStatsProps> = ({ stats }) => {
+  const [showCharts, setShowCharts] = useState(false);
   // 実行時間のフォーマット
   const formatTotalDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -269,6 +275,68 @@ const HistoryStats: React.FC<HistoryStatsProps> = ({ stats }) => {
           </div>
         </div>
       </div>
+
+      {/* グラフ表示切り替えボタン */}
+      <div className="mt-6 text-center">
+        <button
+          onClick={() => setShowCharts(!showCharts)}
+          className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-text-inverse rounded-lg shadow-sm hover:shadow-md transition-all duration-200 focus-ring"
+        >
+          {showCharts ? (
+            <>
+              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+              グラフを非表示
+            </>
+          ) : (
+            <>
+              <svg className="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              詳細グラフを表示
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* グラフセクション */}
+      {showCharts && (
+        <div className="mt-6 space-y-6 animate-fadeIn">
+          {/* カテゴリー分布とトレンドのグリッド */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* カテゴリー分布チャート */}
+            <CategoryDistributionChart categoryCounts={stats.categoryCounts} />
+            
+            {/* 月別トレンドチャート */}
+            <div className="lg:col-span-1">
+              <MonthlyTrendChart monthlyTrend={stats.monthlyTrend} />
+            </div>
+          </div>
+
+          {/* 時間帯・曜日パターンのグリッド */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* 時間帯別パターン */}
+            <HourlyPatternChart hourlyPattern={stats.hourlyPattern} />
+            
+            {/* 曜日別パターン */}
+            <WeeklyPatternChart weeklyPattern={stats.weeklyPattern} />
+          </div>
+
+          {/* 統計の詳細説明 */}
+          <div className="bg-surface-secondary dark:bg-gray-900/50 rounded-lg p-4 border border-primary-100">
+            <h4 className="text-sm font-medium text-text-primary dark:text-gray-300 mb-2">
+              グラフの見方
+            </h4>
+            <div className="text-sm text-text-secondary dark:text-gray-400 space-y-1">
+              <p>• <strong>時間帯別パターン</strong>: 一日の中でどの時間に最も気晴らしを実行するかがわかります</p>
+              <p>• <strong>曜日別パターン</strong>: 平日と休日での利用傾向の違いを確認できます</p>
+              <p>• <strong>月別トレンド</strong>: 継続的な利用状況と完了率の変化を追跡できます</p>
+              <p>• <strong>カテゴリー分布</strong>: 認知的・行動的気晴らしのバランスを確認できます</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -5,16 +5,20 @@ interface HeaderProps {
   onFavoritesClick?: () => void;
   onHistoryClick?: () => void;
   onSettingsClick?: () => void;
+  onCustomClick?: () => void;
   showFavoritesButton?: boolean;
   showHistoryButton?: boolean;
+  showCustomButton?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
   onFavoritesClick, 
   onHistoryClick,
   onSettingsClick,
+  onCustomClick,
   showFavoritesButton = true,
-  showHistoryButton = true
+  showHistoryButton = true,
+  showCustomButton = true
 }) => {
   const [showMessage, setShowMessage] = useState(false);
 
@@ -86,6 +90,29 @@ const Header: React.FC<HeaderProps> = ({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </button>
+            )}
+            
+            {showCustomButton && onCustomClick && (
+              <button
+                onClick={onCustomClick}
+                className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+                aria-label="マイ気晴らし"
+                title="マイ気晴らし"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                   />
                 </svg>
               </button>

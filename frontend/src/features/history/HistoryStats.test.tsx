@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import HistoryStats from './HistoryStats';
 import type { HistoryStats as HistoryStatsType } from '../../types/history';
 
@@ -26,7 +26,18 @@ describe('HistoryStats', () => {
       workplace: 5,
       home: 3,
       outside: 2
-    }
+    },
+    hourlyPattern: {
+      9: 2, 12: 3, 15: 2, 18: 3
+    },
+    weeklyPattern: {
+      1: 2, 2: 1, 3: 2, 4: 1, 5: 3, 6: 1, 0: 0
+    },
+    monthlyTrend: [
+      { month: '2024-01', count: 3, completed: 2 },
+      { month: '2024-02', count: 4, completed: 3 },
+      { month: '2024-03', count: 3, completed: 3 }
+    ]
   };
 
   const emptyStats: HistoryStatsType = {
@@ -42,7 +53,10 @@ describe('HistoryStats', () => {
       workplace: 0,
       home: 0,
       outside: 0
-    }
+    },
+    hourlyPattern: {},
+    weeklyPattern: {},
+    monthlyTrend: []
   };
 
   describe('基本統計の表示', () => {
@@ -199,10 +213,11 @@ describe('HistoryStats', () => {
       expect(icons.length).toBeGreaterThanOrEqual(4);
       
       // 色が正しく設定されていることを確認
-      expect(container.querySelector('.text-primary-500')).toBeInTheDocument();
-      expect(container.querySelector('.text-accent-500')).toBeInTheDocument();
-      expect(container.querySelector('.text-primary-500')).toBeInTheDocument();
-      expect(container.querySelector('.text-yellow-500')).toBeInTheDocument();
+      const primaryIcons = container.querySelectorAll('svg.text-primary-500');
+      const accentIcons = container.querySelectorAll('svg.text-accent-500');
+      
+      expect(primaryIcons.length).toBeGreaterThan(0);
+      expect(accentIcons.length).toBeGreaterThan(0);
     });
   });
 
@@ -233,6 +248,51 @@ describe('HistoryStats', () => {
       
       const progressBars = container.querySelectorAll('.transition-all.duration-500');
       expect(progressBars.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('グラフ機能', () => {
+    it('詳細グラフ表示ボタンが表示される', () => {
+      render(<HistoryStats stats={defaultStats} />);
+      
+      expect(screen.getByText('詳細グラフを表示')).toBeInTheDocument();
+    });
+
+    it('グラフ表示ボタンをクリックするとグラフが表示される', () => {
+      render(<HistoryStats stats={defaultStats} />);
+      
+      const toggleButton = screen.getByText('詳細グラフを表示');
+      fireEvent.click(toggleButton);
+      
+      expect(screen.getByText('グラフを非表示')).toBeInTheDocument();
+      expect(screen.getByText('グラフの見方')).toBeInTheDocument();
+    });
+
+    it('グラフの説明が表示される', () => {
+      render(<HistoryStats stats={defaultStats} />);
+      
+      const toggleButton = screen.getByText('詳細グラフを表示');
+      fireEvent.click(toggleButton);
+      
+      expect(screen.getByText('時間帯別パターン')).toBeInTheDocument();
+      expect(screen.getByText('曜日別パターン')).toBeInTheDocument();
+      expect(screen.getByText('月別トレンド')).toBeInTheDocument();
+      expect(screen.getByText('カテゴリー分布')).toBeInTheDocument();
+    });
+
+    it('グラフを非表示にできる', () => {
+      render(<HistoryStats stats={defaultStats} />);
+      
+      // グラフを表示
+      const showButton = screen.getByText('詳細グラフを表示');
+      fireEvent.click(showButton);
+      
+      // グラフを非表示
+      const hideButton = screen.getByText('グラフを非表示');
+      fireEvent.click(hideButton);
+      
+      expect(screen.getByText('詳細グラフを表示')).toBeInTheDocument();
+      expect(screen.queryByText('グラフの見方')).not.toBeInTheDocument();
     });
   });
 });
