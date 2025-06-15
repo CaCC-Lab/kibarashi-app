@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useDarkMode } from './useDarkMode';
 
@@ -11,11 +11,33 @@ import { useDarkMode } from './useDarkMode';
  * - matchMedia APIの動作を検証
  */
 describe('useDarkMode', () => {
+  let consoleSpy: any;
+  let originalLocalStorage: Storage;
+  
   beforeEach(() => {
+    // 元のlocalStorageを保存
+    originalLocalStorage = window.localStorage;
+    
     // テスト前にlocalStorageをクリア
     localStorage.clear();
     // classListをクリア
     document.documentElement.classList.remove('dark');
+    
+    // console.errorをスパイ化してテスト出力をクリーンに保つ
+    consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  
+  afterEach(() => {
+    // localStorageを復元
+    Object.defineProperty(window, 'localStorage', {
+      value: originalLocalStorage,
+      writable: true
+    });
+    
+    // console.errorスパイを復元
+    if (consoleSpy) {
+      consoleSpy.mockRestore();
+    }
   });
 
   describe('初期状態のテスト', () => {
@@ -175,7 +197,7 @@ describe('useDarkMode', () => {
   describe('エラーハンドリングのテスト', () => {
     it('localStorage が利用できない場合でも動作する', () => {
       // localStorageを一時的に無効化
-      const originalLocalStorage = window.localStorage;
+      const testOriginalLocalStorage = window.localStorage;
       
       // localStorageのメソッドがエラーを投げるようにする
       const mockLocalStorage = {
@@ -208,9 +230,12 @@ describe('useDarkMode', () => {
       // DOM操作は正常に動作
       expect(document.documentElement.classList.contains('dark')).toBe(true);
       
+      // エラーが適切にログ出力されることを確認
+      expect(consoleSpy).toHaveBeenCalled();
+      
       // localStorageを復元
       Object.defineProperty(window, 'localStorage', {
-        value: originalLocalStorage,
+        value: testOriginalLocalStorage,
         writable: true
       });
     });

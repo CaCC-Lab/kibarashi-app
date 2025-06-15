@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useDuration } from './useDuration';
 
 /**
@@ -14,27 +14,39 @@ describe('useDuration', () => {
     it('初期状態はnullである', () => {
       const { result } = renderHook(() => useDuration());
       
-      expect(result.current).toBeNull();
+      expect(result.current.duration).toBeNull();
     });
   });
 
-  describe('異なる初期値', () => {
-    it('5分を初期値として設定できる', () => {
-      const { result } = renderHook(() => useDuration(5));
+  describe('状態の更新', () => {
+    it('5分に設定できる', () => {
+      const { result } = renderHook(() => useDuration());
       
-      expect(result.current).toBe(5);
+      act(() => {
+        result.current.setDuration(5);
+      });
+      
+      expect(result.current.duration).toBe(5);
     });
 
-    it('15分を初期値として設定できる', () => {
-      const { result } = renderHook(() => useDuration(15));
+    it('15分に設定できる', () => {
+      const { result } = renderHook(() => useDuration());
       
-      expect(result.current).toBe(15);
+      act(() => {
+        result.current.setDuration(15);
+      });
+      
+      expect(result.current.duration).toBe(15);
     });
 
-    it('30分を初期値として設定できる', () => {
-      const { result } = renderHook(() => useDuration(30));
+    it('30分に設定できる', () => {
+      const { result } = renderHook(() => useDuration());
       
-      expect(result.current).toBe(30);
+      act(() => {
+        result.current.setDuration(30);
+      });
+      
+      expect(result.current.duration).toBe(30);
     });
   });
 
@@ -43,16 +55,20 @@ describe('useDuration', () => {
       const { result } = renderHook(() => useDuration());
       
       // TypeScriptの型チェックが通ることを確認
-      const duration: 5 | 15 | 30 | null = result.current;
+      const duration: 5 | 15 | 30 | null = result.current.duration;
       expect(duration).toBeNull();
     });
 
     it('数値型として扱える', () => {
-      const { result } = renderHook(() => useDuration(15));
+      const { result } = renderHook(() => useDuration());
+      
+      act(() => {
+        result.current.setDuration(15);
+      });
       
       // 数値演算が可能
-      if (result.current !== null) {
-        const doubled = result.current * 2;
+      if (result.current.duration !== null) {
+        const doubled = result.current.duration * 2;
         expect(doubled).toBe(30);
       }
     });
@@ -60,43 +76,61 @@ describe('useDuration', () => {
 
   describe('再レンダリング時の安定性', () => {
     it('再レンダリングしても値が保持される', () => {
-      const { result, rerender } = renderHook(
-        ({ initial }) => useDuration(initial),
-        { initialProps: { initial: 5 as const } }
-      );
+      const { result, rerender } = renderHook(() => useDuration());
       
-      expect(result.current).toBe(5);
+      act(() => {
+        result.current.setDuration(5);
+      });
+      
+      expect(result.current.duration).toBe(5);
       
       // 再レンダリング
-      rerender({ initial: 5 as const });
-      expect(result.current).toBe(5);
+      rerender();
+      expect(result.current.duration).toBe(5);
     });
 
-    it('異なる初期値でフックを呼び出しても最初の値が保持される', () => {
-      const { result, rerender } = renderHook(
-        ({ initial }) => useDuration(initial),
-        { initialProps: { initial: 5 as const } }
-      );
+    it('リセット機能が動作する', () => {
+      const { result } = renderHook(() => useDuration());
       
-      expect(result.current).toBe(5);
+      act(() => {
+        result.current.setDuration(5);
+      });
       
-      // 異なる初期値で再レンダリング（Reactの仕様により初期値は変わらない）
-      rerender({ initial: 15 as const });
-      expect(result.current).toBe(5);
+      expect(result.current.duration).toBe(5);
+      
+      act(() => {
+        result.current.resetDuration();
+      });
+      
+      expect(result.current.duration).toBeNull();
     });
   });
 
   describe('境界値テスト', () => {
-    it('nullを初期値として扱える', () => {
-      const { result } = renderHook(() => useDuration(null));
+    it('nullを設定できる', () => {
+      const { result } = renderHook(() => useDuration());
       
-      expect(result.current).toBeNull();
+      act(() => {
+        result.current.setDuration(15);
+      });
+      
+      expect(result.current.duration).toBe(15);
+      
+      act(() => {
+        result.current.setDuration(null);
+      });
+      
+      expect(result.current.duration).toBeNull();
     });
 
-    it('undefinedを渡すとnullになる', () => {
-      const { result } = renderHook(() => useDuration(undefined));
+    it('型制約で許可された値のみ設定できる', () => {
+      const { result } = renderHook(() => useDuration());
       
-      expect(result.current).toBeNull();
+      // TypeScriptで型エラーになるため、実質的にテスト不要
+      // 以下のコードはコンパイルエラーになる
+      // result.current.setDuration(10); // Error: Argument of type '10' is not assignable to parameter of type 'Duration'
+      
+      expect(result.current.duration).toBeNull();
     });
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { useSituation } from './useSituation';
 
 /**
@@ -14,27 +14,39 @@ describe('useSituation', () => {
     it('初期状態はnullである', () => {
       const { result } = renderHook(() => useSituation());
       
-      expect(result.current).toBeNull();
+      expect(result.current.situation).toBeNull();
     });
   });
 
-  describe('異なる初期値', () => {
-    it('workplace を初期値として設定できる', () => {
-      const { result } = renderHook(() => useSituation('workplace'));
+  describe('状態の更新', () => {
+    it('workplace に設定できる', () => {
+      const { result } = renderHook(() => useSituation());
       
-      expect(result.current).toBe('workplace');
+      act(() => {
+        result.current.setSituation('workplace');
+      });
+      
+      expect(result.current.situation).toBe('workplace');
     });
 
-    it('home を初期値として設定できる', () => {
-      const { result } = renderHook(() => useSituation('home'));
+    it('home に設定できる', () => {
+      const { result } = renderHook(() => useSituation());
       
-      expect(result.current).toBe('home');
+      act(() => {
+        result.current.setSituation('home');
+      });
+      
+      expect(result.current.situation).toBe('home');
     });
 
-    it('outside を初期値として設定できる', () => {
-      const { result } = renderHook(() => useSituation('outside'));
+    it('outside に設定できる', () => {
+      const { result } = renderHook(() => useSituation());
       
-      expect(result.current).toBe('outside');
+      act(() => {
+        result.current.setSituation('outside');
+      });
+      
+      expect(result.current.situation).toBe('outside');
     });
   });
 
@@ -43,36 +55,40 @@ describe('useSituation', () => {
       const { result } = renderHook(() => useSituation());
       
       // TypeScriptの型チェックが通ることを確認
-      const situation: 'workplace' | 'home' | 'outside' | null = result.current;
+      const situation: 'workplace' | 'home' | 'outside' | null = result.current.situation;
       expect(situation).toBeNull();
     });
   });
 
   describe('再レンダリング時の安定性', () => {
     it('再レンダリングしても値が保持される', () => {
-      const { result, rerender } = renderHook(
-        ({ initial }) => useSituation(initial),
-        { initialProps: { initial: 'workplace' as const } }
-      );
+      const { result, rerender } = renderHook(() => useSituation());
       
-      expect(result.current).toBe('workplace');
+      act(() => {
+        result.current.setSituation('workplace');
+      });
+      
+      expect(result.current.situation).toBe('workplace');
       
       // 再レンダリング
-      rerender({ initial: 'workplace' as const });
-      expect(result.current).toBe('workplace');
+      rerender();
+      expect(result.current.situation).toBe('workplace');
     });
 
-    it('異なる初期値でフックを呼び出しても最初の値が保持される', () => {
-      const { result, rerender } = renderHook(
-        ({ initial }) => useSituation(initial),
-        { initialProps: { initial: 'workplace' as const } }
-      );
+    it('リセット機能が動作する', () => {
+      const { result } = renderHook(() => useSituation());
       
-      expect(result.current).toBe('workplace');
+      act(() => {
+        result.current.setSituation('workplace');
+      });
       
-      // 異なる初期値で再レンダリング（Reactの仕様により初期値は変わらない）
-      rerender({ initial: 'home' as const });
-      expect(result.current).toBe('workplace');
+      expect(result.current.situation).toBe('workplace');
+      
+      act(() => {
+        result.current.resetSituation();
+      });
+      
+      expect(result.current.situation).toBeNull();
     });
   });
 });

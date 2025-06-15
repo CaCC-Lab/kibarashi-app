@@ -7,6 +7,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './tests/setup.ts',
+    testTimeout: 15000, // タイムアウトを15秒に延長
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: [

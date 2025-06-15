@@ -11,7 +11,7 @@ export function useDarkMode() {
       }
     } catch (error) {
       // localStorageが利用できない場合は無視
-      console.warn('localStorage is not available:', error);
+      console.error('localStorage is not available:', error);
     }
     
     // システムのprefers-color-schemeを確認
@@ -33,7 +33,7 @@ export function useDarkMode() {
       localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
     } catch (error) {
       // localStorageが利用できない場合は無視
-      console.warn('Failed to save dark mode preference:', error);
+      console.error('Failed to save dark mode preference:', error);
     }
   }, [isDarkMode]);
 
@@ -50,7 +50,7 @@ export function useDarkMode() {
         }
       } catch (error) {
         // localStorageが利用できない場合はシステム設定に従う
-        console.warn('Failed to read dark mode preference:', error);
+        console.error('Failed to read dark mode preference:', error);
         setIsDarkMode(e.matches);
       }
     };

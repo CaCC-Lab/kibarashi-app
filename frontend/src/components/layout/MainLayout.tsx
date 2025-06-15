@@ -4,15 +4,30 @@ import Footer from './Footer';
 
 interface MainLayoutProps {
   children: React.ReactNode;
+  onFavoritesClick?: () => void;
+  onHistoryClick?: () => void;
+  showFavoritesButton?: boolean;
+  showHistoryButton?: boolean;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ 
+  children, 
+  onFavoritesClick, 
+  onHistoryClick,
+  showFavoritesButton = true,
+  showHistoryButton = true
+}) => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* アクセシビリティ: スキップリンク */}
       <a href="#main-content" className="skip-link">メインコンテンツにスキップ</a>
       
-      <Header />
+      <Header 
+        onFavoritesClick={onFavoritesClick} 
+        onHistoryClick={onHistoryClick}
+        showFavoritesButton={showFavoritesButton}
+        showHistoryButton={showHistoryButton}
+      />
       <main id="main-content" className="flex-1 container mx-auto px-4 py-8 animate-fadeIn">
         {children}
       </main>

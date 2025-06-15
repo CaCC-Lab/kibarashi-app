@@ -79,6 +79,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
     return (
       <SuggestionDetail
         {...selectedSuggestion}
+        situation={situation}
         onBack={() => {
           // 詳細から一覧に戻る
           // nullをセットすることで、選択状態をクリアし、一覧表示に戻る

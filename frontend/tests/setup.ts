@@ -26,27 +26,77 @@ global.Audio = class Audio {
   removeEventListener() {}
 } as any;
 
-// Speech Synthesis APIのモック
+// Speech Synthesis APIの実装
+// モックを使用せず、実際の動作をシミュレート
+global.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+  text: string;
+  lang: string = 'ja-JP';
+  voice: any = null;
+  volume: number = 1;
+  rate: number = 1;
+  pitch: number = 1;
+  onstart: any = null;
+  onend: any = null;
+  onerror: any = null;
+  onpause: any = null;
+  onresume: any = null;
+  onmark: any = null;
+  onboundary: any = null;
+
+  constructor(text?: string) {
+    this.text = text || '';
+  }
+
+  addEventListener() {}
+  removeEventListener() {}
+  dispatchEvent() { return true; }
+} as any;
+
+global.SpeechSynthesisErrorEvent = class SpeechSynthesisErrorEvent extends Event {
+  error: string;
+  
+  constructor(type: string, init?: { error?: string }) {
+    super(type);
+    this.error = init?.error || 'unknown';
+  }
+} as any;
+
 global.speechSynthesis = {
-  speak: vi.fn(),
-  cancel: vi.fn(),
-  pause: vi.fn(),
-  resume: vi.fn(),
-  getVoices: vi.fn(() => []),
-  addEventListener: vi.fn(),
+  speak: function(utterance: any) {
+    // 音声合成をシミュレート
+    if (utterance.onstart) {
+      setTimeout(() => utterance.onstart(new Event('start')), 0);
+    }
+    if (utterance.onend) {
+      setTimeout(() => utterance.onend(new Event('end')), 100);
+    }
+  },
+  cancel: function() {
+    // キャンセル処理
+  },
+  pause: function() {
+    // 一時停止処理
+  },
+  resume: function() {
+    // 再開処理
+  },
+  getVoices: function() {
+    return [];
+  },
+  addEventListener: function() {},
+  removeEventListener: function() {},
+  dispatchEvent: function() { return true; },
   speaking: false,
   paused: false,
   pending: false,
   onvoiceschanged: null,
-  removeEventListener: vi.fn(),
-  dispatchEvent: vi.fn(),
 } as any;
 
-// Vibration APIのモック
-Object.defineProperty(navigator, 'vibrate', {
-  value: vi.fn(),
-  writable: true
-});
+// Vibration APIの実装
+navigator.vibrate = function(pattern?: number | number[]) {
+  // 振動をシミュレート（実際には何もしない）
+  return true;
+};
 
 // IntersectionObserverのモック
 global.IntersectionObserver = class IntersectionObserver {
@@ -56,17 +106,19 @@ global.IntersectionObserver = class IntersectionObserver {
   disconnect() {}
 } as any;
 
-// matchMediaのモック
+// matchMediaの実装
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: vi.fn().mockImplementation(query => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: vi.fn(), // Deprecated
-    removeListener: vi.fn(), // Deprecated
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-    dispatchEvent: vi.fn(),
-  })),
+  value: function(query: string) {
+    return {
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: function() {}, // Deprecated
+      removeListener: function() {}, // Deprecated
+      addEventListener: function() {},
+      removeEventListener: function() {},
+      dispatchEvent: function() { return true; },
+    };
+  },
 });

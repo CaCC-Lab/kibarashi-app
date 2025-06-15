@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import AudioPlayer, { AudioPlayerHandle } from '../../components/audio/AudioPlayer';
 import { ttsService } from '../../services/api/tts';
 import { browserTTS } from '../../services/browserTTS';
+import { useHistory } from '../../hooks/useHistory';
 
 interface SuggestionDetailProps {
   id: string;
@@ -9,14 +10,19 @@ interface SuggestionDetailProps {
   description: string;
   duration: number;
   guide: string;
+  category: '認知的' | '行動的';
+  situation: 'workplace' | 'home' | 'outside';
   onBack: () => void;
 }
 
 const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
+  id,
   title,
   description,
   duration,
   guide,
+  category,
+  situation,
   onBack,
 }) => {
   const [timeRemaining, setTimeRemaining] = useState(duration * 60); // seconds
@@ -30,6 +36,8 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false); // 音声再生中かどうか
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false); // 音声生成中かどうか
   const audioPlayerRef = useRef<AudioPlayerHandle | null>(null); // AudioPlayerの参照
+  const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null); // 現在の履歴ID
+  const { startHistory, completeHistory } = useHistory();
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -40,6 +48,11 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
           if (prev <= 1) {
             setIsRunning(false);
             setIsComplete(true);
+            // 完了時に履歴を更新
+            if (currentHistoryId) {
+              const actualDuration = duration * 60; // 全時間実行
+              completeHistory(currentHistoryId, actualDuration);
+            }
             return 0;
           }
           return prev - 1;
@@ -81,6 +94,15 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
     // 音声ガイドが有効な場合、音声を生成
     if (showAudioPlayer && !audioUrl) {
       await generateAudio();
+    }
+    
+    // 履歴に記録
+    const historyId = startHistory(
+      { id, title, description, duration, category, steps: guide.split('\n').filter(s => s.trim()) },
+      situation
+    );
+    if (historyId) {
+      setCurrentHistoryId(historyId);
     }
     
     // 音声生成が完了してから、またはエラーがあってもタイマーを開始
@@ -167,9 +189,22 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
       console.log('Stopping Gemini TTS audio');
       audioPlayerRef.current.stop();
     }
+    
+    // 一時停止時に履歴を更新（未完了で記録）
+    if (currentHistoryId && !isComplete) {
+      const actualDuration = (duration * 60) - timeRemaining;
+      completeHistory(currentHistoryId, actualDuration, undefined, '一時停止');
+    }
   };
 
   const handleReset = () => {
+    // リセット時に履歴を更新（未完了で記録）
+    if (currentHistoryId && !isComplete && timeRemaining < duration * 60) {
+      const actualDuration = (duration * 60) - timeRemaining;
+      completeHistory(currentHistoryId, actualDuration, undefined, 'リセット');
+      setCurrentHistoryId(null); // リセット後は新しい履歴として記録
+    }
+    
     setTimeRemaining(duration * 60);
     setIsRunning(false);
     setIsComplete(false);

@@ -44,68 +44,77 @@ describe('SuggestionDetail', () => {
     it('提案の詳細情報が表示される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
       expect(screen.getByText('デスクで深呼吸')).toBeInTheDocument();
       expect(screen.getByText('椅子に座ったまま、ゆっくりと深呼吸をしてリラックスしましょう。')).toBeInTheDocument();
-      expect(screen.getByText('5分')).toBeInTheDocument();
-      expect(screen.getByText('認知的')).toBeInTheDocument();
+      // タイマーの初期表示確認（5分 = 300秒 = 5:00）
+      expect(screen.getByText('5:00')).toBeInTheDocument();
     });
 
-    it('ステップが存在する場合、すべて表示される', () => {
+    it('ガイドが表示される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
-      expect(screen.getByText('実践方法')).toBeInTheDocument();
-      expect(screen.getByText('背筋を伸ばして座る')).toBeInTheDocument();
-      expect(screen.getByText('鼻から4秒かけて息を吸う')).toBeInTheDocument();
-      expect(screen.getByText('4秒間息を止める')).toBeInTheDocument();
-      expect(screen.getByText('口から6秒かけて息を吐く')).toBeInTheDocument();
-      expect(screen.getByText('これを5回繰り返す')).toBeInTheDocument();
+      expect(screen.getByText('ガイド')).toBeInTheDocument();
+      expect(screen.getByText(/背筋を伸ばして座る/)).toBeInTheDocument();
+      expect(screen.getByText(/鼻から4秒かけて息を吸う/)).toBeInTheDocument();
+      expect(screen.getByText(/4秒間息を止める/)).toBeInTheDocument();
+      expect(screen.getByText(/口から6秒かけて息を吐く/)).toBeInTheDocument();
+      expect(screen.getByText(/これを5回繰り返す/)).toBeInTheDocument();
     });
 
-    it('ステップがない場合、実践方法セクションが表示されない', () => {
+    it('ガイドセクションは常に表示される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestionWithoutSteps}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestionWithoutSteps.id}
+          title={mockSuggestionWithoutSteps.title}
+          description={mockSuggestionWithoutSteps.description}
+          duration={mockSuggestionWithoutSteps.duration}
+          guide={mockSuggestionWithoutSteps.steps ? mockSuggestionWithoutSteps.steps.join('\n') : mockSuggestionWithoutSteps.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
-      expect(screen.queryByText('実践方法')).not.toBeInTheDocument();
+      expect(screen.getByText('ガイド')).toBeInTheDocument();
+      // ガイドセクション内のテキストを確認
+      const guideSection = screen.getByText('ガイド').closest('.bg-gray-50');
+      expect(guideSection).toHaveTextContent('少し立ち上がって、窓の外の景色を眺めてみましょう');
     });
 
-    it('カテゴリーに応じて適切なスタイルが適用される', () => {
-      const { rerender } = render(
+    it('開始ボタンとリセットボタンが表示される', () => {
+      render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
-      // 認知的カテゴリーのスタイル
-      const cognitiveCategory = screen.getByText('認知的');
-      expect(cognitiveCategory).toHaveClass('bg-blue-100');
-      expect(cognitiveCategory).toHaveClass('text-blue-800');
+      expect(screen.getByText('開始')).toBeInTheDocument();
+      expect(screen.getByText('リセット')).toBeInTheDocument();
 
-      // 行動的カテゴリーのスタイル
-      rerender(
-        <SuggestionDetail 
-          suggestion={mockSuggestionWithoutSteps}
-          onClose={() => { onCloseCallCount++; }}
-        />
-      );
-
-      const behavioralCategory = screen.getByText('行動的');
-      expect(behavioralCategory).toHaveClass('bg-green-100');
-      expect(behavioralCategory).toHaveClass('text-green-800');
+      // 音声ガイドのチェックボックスが表示される
+      expect(screen.getByText('音声ガイドを使用する')).toBeInTheDocument();
+      expect(screen.getByRole('checkbox')).toBeInTheDocument();
     });
   });
 
@@ -113,8 +122,12 @@ describe('SuggestionDetail', () => {
     it('音声読み上げボタンが表示される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -126,8 +139,12 @@ describe('SuggestionDetail', () => {
     it('音声読み上げボタンをクリックすると読み上げが開始される', async () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -145,8 +162,12 @@ describe('SuggestionDetail', () => {
     it('読み上げ中に停止ボタンが表示される', async () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -170,8 +191,12 @@ describe('SuggestionDetail', () => {
     it('閉じるボタンをクリックするとonCloseが呼ばれる', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -184,8 +209,12 @@ describe('SuggestionDetail', () => {
     it('一覧に戻るボタンをクリックするとonCloseが呼ばれる', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -198,8 +227,12 @@ describe('SuggestionDetail', () => {
     it('オーバーレイをクリックするとonCloseが呼ばれる', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -214,8 +247,12 @@ describe('SuggestionDetail', () => {
     it('モーダル内部をクリックしてもonCloseは呼ばれない', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -230,8 +267,12 @@ describe('SuggestionDetail', () => {
     it('モーダルにアニメーションクラスが適用される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -242,8 +283,12 @@ describe('SuggestionDetail', () => {
     it('ステップアイテムにアニメーションクラスが適用される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -258,8 +303,12 @@ describe('SuggestionDetail', () => {
     it('適切なARIA属性が設定されている', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -271,8 +320,12 @@ describe('SuggestionDetail', () => {
     it('閉じるボタンに適切なaria-labelが設定されている', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -285,8 +338,12 @@ describe('SuggestionDetail', () => {
     it('モバイルとデスクトップで適切なパディングが適用される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -298,8 +355,12 @@ describe('SuggestionDetail', () => {
     it('最大幅が設定されている', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -312,8 +373,12 @@ describe('SuggestionDetail', () => {
     it('実践開始ボタンが表示される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 
@@ -325,8 +390,12 @@ describe('SuggestionDetail', () => {
     it('タイマーセクションが表示される', () => {
       render(
         <SuggestionDetail 
-          suggestion={mockSuggestion}
-          onClose={() => { onCloseCallCount++; }}
+          id={mockSuggestion.id}
+          title={mockSuggestion.title}
+          description={mockSuggestion.description}
+          duration={mockSuggestion.duration}
+          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
+          onBack={() => { onCloseCallCount++; }}
         />
       );
 

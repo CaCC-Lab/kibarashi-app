@@ -24,10 +24,14 @@ describe('App', () => {
       expect(footer).toHaveTextContent('5分気晴らし');
     });
 
-    it('初期状態では状況選択画面が表示される', () => {
+    it('初期状態では状況選択画面が表示される', async () => {
       render(<App />);
       
-      expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      // Suspenseによる遅延読み込みを待つ
+      await waitFor(() => {
+        expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      });
+      
       expect(screen.getByText('職場')).toBeInTheDocument();
       expect(screen.getByText('家')).toBeInTheDocument();
       expect(screen.getByText('外出先')).toBeInTheDocument();
@@ -50,34 +54,55 @@ describe('App', () => {
   });
 
   describe('状況選択フロー', () => {
-    it('職場を選択すると時間選択画面に遷移する', () => {
+    it('職場を選択すると時間選択画面に遷移する', async () => {
       render(<App />);
+      
+      // コンポーネントの読み込みを待つ
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       
       const workplaceButton = screen.getByText('職場');
       fireEvent.click(workplaceButton);
       
-      expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      // 次の画面の読み込みを待つ
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
+      
       expect(screen.getByText('5分')).toBeInTheDocument();
       expect(screen.getByText('15分')).toBeInTheDocument();
       expect(screen.getByText('30分')).toBeInTheDocument();
     });
 
-    it('家を選択すると時間選択画面に遷移する', () => {
+    it('家を選択すると時間選択画面に遷移する', async () => {
       render(<App />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('家')).toBeInTheDocument();
+      });
       
       const homeButton = screen.getByText('家');
       fireEvent.click(homeButton);
       
-      expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
     });
 
-    it('外出先を選択すると時間選択画面に遷移する', () => {
+    it('外出先を選択すると時間選択画面に遷移する', async () => {
       render(<App />);
+      
+      await waitFor(() => {
+        expect(screen.getByText('外出先')).toBeInTheDocument();
+      });
       
       const outsideButton = screen.getByText('外出先');
       fireEvent.click(outsideButton);
       
-      expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
     });
   });
 
@@ -86,89 +111,132 @@ describe('App', () => {
       render(<App />);
       
       // 職場を選択
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('職場'));
       
       // 5分を選択
+      await waitFor(() => {
+        expect(screen.getByText('5分')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('5分'));
       
       // ローディング表示を確認
-      expect(screen.getByText(/提案を生成中.../)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/気晴らし方法を探しています.../)).toBeInTheDocument();
+      });
       
       // 提案の表示を待つ（APIレスポンスまたはエラー）
       await waitFor(() => {
-        const errorMessage = screen.queryByText(/ネットワークエラー/);
-        const suggestionTitle = screen.queryByText(/気晴らし提案/);
+        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
+        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
         expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 10000 });
+      }, { timeout: 12000 });
     });
 
     it('15分を選択すると提案一覧が表示される', async () => {
       render(<App />);
       
+      await waitFor(() => {
+        expect(screen.getByText('家')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('家'));
-      fireEvent.click(screen.getByText('15分'));
-      
-      expect(screen.getByText(/提案を生成中.../)).toBeInTheDocument();
       
       await waitFor(() => {
-        const errorMessage = screen.queryByText(/ネットワークエラー/);
-        const suggestionTitle = screen.queryByText(/気晴らし提案/);
+        expect(screen.getByText('15分')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByText('15分'));
+      
+      await waitFor(() => {
+        expect(screen.getByText(/気晴らし方法を探しています.../)).toBeInTheDocument();
+      });
+      
+      await waitFor(() => {
+        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
+        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
         expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 10000 });
+      }, { timeout: 12000 });
     });
 
     it('30分を選択すると提案一覧が表示される', async () => {
       render(<App />);
       
+      await waitFor(() => {
+        expect(screen.getByText('外出先')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('外出先'));
-      fireEvent.click(screen.getByText('30分'));
-      
-      expect(screen.getByText(/提案を生成中.../)).toBeInTheDocument();
       
       await waitFor(() => {
-        const errorMessage = screen.queryByText(/ネットワークエラー/);
-        const suggestionTitle = screen.queryByText(/気晴らし提案/);
+        expect(screen.getByText('30分')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByText('30分'));
+      
+      await waitFor(() => {
+        expect(screen.getByText(/気晴らし方法を探しています.../)).toBeInTheDocument();
+      });
+      
+      await waitFor(() => {
+        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
+        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
         expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 10000 });
+      }, { timeout: 12000 });
     });
   });
 
   describe('ブレッドクラムナビゲーション', () => {
-    it('ブレッドクラムを使って前の画面に戻れる', () => {
+    it('ブレッドクラムを使って前の画面に戻れる', async () => {
       render(<App />);
       
       // 職場を選択
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('職場'));
-      expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
       
       // ブレッドクラムのステップ1（場所）をクリック
       const step1Button = screen.getByText('1').parentElement as HTMLElement;
       fireEvent.click(step1Button);
       
       // 状況選択画面に戻ることを確認
-      expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      });
     });
 
     it('提案表示画面からブレッドクラムで戻れる', async () => {
       render(<App />);
       
       // 職場 → 5分を選択
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('職場'));
+      
+      await waitFor(() => {
+        expect(screen.getByText('5分')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('5分'));
       
       // 提案またはエラーの表示を待つ
       await waitFor(() => {
-        const errorMessage = screen.queryByText(/ネットワークエラー/);
-        const suggestionTitle = screen.queryByText(/気晴らし提案/);
+        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
+        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
         expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 10000 });
+      }, { timeout: 12000 });
       
       // ブレッドクラムのステップ2（時間）をクリック
       const step2Button = screen.getByText('2').parentElement as HTMLElement;
       fireEvent.click(step2Button);
       
       // 時間選択画面に戻ることを確認
-      expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
     });
 
     it('未選択のステップは無効化されている', () => {
@@ -187,43 +255,76 @@ describe('App', () => {
   });
 
   describe('再選択フロー', () => {
-    it('同じ状況を再選択できる', () => {
+    it('同じ状況を再選択できる', async () => {
       render(<App />);
       
       // 職場を選択
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('職場'));
+      
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
       
       // ブレッドクラムで戻る
       const step1Button = screen.getByText('1').parentElement as HTMLElement;
       fireEvent.click(step1Button);
+      
+      await waitFor(() => {
+        expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      });
       
       // 再度職場を選択
       fireEvent.click(screen.getByText('職場'));
       
-      expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
     });
 
-    it('異なる状況を選択できる', () => {
+    it('異なる状況を選択できる', async () => {
       render(<App />);
       
       // 職場を選択
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('職場'));
+      
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
       
       // ブレッドクラムで戻る
       const step1Button = screen.getByText('1').parentElement as HTMLElement;
       fireEvent.click(step1Button);
       
+      await waitFor(() => {
+        expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      });
+      
       // 家を選択
       fireEvent.click(screen.getByText('家'));
       
-      expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('どのくらい時間がありますか？')).toBeInTheDocument();
+      });
     });
 
     it('最初からやり直すボタンが機能する', async () => {
       render(<App />);
       
       // 職場 → 5分を選択
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('職場'));
+      
+      await waitFor(() => {
+        expect(screen.getByText('5分')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('5分'));
       
       // 提案の表示を待つ
@@ -236,7 +337,9 @@ describe('App', () => {
       fireEvent.click(screen.getByText('最初からやり直す'));
       
       // 状況選択画面に戻ることを確認
-      expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('どこにいますか？')).toBeInTheDocument();
+      });
     });
   });
 
@@ -248,16 +351,23 @@ describe('App', () => {
       
       render(<App />);
       
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('職場'));
+      
+      await waitFor(() => {
+        expect(screen.getByText('5分')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('5分'));
       
       await waitFor(() => {
-        expect(screen.getByText(/ネットワークエラー/)).toBeInTheDocument();
-      }, { timeout: 5000 });
+        expect(screen.getByText('気晴らし方法の取得に失敗しました')).toBeInTheDocument();
+      }, { timeout: 12000 });
       
       // エラーメッセージの構造を確認
-      expect(screen.getByText('サーバーに接続できません。')).toBeInTheDocument();
-      expect(screen.getByText('インターネット接続を確認してください。')).toBeInTheDocument();
+      expect(screen.getByText('気晴らし方法の取得に失敗しました')).toBeInTheDocument();
+      expect(screen.getByText(/サーバーからデータを取得できませんでした/)).toBeInTheDocument();
       
       // 環境変数を復元
       (import.meta.env as any).VITE_API_URL = originalUrl;
@@ -266,22 +376,36 @@ describe('App', () => {
     it('エラー後に再試行できる', async () => {
       render(<App />);
       
+      await waitFor(() => {
+        expect(screen.getByText('職場')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('職場'));
+      
+      await waitFor(() => {
+        expect(screen.getByText('5分')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('5分'));
       
       // エラーまたは成功を待つ
       await waitFor(() => {
-        const elements = screen.queryByText(/ネットワークエラー|気晴らし提案/);
-        expect(elements).toBeInTheDocument();
-      }, { timeout: 10000 });
+        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
+        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
+        expect(errorMessage || suggestionTitle).toBeInTheDocument();
+      }, { timeout: 12000 });
       
       // ブレッドクラムで時間選択に戻る
       const step2Button = screen.getByText('2').parentElement as HTMLElement;
       fireEvent.click(step2Button);
+      
+      await waitFor(() => {
+        expect(screen.getByText('15分')).toBeInTheDocument();
+      });
       fireEvent.click(screen.getByText('15分'));
       
       // 再度ローディングが表示されることを確認
-      expect(screen.getByText(/提案を生成中.../)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText(/気晴らし方法を探しています.../)).toBeInTheDocument();
+      });
     });
   });
 

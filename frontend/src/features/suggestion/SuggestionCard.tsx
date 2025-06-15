@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import FavoriteButton from '../../components/favorites/FavoriteButton';
+import { Suggestion } from '../../services/api/types';
 
 interface SuggestionCardProps {
   id: string;
@@ -11,6 +13,7 @@ interface SuggestionCardProps {
 }
 
 const SuggestionCard: React.FC<SuggestionCardProps> = ({
+  id,
   title,
   description,
   duration,
@@ -19,6 +22,16 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   onStart,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // FavoriteButton用のsuggestionオブジェクトを作成
+  const suggestion: Suggestion = {
+    id,
+    title,
+    description,
+    duration,
+    category,
+    steps: steps || []
+  };
 
   const categoryStyles = {
     認知的: {
@@ -48,12 +61,15 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   const style = categoryStyles[category];
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col">
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col">
       <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
-            <p className="text-gray-600 text-sm">{description}</p>
+            <div className="flex items-start justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex-1 pr-2">{title}</h3>
+              <FavoriteButton suggestion={suggestion} className="flex-shrink-0" />
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">{description}</p>
           </div>
           <div className={`ml-4 px-3 py-1 rounded-full ${style.bg} ${style.border} border`}>
             <div className={`flex items-center space-x-1 ${style.text}`}>

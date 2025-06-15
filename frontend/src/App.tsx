@@ -6,8 +6,10 @@ import Loading from './components/common/Loading';
 const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
 const DurationSelector = lazy(() => import('./features/duration/DurationSelector'));
 const SuggestionList = lazy(() => import('./features/suggestion/SuggestionList'));
+const FavoritesList = lazy(() => import('./features/favorites/FavoritesList'));
+const HistoryList = lazy(() => import('./features/history/HistoryList'));
 
-type Step = 'situation' | 'duration' | 'suggestions';
+type Step = 'situation' | 'duration' | 'suggestions' | 'favorites' | 'history';
 type Situation = 'workplace' | 'home' | 'outside' | null;
 type Duration = 5 | 15 | 30 | null;
 
@@ -32,6 +34,18 @@ function App() {
     setCurrentStep('situation');
   };
 
+  const handleFavoritesClick = () => {
+    setCurrentStep('favorites');
+  };
+
+  const handleHistoryClick = () => {
+    setCurrentStep('history');
+  };
+
+  const handleBackToMain = () => {
+    setCurrentStep('situation');
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'situation':
@@ -43,6 +57,10 @@ function App() {
           return <SuggestionList situation={situation} duration={duration} />;
         }
         return null;
+      case 'favorites':
+        return <FavoritesList />;
+      case 'history':
+        return <HistoryList />;
       default:
         return null;
     }
@@ -101,15 +119,21 @@ function App() {
   );
 
   return (
-    <MainLayout>
+    <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick}>
       <div className="max-w-4xl mx-auto">
-        {renderBreadcrumb()}
+        {currentStep !== 'favorites' && currentStep !== 'history' && renderBreadcrumb()}
         
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+        {currentStep === 'history' ? (
           <Suspense fallback={<Loading />}>
             {renderStep()}
           </Suspense>
-        </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <Suspense fallback={<Loading />}>
+              {renderStep()}
+            </Suspense>
+          </div>
+        )}
 
         {currentStep === 'suggestions' && (
           <div className="mt-6 text-center">
@@ -118,6 +142,17 @@ function App() {
               className="text-gray-600 hover:text-gray-800 underline"
             >
               最初からやり直す
+            </button>
+          </div>
+        )}
+        
+        {(currentStep === 'favorites' || currentStep === 'history') && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleBackToMain}
+              className="text-gray-600 hover:text-gray-800 underline"
+            >
+              気晴らし選択に戻る
             </button>
           </div>
         )}
