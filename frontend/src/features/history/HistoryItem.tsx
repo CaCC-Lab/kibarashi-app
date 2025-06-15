@@ -78,8 +78,8 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
       className={`
         border rounded-lg p-4 transition-all duration-200
         ${item.completed 
-          ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700' 
-          : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
+          ? 'bg-surface-primary dark:bg-gray-800 border-primary-200 dark:border-gray-700' 
+          : 'bg-accent-50 dark:bg-accent-900/20 border-accent-200 dark:border-accent-800'
         }
         hover:shadow-md
       `}
@@ -87,33 +87,33 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center space-x-3 mb-2">
-            <h3 className="font-semibold text-gray-800 dark:text-white">
+            <h3 className="font-semibold text-text-primary dark:text-white">
               {item.title}
             </h3>
             <span className={`
               inline-flex px-2 py-1 text-xs rounded-full
               ${item.category === '認知的' 
-                ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' 
-                : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
+                ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300' 
+                : 'bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300'
               }
             `}>
               {item.category}
             </span>
-            <span className="text-sm text-gray-600 dark:text-gray-400">
+            <span className="text-sm text-text-secondary dark:text-gray-400">
               {situationLabels[item.situation]}
             </span>
             {!item.completed && (
-              <span className="inline-flex px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+              <span className="inline-flex px-2 py-1 text-xs rounded-full bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300 shadow-sm">
                 実行中
               </span>
             )}
           </div>
           
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+          <p className="text-sm text-text-secondary dark:text-gray-400 mb-2">
             {item.description}
           </p>
           
-          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-500">
+          <div className="flex items-center space-x-4 text-sm text-text-muted dark:text-gray-500">
             <span>{formatDateTime(item.startedAt)}</span>
             <span>•</span>
             <span>設定: {item.duration}分</span>
@@ -129,11 +129,11 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
         <div className="flex items-center space-x-2">
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-gray-700 transition-all duration-200 focus-ring hover:scale-105"
             aria-label={isExpanded ? '詳細を閉じる' : '詳細を表示'}
           >
             <svg
-              className={`w-5 h-5 text-gray-600 dark:text-gray-400 transform transition-transform ${
+              className={`w-5 h-5 text-text-secondary dark:text-gray-400 transform transition-transform ${
                 isExpanded ? 'rotate-180' : ''
               }`}
               fill="none"
@@ -150,11 +150,11 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
           </button>
           <button
             onClick={() => setShowDeleteConfirm(true)}
-            className="p-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+            className="p-2 rounded-lg hover:bg-secondary-50 dark:hover:bg-secondary-900/20 transition-all duration-200 focus-ring hover:scale-105"
             aria-label="削除"
           >
             <svg
-              className="w-5 h-5 text-red-600 dark:text-red-400"
+              className="w-5 h-5 text-secondary-600 dark:text-secondary-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -172,11 +172,11 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
 
       {/* 詳細セクション */}
       {isExpanded && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4 animate-fadeIn">
+        <div className="mt-4 pt-4 border-t border-primary-200 dark:border-gray-700 space-y-4 animate-fadeIn">
           {/* 評価 */}
           {item.completed && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-text-primary dark:text-gray-300 mb-2">
                 満足度
               </label>
               <div className="flex items-center space-x-1">
@@ -188,10 +188,10 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
                     aria-label={`${star}点`}
                   >
                     <svg
-                      className={`w-6 h-6 ${
+                      className={`w-6 h-6 transition-colors duration-200 ${
                         item.rating && star <= item.rating
-                          ? 'text-yellow-500 fill-current'
-                          : 'text-gray-300 dark:text-gray-600'
+                          ? 'text-accent-500 fill-current drop-shadow-sm'
+                          : 'text-primary-200 dark:text-gray-600'
                       }`}
                       fill="none"
                       stroke="currentColor"
@@ -207,7 +207,7 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
                   </button>
                 ))}
                 {item.rating && (
-                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                  <span className="ml-2 text-sm text-text-secondary dark:text-gray-400">
                     {item.rating}点
                   </span>
                 )}
@@ -217,7 +217,7 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
 
           {/* メモ */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-text-primary dark:text-gray-300 mb-2">
               メモ
             </label>
             {isEditingNote ? (
@@ -225,9 +225,9 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
                 <textarea
                   value={editingNote}
                   onChange={(e) => setEditingNote(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 
-                    rounded-lg focus:ring-primary-500 focus:border-primary-500
-                    dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-primary-300 dark:border-gray-600 
+                    rounded-lg focus:ring-primary-500 focus:border-primary-500 bg-surface-primary
+                    dark:bg-gray-700 dark:text-white transition-colors duration-200"
                   rows={3}
                   placeholder="気づいたことや感想を記録..."
                 />
@@ -237,15 +237,15 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
                       setEditingNote(item.note || '');
                       setIsEditingNote(false);
                     }}
-                    className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 
-                      hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                    className="px-3 py-1 text-sm text-text-secondary dark:text-gray-400 
+                      hover:bg-surface-secondary dark:hover:bg-gray-700 rounded transition-all duration-200 focus-ring"
                   >
                     キャンセル
                   </button>
                   <button
                     onClick={handleSaveNote}
-                    className="px-3 py-1 text-sm bg-primary-500 text-white 
-                      rounded hover:bg-primary-600 transition-colors"
+                    className="px-3 py-1 text-sm bg-primary-500 text-text-inverse 
+                      rounded hover:bg-primary-600 transition-all duration-200 focus-ring shadow-sm hover:shadow-md"
                   >
                     保存
                   </button>
@@ -254,16 +254,16 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
             ) : (
               <div
                 onClick={() => setIsEditingNote(true)}
-                className="min-h-[60px] px-3 py-2 bg-gray-50 dark:bg-gray-700/50 
-                  rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 
-                  transition-colors"
+                className="min-h-[60px] px-3 py-2 bg-surface-secondary dark:bg-gray-700/50 
+                  rounded-lg cursor-pointer hover:bg-primary-50 dark:hover:bg-gray-700 
+                  transition-all duration-200 border border-primary-100 hover:border-primary-200"
               >
                 {item.note ? (
-                  <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                  <p className="text-sm text-text-primary dark:text-gray-300 whitespace-pre-wrap">
                     {item.note}
                   </p>
                 ) : (
-                  <p className="text-sm text-gray-400 dark:text-gray-500">
+                  <p className="text-sm text-text-muted dark:text-gray-500">
                     クリックしてメモを追加...
                   </p>
                 )}
@@ -276,25 +276,25 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
       {/* 削除確認ダイアログ */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+          <div className="bg-surface-primary dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-xl border border-primary-200">
+            <h3 className="text-lg font-semibold text-text-primary dark:text-white mb-4">
               履歴の削除
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-text-secondary dark:text-gray-400 mb-6">
               この履歴を削除しますか？この操作は取り消せません。
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 
-                  dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="px-4 py-2 text-text-primary dark:text-gray-300 hover:bg-surface-secondary 
+                  dark:hover:bg-gray-700 rounded-lg transition-all duration-200 focus-ring"
               >
                 キャンセル
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg 
-                  hover:bg-red-600 transition-colors"
+                className="px-4 py-2 bg-secondary-500 text-text-inverse rounded-lg 
+                  hover:bg-secondary-600 transition-all duration-200 focus-ring shadow-md hover:shadow-lg"
               >
                 削除する
               </button>

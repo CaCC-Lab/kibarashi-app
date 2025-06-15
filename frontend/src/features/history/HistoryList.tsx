@@ -3,7 +3,6 @@ import { useHistory } from '../../hooks/useHistory';
 import HistoryItem from './HistoryItem';
 import HistoryStats from './HistoryStats';
 import HistoryFilter from './HistoryFilter';
-import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import type { HistoryItem as HistoryItemType } from '../../types/history';
 

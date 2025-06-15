@@ -3,6 +3,29 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* 新カラーパレットのCSS変数定義 */
+    --color-primary-50: #f4f4f8;
+    --color-primary-100: #e8e8f0;
+    --color-primary-500: #3b3b6b;
+    --color-primary-600: #32325c;
+    --color-secondary-500: #B73E3E;
+    --color-accent-500: #B8970F;
+    --color-text-primary: #191919;
+    --color-text-inverse: #ffffff;
+    
+    /* アクセシビリティ関連変数 */
+    --focus-ring-color: var(--color-primary-500);
+    --focus-ring-opacity: 0.5;
+  }
+  
+  /* ダークモード用変数 */
+  .dark {
+    --color-primary-50: #191932;
+    --color-primary-100: #212140;
+    --focus-ring-color: var(--color-primary-300);
+  }
+  
   html {
     font-family: 'Noto Sans JP', system-ui, sans-serif;
     scroll-behavior: smooth;
@@ -29,7 +52,7 @@
 
 /* キーボードフォーカススタイル */
 *:focus {
-  outline: 2px solid theme('colors.primary.500');
+  outline: 2px solid var(--focus-ring-color);
   outline-offset: 2px;
 }
 

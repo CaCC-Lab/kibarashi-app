@@ -1,14 +1,10 @@
 import { apiClient } from './client';
-import { Suggestion } from '../../features/suggestion/useSuggestions';
+import { SuggestionsResponse } from './types';
 
-interface SuggestionsResponse {
-  suggestions: Suggestion[];
-  metadata: {
-    situation: string;
-    duration: number;
-    timestamp: string;
-  };
-}
+// Suggestion型を他のファイルから使用できるように再エクスポート
+export type { Suggestion } from './types';
+
+// SuggestionsResponse は types.ts からインポート済み
 
 export async function fetchSuggestions(
   situation: 'workplace' | 'home' | 'outside',

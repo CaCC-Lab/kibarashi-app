@@ -86,7 +86,7 @@ describe('HistoryStats', () => {
       expect(screen.getByText('完了率')).toBeInTheDocument();
       
       // 完了率ラベルの近くに0と%が表示されることを確認
-      const completionSection = screen.getByText('完了率').closest('div.bg-white');
+      const completionSection = screen.getByText('完了率').closest('div.bg-surface-primary');
       expect(completionSection).toHaveTextContent('0');
       expect(completionSection).toHaveTextContent('%');
     });
@@ -150,11 +150,11 @@ describe('HistoryStats', () => {
       const { container } = render(<HistoryStats stats={defaultStats} />);
       
       // 認知的: 6/10 = 60%
-      const cognitiveBar = container.querySelector('.bg-blue-500');
+      const cognitiveBar = container.querySelector('.bg-primary-500');
       expect(cognitiveBar).toHaveStyle({ width: '60%' });
       
       // 行動的: 4/10 = 40%
-      const behavioralBar = container.querySelector('.bg-green-500');
+      const behavioralBar = container.querySelector('.bg-accent-500');
       expect(behavioralBar).toHaveStyle({ width: '40%' });
     });
 
@@ -162,15 +162,15 @@ describe('HistoryStats', () => {
       const { container } = render(<HistoryStats stats={defaultStats} />);
       
       // 職場: 5/10 = 50%
-      const workplaceBar = container.querySelector('.bg-purple-500');
+      const workplaceBar = container.querySelector('.bg-primary-600');
       expect(workplaceBar).toHaveStyle({ width: '50%' });
       
       // 家: 3/10 = 30%
-      const homeBar = container.querySelector('.bg-indigo-500');
+      const homeBar = container.querySelector('.bg-accent-600');
       expect(homeBar).toHaveStyle({ width: '30%' });
       
       // 外出先: 2/10 = 20%
-      const outsideBar = container.querySelector('.bg-pink-500');
+      const outsideBar = container.querySelector('.bg-secondary-500');
       expect(outsideBar).toHaveStyle({ width: '20%' });
     });
 
@@ -179,11 +179,11 @@ describe('HistoryStats', () => {
       
       const progressBars = container.querySelectorAll('[class*="rounded-full"][class*="bg-"]');
       progressBars.forEach(bar => {
-        if (bar.className.includes('bg-blue-500') || 
-            bar.className.includes('bg-green-500') || 
-            bar.className.includes('bg-purple-500') || 
-            bar.className.includes('bg-indigo-500') || 
-            bar.className.includes('bg-pink-500')) {
+        if (bar.className.includes('bg-primary-500') || 
+            bar.className.includes('bg-accent-500') || 
+            bar.className.includes('bg-primary-600') || 
+            bar.className.includes('bg-accent-600') || 
+            bar.className.includes('bg-secondary-500')) {
           expect(bar).toHaveStyle({ width: '0%' });
         }
       });
@@ -200,8 +200,8 @@ describe('HistoryStats', () => {
       
       // 色が正しく設定されていることを確認
       expect(container.querySelector('.text-primary-500')).toBeInTheDocument();
-      expect(container.querySelector('.text-green-500')).toBeInTheDocument();
-      expect(container.querySelector('.text-blue-500')).toBeInTheDocument();
+      expect(container.querySelector('.text-accent-500')).toBeInTheDocument();
+      expect(container.querySelector('.text-primary-500')).toBeInTheDocument();
       expect(container.querySelector('.text-yellow-500')).toBeInTheDocument();
     });
   });

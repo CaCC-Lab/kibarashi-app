@@ -106,7 +106,7 @@ describe('DarkModeToggle', () => {
       const toggleButton = screen.getByRole('switch');
       
       // ライトモード時のスタイル確認
-      expect(toggleButton).toHaveClass('bg-gray-300');
+      expect(toggleButton).toHaveClass('bg-surface-tertiary');
       
       // トグルサークルの位置確認
       const toggleCircle = toggleButton.querySelector('.translate-x-1');
@@ -121,7 +121,7 @@ describe('DarkModeToggle', () => {
       const toggleButton = screen.getByRole('switch');
       
       // ダークモード時のスタイル確認
-      expect(toggleButton).toHaveClass('bg-primary-600');
+      expect(toggleButton).toHaveClass('bg-primary-500');
       
       // トグルサークルの位置確認
       const toggleCircle = toggleButton.querySelector('.translate-x-6');
@@ -134,11 +134,11 @@ describe('DarkModeToggle', () => {
       const toggleButton = screen.getByRole('switch');
       
       // トランジションクラスの確認
-      expect(toggleButton).toHaveClass('transition-colors');
+      expect(toggleButton).toHaveClass('transition-all');
       expect(toggleButton).toHaveClass('duration-200');
       
       // サークルのトランジションクラス確認
-      const toggleCircle = toggleButton.querySelector('.transition-transform');
+      const toggleCircle = toggleButton.querySelector('.transition-all');
       expect(toggleCircle).toBeInTheDocument();
     });
 

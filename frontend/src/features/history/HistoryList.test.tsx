@@ -381,7 +381,7 @@ describe('HistoryList', () => {
       const { container } = render(<HistoryList />);
 
       expect(container.querySelector('.w-full.max-w-4xl.mx-auto')).toBeInTheDocument();
-      expect(container.querySelector('.bg-white.dark\\:bg-gray-800')).toBeInTheDocument();
+      expect(container.querySelector('.bg-surface-primary.dark\\:bg-gray-800')).toBeInTheDocument();
     });
   });
 });

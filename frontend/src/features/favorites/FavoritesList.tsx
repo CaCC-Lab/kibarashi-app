@@ -148,8 +148,14 @@ export default function FavoritesList() {
       {/* 詳細モーダル */}
       {selectedSuggestion && (
         <SuggestionDetail
-          suggestion={selectedSuggestion}
-          onClose={() => setSelectedSuggestion(null)}
+          id={selectedSuggestion.id}
+          title={selectedSuggestion.title}
+          description={selectedSuggestion.description}
+          duration={selectedSuggestion.duration}
+          guide={selectedSuggestion.guide}
+          category={selectedSuggestion.category}
+          situation="workplace" // お気に入りからは元のsituationが不明なためデフォルト値
+          onBack={() => setSelectedSuggestion(null)}
         />
       )}
 

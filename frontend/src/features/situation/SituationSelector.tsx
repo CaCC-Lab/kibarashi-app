@@ -53,8 +53,8 @@ const situations: SituationOption[] = [
 const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelect }) => {
   return (
     <div className="w-full">
-      <h2 className="text-xl font-bold text-gray-800 mb-2 animate-fadeIn">どこにいますか？</h2>
-      <p className="text-gray-600 mb-6 animate-fadeIn animation-delay-100">今いる場所を選んでください</p>
+      <h2 className="text-xl font-bold text-text-primary mb-2 animate-fadeIn">どこにいますか？</h2>
+      <p className="text-text-secondary mb-6 animate-fadeIn animation-delay-100">今いる場所を選んでください</p>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {situations.map((option, index) => (
@@ -73,7 +73,7 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
               ${
                 selected === option.id
                   ? 'border-primary-500 bg-primary-50 shadow-lg transform scale-105'
-                  : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-md hover:scale-[1.02]'
+                  : 'border-primary-200 bg-surface-primary hover:border-primary-400 hover:bg-primary-50 hover:shadow-md hover:scale-[1.02]'
               }
             `}
             style={{ animationDelay: `${index * 100}ms` }}
@@ -81,8 +81,8 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
             aria-describedby={`situation-${option.id}-desc`}
           >
             <div className={`
-              flex flex-col items-center space-y-3
-              ${selected === option.id ? 'text-primary-600' : 'text-gray-600'}
+              flex flex-col items-center space-y-3 transition-colors duration-200
+              ${selected === option.id ? 'text-primary-600' : 'text-text-secondary'}
             `}>
               <div className={`transition-transform duration-200 ${
                 selected === option.id ? 'scale-110' : 'scale-100'

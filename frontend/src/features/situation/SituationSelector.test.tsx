@@ -80,7 +80,7 @@ describe('SituationSelector', () => {
       
       // 他のボタンはハイライトされない
       const homeButton = screen.getByText('家').closest('button');
-      expect(homeButton?.className).toContain('border-gray-200');
+      expect(homeButton?.className).toContain('border-primary-200');
       expect(homeButton?.className).not.toContain('shadow-lg');
     });
 

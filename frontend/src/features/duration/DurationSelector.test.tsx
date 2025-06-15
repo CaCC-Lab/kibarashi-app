@@ -89,7 +89,7 @@ describe('DurationSelector', () => {
       
       // 他のボタンはハイライトされない
       const button15min = screen.getByText('15分').closest('button');
-      expect(button15min?.className).toContain('border-gray-200');
+      expect(button15min?.className).toContain('border-primary-200');
       expect(button15min?.className).not.toContain('shadow-lg');
     });
 

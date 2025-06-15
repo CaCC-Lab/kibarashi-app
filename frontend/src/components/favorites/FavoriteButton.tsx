@@ -21,10 +21,10 @@ export default function FavoriteButton({ suggestion, className = '' }: FavoriteB
   return (
     <button
       onClick={handleClick}
-      className={`p-2 rounded-full transition-all duration-200 ${
+      className={`p-2 rounded-full transition-all duration-200 hover:scale-110 focus-ring ${
         isFav 
-          ? 'text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30' 
-          : 'text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+          ? 'text-accent-600 bg-accent-50 hover:bg-accent-100 shadow-md dark:bg-accent-900/20 dark:hover:bg-accent-900/30' 
+          : 'text-text-muted hover:text-accent-500 hover:bg-accent-50 dark:hover:bg-gray-700'
       } ${className}`}
       aria-label={isFav ? 'お気に入りから削除' : 'お気に入りに追加'}
       title={isFav ? 'お気に入りから削除' : 'お気に入りに追加'}

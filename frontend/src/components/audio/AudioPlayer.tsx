@@ -70,9 +70,9 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({
   }
 
   return (
-    <div className={`bg-gray-100 rounded-lg p-4 ${className}`}>
+    <div className={`bg-surface-secondary rounded-lg p-4 shadow-sm border border-primary-100 ${className}`}>
       {error && (
-        <div className="text-red-600 text-sm mb-2">{error}</div>
+        <div className="text-secondary-600 text-sm mb-2 bg-secondary-50 border border-secondary-200 rounded px-3 py-2">{error}</div>
       )}
 
       <div className="flex items-center space-x-4">
@@ -80,7 +80,7 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({
         <button
           onClick={isPlaying ? pause : play}
           disabled={isLoading}
-          className="flex-shrink-0 w-12 h-12 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-shrink-0 w-12 h-12 bg-primary-500 text-text-inverse rounded-full flex items-center justify-center hover:bg-primary-600 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-ring shadow-md hover:shadow-lg"
           aria-label={isPlaying ? '一時停止' : '再生'}
         >
           {isLoading ? (
@@ -103,7 +103,7 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({
         <button
           onClick={stop}
           disabled={!isPlaying && currentTime === 0}
-          className="flex-shrink-0 w-10 h-10 bg-gray-500 text-white rounded-full flex items-center justify-center hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-shrink-0 w-10 h-10 bg-text-muted text-text-inverse rounded-full flex items-center justify-center hover:bg-text-secondary hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed focus-ring shadow-sm hover:shadow-md"
           aria-label="停止"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -113,13 +113,13 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({
 
         {/* プログレスバーとタイム表示 */}
         <div className="flex-1">
-          <div className="flex items-center justify-between text-sm text-gray-600 mb-1">
+          <div className="flex items-center justify-between text-sm text-text-secondary mb-1">
             <span>{formatTime(currentTime)}</span>
             <span>{formatTime(duration)}</span>
           </div>
-          <div className="relative h-2 bg-gray-300 rounded-full overflow-hidden">
+          <div className="relative h-2 bg-primary-100 rounded-full overflow-hidden shadow-inner">
             <div 
-              className="absolute left-0 top-0 h-full bg-primary-500 transition-all duration-100"
+              className="absolute left-0 top-0 h-full bg-primary-500 transition-all duration-100 shadow-sm"
               style={{ width: `${progress}%` }}
             />
             <input
@@ -136,7 +136,7 @@ const AudioPlayer = forwardRef<AudioPlayerHandle, AudioPlayerProps>(({
 
         {/* ボリュームコントロール */}
         <div className="flex items-center space-x-2">
-          <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-text-secondary" fill="currentColor" viewBox="0 0 24 24">
             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
           </svg>
           <input

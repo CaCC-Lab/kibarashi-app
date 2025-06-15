@@ -59,10 +59,10 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
   if (!suggestions || suggestions.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">提案が見つかりませんでした</p>
+        <p className="text-text-secondary">提案が見つかりませんでした</p>
         <button
           onClick={refetch}
-          className="mt-4 text-primary-600 hover:text-primary-700"
+          className="mt-4 px-4 py-2 text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-all duration-200 focus-ring"
         >
           再試行
         </button>
@@ -92,10 +92,10 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
   return (
     <div className="w-full">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-gray-800 mb-2">
+        <h2 className="text-xl font-bold text-text-primary mb-2">
           あなたにおすすめの気晴らし方法
         </h2>
-        <p className="text-gray-600">
+        <p className="text-text-secondary">
           {/* ユーザーが選択した条件を明確に表示 */}
           {situation === 'workplace' && '職場で'}
           {situation === 'home' && '家で'}
@@ -123,7 +123,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
       <div className="mt-8 text-center">
         <button
           onClick={refetch}
-          className="inline-flex items-center space-x-2 text-primary-600 hover:text-primary-700"
+          className="inline-flex items-center space-x-2 px-4 py-2 text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 rounded-lg transition-all duration-200 focus-ring hover:scale-105"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 

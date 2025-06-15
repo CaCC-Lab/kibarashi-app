@@ -137,7 +137,7 @@ describe('FavoriteButton', () => {
       render(<FavoriteButton suggestion={mockSuggestion} />);
       
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('text-gray-400');
+      expect(button).toHaveClass('text-text-muted');
     });
 
     it('選択状態の適切なスタイルが適用される', () => {
@@ -159,7 +159,7 @@ describe('FavoriteButton', () => {
       render(<FavoriteButton suggestion={mockSuggestion} />);
       
       const button = screen.getByRole('button');
-      expect(button).toHaveClass('text-red-500');
+      expect(button).toHaveClass('text-accent-600');
     });
 
     it('カスタムクラスが適用される', () => {

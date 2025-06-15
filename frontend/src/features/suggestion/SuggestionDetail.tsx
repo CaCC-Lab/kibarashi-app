@@ -9,7 +9,7 @@ interface SuggestionDetailProps {
   title: string;
   description: string;
   duration: number;
-  guide: string;
+  guide?: string;
   category: '認知的' | '行動的';
   situation: 'workplace' | 'home' | 'outside';
   onBack: () => void;
@@ -98,7 +98,7 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
     
     // 履歴に記録
     const historyId = startHistory(
-      { id, title, description, duration, category, steps: guide.split('\n').filter(s => s.trim()) },
+      { id, title, description, duration, category, steps: guide?.split('\n').filter(s => s.trim()) || [] },
       situation
     );
     if (historyId) {

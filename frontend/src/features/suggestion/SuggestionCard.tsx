@@ -124,7 +124,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
-                <span className={`font-medium ${isExpanded ? 'text-primary-700' : 'text-gray-700'}`}>
+                <span className={`font-medium transition-colors duration-200 ${isExpanded ? 'text-primary-700' : 'text-text-primary'}`}>
                   {isExpanded ? '手順を隠す' : `${steps.length}つの手順を見る`}
                 </span>
               </button>
@@ -132,7 +132,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
               {isExpanded && (
                 <ol id={`steps-${title.replace(/\s+/g, '-').toLowerCase()}`} className="mt-3 space-y-2 animate-fadeIn">
                   {steps.map((step, index) => (
-                    <li key={index} className="flex items-start space-x-3 text-sm text-gray-600 animate-slideIn" style={{ animationDelay: `${index * 50}ms` }}>
+                    <li key={index} className="flex items-start space-x-3 text-sm text-text-secondary animate-slideIn" style={{ animationDelay: `${index * 50}ms` }}>
                       <span className="flex-shrink-0 w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-medium">
                         {index + 1}
                       </span>

@@ -405,7 +405,7 @@ describe('HistoryItem', () => {
       );
 
       const container = screen.getByText('テスト気晴らし').closest('div[class*="border"]');
-      expect(container).toHaveClass('bg-yellow-50');
+      expect(container).toHaveClass('bg-accent-50');
     });
 
     it('完了アイテムは白色の背景色を持つ', () => {
@@ -419,7 +419,7 @@ describe('HistoryItem', () => {
       );
 
       const container = screen.getByText('テスト気晴らし').closest('div[class*="border"]');
-      expect(container).toHaveClass('bg-white');
+      expect(container).toHaveClass('bg-surface-primary');
     });
 
     it('カテゴリーごとに適切な色が付けられる', () => {
@@ -433,7 +433,7 @@ describe('HistoryItem', () => {
       );
 
       const cognitiveTag = screen.getByText('認知的');
-      expect(cognitiveTag).toHaveClass('bg-blue-100');
+      expect(cognitiveTag).toHaveClass('bg-primary-100');
 
       const { rerender } = render(
         <HistoryItem
@@ -445,7 +445,7 @@ describe('HistoryItem', () => {
       );
 
       const behavioralTag = screen.getByText('行動的');
-      expect(behavioralTag).toHaveClass('bg-green-100');
+      expect(behavioralTag).toHaveClass('bg-accent-100');
     });
   });
 });

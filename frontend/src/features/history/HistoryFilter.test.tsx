@@ -128,9 +128,9 @@ describe('HistoryFilter', () => {
     it('選択された状況がハイライト表示される', () => {
       render(<HistoryFilter {...defaultProps} filterType="situation" filterValue="workplace" />);
       
-      expect(screen.getByText('職場')).toHaveClass('bg-purple-500');
-      expect(screen.getByText('家')).not.toHaveClass('bg-indigo-500');
-      expect(screen.getByText('外出先')).not.toHaveClass('bg-pink-500');
+      expect(screen.getByText('職場')).toHaveClass('bg-primary-600');
+      expect(screen.getByText('家')).not.toHaveClass('bg-accent-600');
+      expect(screen.getByText('外出先')).not.toHaveClass('bg-secondary-500');
     });
   });
 
@@ -155,8 +155,8 @@ describe('HistoryFilter', () => {
     it('選択されたカテゴリーがハイライト表示される', () => {
       render(<HistoryFilter {...defaultProps} filterType="category" filterValue="認知的" />);
       
-      expect(screen.getByText('認知的')).toHaveClass('bg-blue-500');
-      expect(screen.getByText('行動的')).not.toHaveClass('bg-green-500');
+      expect(screen.getByText('認知的')).toHaveClass('bg-primary-500');
+      expect(screen.getByText('行動的')).not.toHaveClass('bg-accent-500');
     });
   });
 
