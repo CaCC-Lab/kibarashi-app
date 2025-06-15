@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: CI Pipeline
 
 on:
   push:
@@ -6,80 +6,113 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+env:
+  NODE_VERSION: '20.x'
+  CACHE_KEY_VERSION: 'v1'
+
 jobs:
+  # リントチェック
   lint:
-    name: Lint Code
+    name: Lint & Type Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
-        run: |
-          npm run lint:frontend
-          npm run lint:backend
+      - name: Run lint (Frontend)
+        run: npm run lint:frontend
 
-  test:
-    name: Run Tests
+      - name: Run lint (Backend)
+        run: npm run lint:backend
+
+      - name: Run type check (Frontend)
+        run: cd frontend && npm run type-check
+
+      - name: Run type check (Backend)
+        run: cd backend && npm run type-check
+
+  # フロントエンドテスト
+  test-frontend:
+    name: Frontend Tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run Frontend Tests with Coverage
-        run: npm run test:frontend -- --run --coverage
-        env:
-          CI: true
-
-      - name: Run Backend Tests with Coverage
-        run: npm run test:backend -- --coverage --passWithNoTests
+        run: npm run test:frontend -- --coverage
         env:
           CI: true
 
       - name: Upload Frontend Coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
-          path: frontend/coverage
+          path: frontend/coverage/
+          retention-days: 7
         continue-on-error: true
 
-      - name: Upload Backend Coverage
-        uses: actions/upload-artifact@v3
-        with:
-          name: backend-coverage
-          path: backend/coverage
-        continue-on-error: true
-
-  build:
-    name: Build Application
+  # バックエンドテスト
+  test-backend:
+    name: Backend Tests
     runs-on: ubuntu-latest
-    needs: [lint, test]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Backend Tests with Coverage
+        run: npm run test:backend -- --coverage
+        env:
+          CI: true
+
+      - name: Upload Backend Coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+          retention-days: 7
+        continue-on-error: true
+
+  # ビルドテスト
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [lint, test-frontend, test-backend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
 
       - name: Install dependencies
@@ -93,26 +126,94 @@ jobs:
       - name: Build Backend
         run: npm run build:backend
 
-      - name: Upload Frontend Build
-        uses: actions/upload-artifact@v3
+      - name: Upload Frontend Build Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: frontend-dist
-          path: frontend/dist
+          name: frontend-build
+          path: frontend/dist/
+          retention-days: 7
 
-      - name: Upload Backend Build
-        uses: actions/upload-artifact@v3
+      - name: Upload Backend Build Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: backend-dist
-          path: backend/dist
+          name: backend-build
+          path: backend/dist/
+          retention-days: 7
 
+  # セキュリティスキャン
   security:
     name: Security Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Run npm audit
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit (Root)
+        run: npm audit --audit-level=moderate || true
+
+      - name: Run npm audit (Frontend)
+        run: cd frontend && npm audit --audit-level=moderate || true
+
+      - name: Run npm audit (Backend)
+        run: cd backend && npm audit --audit-level=moderate || true
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # 品質ゲート
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [lint, test-frontend, test-backend, build, security]
+    if: always()
+
+    steps:
+      - name: Check all jobs status
         run: |
-          npm audit --audit-level=moderate || true
-          cd frontend && npm audit --audit-level=moderate || true
-          cd ../backend && npm audit --audit-level=moderate || true
+          echo "Lint Status: ${{ needs.lint.result }}"
+          echo "Frontend Tests Status: ${{ needs.test-frontend.result }}"
+          echo "Backend Tests Status: ${{ needs.test-backend.result }}"
+          echo "Build Status: ${{ needs.build.result }}"
+          echo "Security Status: ${{ needs.security.result }}"
+          
+          if [ "${{ needs.lint.result }}" != "success" ] || \
+             [ "${{ needs.test-frontend.result }}" != "success" ] || \
+             [ "${{ needs.test-backend.result }}" != "success" ] || \
+             [ "${{ needs.build.result }}" != "success" ]; then
+            echo "❌ 品質ゲートに失敗しました"
+            exit 1
+          fi
+          echo "✅ すべての品質チェックが成功しました"
+
+  # 統合テスト（将来のE2Eテスト用）
+  integration:
+    name: Integration Tests (Placeholder)
+    runs-on: ubuntu-latest
+    needs: [quality-gate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Integration test placeholder
+        run: |
+          echo "✅ 統合テストの準備完了"
+          echo "📝 E2Eテストが実装されるとここで実行されます"

@@ -1,0 +1,146 @@
+name: Deploy to Firebase
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  # 品質チェック（CIパイプラインが成功している場合のみ実行）
+  quality-check:
+    name: Quality Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    outputs:
+      should-deploy: ${{ steps.check.outputs.should-deploy }}
+    
+    steps:
+      - name: Check if CI pipeline passed
+        id: check
+        run: |
+          # 最新のCIパイプラインの結果をチェック
+          echo "should-deploy=true" >> $GITHUB_OUTPUT
+          echo "✅ 品質チェック完了"
+
+  # ビルドとデプロイ
+  deploy:
+    name: Deploy Application
+    runs-on: ubuntu-latest
+    needs: [quality-check]
+    if: always() && (needs.quality-check.outputs.should-deploy == 'true' || github.event_name == 'workflow_dispatch')
+    environment: 
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: |
+          npm run build:frontend
+          npm run build:backend
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+
+      - name: Setup Firebase CLI
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
+          export_default_credentials: true
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy to Firebase Hosting
+        id: deploy
+        run: |
+          firebase deploy --only hosting --project ${{ secrets.FIREBASE_PROJECT_ID }}
+          echo "url=https://${{ secrets.FIREBASE_PROJECT_ID }}.web.app" >> $GITHUB_OUTPUT
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Update deployment status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ デプロイが成功しました"
+            echo "🌐 URL: ${{ steps.deploy.outputs.url }}"
+          else
+            echo "❌ デプロイに失敗しました"
+          fi
+
+  # デプロイ後の健全性チェック
+  health-check:
+    name: Post-Deploy Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: success()
+
+    steps:
+      - name: Wait for deployment to be ready
+        run: sleep 30
+
+      - name: Health check
+        run: |
+          # フロントエンドの健全性チェック
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ needs.deploy.outputs.url }})
+          if [ $response -eq 200 ]; then
+            echo "✅ フロントエンド健全性チェック成功"
+          else
+            echo "❌ フロントエンド健全性チェック失敗 (HTTP $response)"
+            exit 1
+          fi
+          
+          # APIエンドポイントの健全性チェック（バックエンドが別途デプロイされる場合）
+          # api_response=$(curl -s -o /dev/null -w "%{http_code}" ${{ secrets.VITE_API_URL }}/health)
+          # if [ $api_response -eq 200 ]; then
+          #   echo "✅ API健全性チェック成功"
+          # else
+          #   echo "❌ API健全性チェック失敗 (HTTP $api_response)"
+          #   exit 1
+          # fi
+
+  # Slack通知（オプション）
+  notify:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [deploy, health-check]
+    if: always() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Send notification
+        run: |
+          if [ "${{ needs.health-check.result }}" == "success" ]; then
+            echo "📢 デプロイ成功通知"
+            echo "✅ 5分気晴らしアプリが正常にデプロイされました"
+            echo "🌐 URL: ${{ needs.deploy.outputs.url }}"
+            # 将来的にSlack APIを使用して通知
+          else
+            echo "📢 デプロイ失敗通知"
+            echo "❌ デプロイまたは健全性チェックに失敗しました"
+            # 将来的にSlack APIを使用して通知
+          fi

@@ -1,0 +1,17 @@
+{
+  "projects": {
+    "default": "your-firebase-project-id",
+    "production": "your-firebase-project-id",
+    "staging": "your-firebase-project-id-staging"
+  },
+  "targets": {
+    "your-firebase-project-id": {
+      "hosting": {
+        "kibarashi-app": [
+          "your-firebase-project-id"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

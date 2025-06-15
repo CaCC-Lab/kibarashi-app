@@ -40,9 +40,15 @@
 - **統合データ管理**: 全データの一括エクスポート/インポート機能、デバイス間移行サポート、バックアップ機能
 - **UI/UX改善**: モーダル視認性改善、ダークモード対応強化（継続課題あり）
 
-### 今後実装予定（Phase 3）
-- **Firebaseデプロイ**: 本番環境への公開
-- **CI/CD**: GitHub Actionsによる自動デプロイ
+### Phase 3 実装済み機能
+
+- **CI/CD設定**: GitHub Actionsによる自動テスト・ビルド・デプロイパイプライン
+- **セキュリティスキャン**: Trivy脆弱性スキャン、依存関係チェック自動化
+- **Firebase Hosting設定**: 本番環境への自動デプロイ準備完了
+
+### 今後実装予定（Phase 3 残タスク）
+- **Firebase プロジェクト初期化**: 本番環境への公開
+- **GitHub Secrets 設定**: 自動デプロイの有効化
 
 ### 研究・検証課題
 
@@ -58,6 +64,10 @@
 - **インフラ**: Google Cloud Platform, Firebase Hosting
 
 詳細は [technologystack.md](./technologystack.md) を参照してください。
+
+**CI/CD**: GitHub Actions, Firebase Hosting, Trivy Security Scanner
+
+詳細は [CI/CD設定ガイド](./docs/CI_CD_SETUP.md) を参照してください。
 
 ## 🚀 クイックスタート
 
@@ -209,4 +219,4 @@ cd backend && npm run build
 
 **開発方針**: シンプルさを最優先に、ユーザーのストレスを増やさない設計を心がけています。
 
-最終更新: 2025/06/15 - 統合データ管理機能実装完了
+最終更新: 2025/06/15 - CI/CD設定完了（GitHub Actions、Firebase Hosting、セキュリティスキャン）
