@@ -147,3 +147,6 @@ dump.rdb
 .sass-cache/
 .connect.lock
 .lock-wscript
+
+# ローカルデータ
+*.png
