@@ -8,7 +8,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 
-**AIによる音声ガイド付きストレス解消提案アプリ**  
+**AIによる音声ガイド付きストレス解消提案アプリ**
 職場の人間関係でストレスを抱える20-40代のための、シンプルで使いやすい気晴らし提案サービス
 
 </div>
@@ -40,27 +40,32 @@
 ## ✨ 主な機能
 
 ### 🤖 AI駆動の提案システム
+
 - **Gemini 2.5 Flash Preview** による動的でコンテキストに応じた提案生成
 - 場所（職場・家・外出）と時間（5分・15分・30分）に基づくパーソナライズ
 - 認知的・行動的カテゴリーに分類された多様な提案
 
 ### 🎙️ 高度な音声ガイド機能
+
 - **Gemini TTS** による高品質な日本語音声合成
 - ブラウザTTSへの自動フォールバック機能
 - タイマーと連動した音声ガイド付きリラクゼーション
 
 ### 📱 プログレッシブウェブアプリ（PWA）
+
 - どのデバイスでもネイティブアプリのようにインストール可能
 - **オフライン対応** - インターネット接続なしでも基本機能が動作
 - ホーム画面への追加機能
 
 ### 🎨 モダンなUI/UX
+
 - **ダークモード** （システム設定連動・手動切り替え可能）
 - **WCAG AA準拠** のアクセシビリティ
 - 全デバイスに最適化されたレスポンシブデザイン
 - スムーズなアニメーションとマイクロインタラクション
 
 ### 🧪 技術的な優位性
+
 - **95.5%のテストカバレッジ** （モック完全排除方針）
 - **サーバーレスアーキテクチャ** （Vercel Functions）
 - **TypeScript** による完全な型安全性
@@ -69,6 +74,7 @@
 ### 📊 実装済み機能一覧
 
 #### Phase 1 & 2 完了
+
 - ✅ AI提案生成（Gemini API）
 - ✅ 音声ガイド（Gemini TTS + ブラウザTTS）
 - ✅ タイマー機能（開始・一時停止・リセット）
@@ -80,6 +86,7 @@
 - ✅ PWA機能（オフライン対応）
 
 #### Phase 3 完了
+
 - ✅ Vercel Functions移行（サーバーレス化）
 - ✅ CI/CD パイプライン構築
 - ✅ セキュリティスキャン自動化
@@ -90,13 +97,13 @@
 
 <div align="center">
 
-| フロントエンド | バックエンド | AI・音声 | インフラ |
-|:--------:|:-------:|:----------:|:--------------:|
-| React 18 | Vercel Functions | Gemini AI | Vercel |
-| TypeScript | Node.js | Gemini TTS | GitHub Actions |
-| Tailwind CSS | Express.js | Web Speech API | Docker |
-| Vite | PostgreSQL | | GCP |
-| PWA | Redis | | |
+| フロントエンド |   バックエンド   |    AI・音声    |    インフラ    |
+| :------------: | :--------------: | :------------: | :------------: |
+|    React 18    | Vercel Functions |   Gemini AI    |     Vercel     |
+|   TypeScript   |     Node.js      |   Gemini TTS   | GitHub Actions |
+|  Tailwind CSS  |    Express.js    | Web Speech API |     Docker     |
+|      Vite      |    PostgreSQL    |                |      GCP       |
+|      PWA       |      Redis       |                |                |
 
 </div>
 
@@ -162,29 +169,37 @@
 ## 🎯 技術的な挑戦と解決策
 
 ### 1. ゼロモックテスト哲学
-**課題**: モックを一切使用せずにテストの信頼性を確保  
-**解決策**: 
+
+**課題**: モックを一切使用せずにテストの信頼性を確保
+**解決策**:
+
 - トランザクションロールバック付きの実際のテストデータベースを実装
 - 各テストスイート用の分離されたテスト環境を作成
 - 実際の統合のみで95.5%のカバレッジを達成
 
 ### 2. サーバーレス環境でのGemini TTS統合
-**課題**: Vercel FunctionsでGemini 2.5 Flash Preview TTSを統合  
+
+**課題**: Vercel FunctionsでGemini 2.5 Flash Preview TTSを統合
 **解決策**:
+
 - ffmpegなしでPCM音声データをWAVフォーマットに変換
 - カスタムWAVヘッダー生成を実装
 - ブラウザTTSへのフォールバック機構を作成
 
 ### 3. オフラインPWA機能
-**課題**: 意味のあるオフライン体験の提供  
+
+**課題**: 意味のあるオフライン体験の提供
 **解決策**:
+
 - インテリジェントなService Workerキャッシュ戦略を実装
 - 必須の提案データを事前キャッシュ
 - 同期機能付きのオフラインファーストアーキテクチャを作成
 
 ### 4. 大規模なアクセシビリティ対応
-**課題**: 全機能でWCAG AA準拠を確保  
+
+**課題**: 全機能でWCAG AA準拠を確保
 **解決策**:
+
 - CI/CDでの自動アクセシビリティテスト
 - 適切なコントラスト比を持つカスタムTailwindカラーパレット
 - 包括的なARIAラベリングとキーボードナビゲーション
@@ -204,6 +219,7 @@
 ## 🔧 セットアップ & インストール
 
 ### 前提条件
+
 - Node.js 20.x 以上
 - npm または yarn
 - Gemini API キー
@@ -276,6 +292,7 @@ kibarashi-app/
 ## 🤝 コントリビューション
 
 これは個人のポートフォリオプロジェクトですが、フィードバックや提案は歓迎します！お気軽に：
+
 - バグや機能リクエストのIssueを開く
 - 改善のためのPRを提出
 - 役立つと思ったらリポジトリにスターを付ける
@@ -290,7 +307,8 @@ kibarashi-app/
 
 ## 👨‍💻 開発者について
 
-こんにちは！私は[Your Name]、日々の生活を改善する意味のあるアプリケーションの作成に情熱を注ぐフルスタック開発者です。このプロジェクトは、メンタルヘルス、AI技術、ユーザー中心設計への私の関心を組み合わせたものです。
+**開発者**: CaCC-Lab
+**問い合わせ先**: https://cacc-lab.net/otoiawase/
 
 <div align="center">
 
