@@ -12,6 +12,18 @@ const suggestionsData = JSON.parse(
   readFileSync(join(__dirname, '../../data/suggestions.json'), 'utf-8')
 );
 
+// Fisher-Yatesシャッフルアルゴリズムの実装
+// なぜ必要か：Math.random() - 0.5を使ったソートは完全にランダムではなく、
+// 偏りが生じるため、より公平なシャッフルアルゴリズムを使用
+function fisherYatesShuffle<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export function getFallbackSuggestions(
   situation: 'workplace' | 'home' | 'outside',
   duration: number
@@ -23,13 +35,20 @@ export function getFallbackSuggestions(
       suggestion.durations.includes(duration)
   );
 
-  // Shuffle and pick suggestions
-  const shuffled = [...filteredSuggestions].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, Math.min(10, shuffled.length)); // Get more than 3 for variety
+  // 選択肢が少ない場合の警告ログ
+  if (filteredSuggestions.length < 5) {
+    console.warn(`Limited suggestions available for ${situation} - ${duration}min: only ${filteredSuggestions.length} options`);
+  }
+
+  // Fisher-Yatesアルゴリズムでシャッフル
+  const shuffled = fisherYatesShuffle(filteredSuggestions);
+  
+  // 最大3つを選択（利用可能な数が少ない場合はすべて返す）
+  const selected = shuffled.slice(0, Math.min(3, shuffled.length));
 
   // Map to the expected format
   return selected.map((suggestion: any) => ({
-    id: suggestion.id,
+    id: `${suggestion.id}-${Date.now()}-${Math.random()}`, // より一意性の高いIDを生成
     title: suggestion.title,
     description: suggestion.description,
     duration: duration,

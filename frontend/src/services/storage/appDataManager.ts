@@ -336,12 +336,24 @@ export class AppDataManager {
     return errors;
   }
 
+  private static readFileAsText(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsText(file);
+    });
+  }
+
   /**
    * ファイルからの読み込み
    */
   static async importFromFile(file: File): Promise<ImportResult> {
+    if (!file) {
+      return { success: false, errors: ['ファイルが選択されていません'] };
+    }
     try {
-      const text = await file.text();
+      const text = await this.readFileAsText(file);
       return this.importAllData(text);
     } catch (error) {
       console.error('Failed to read file:', error);
@@ -356,8 +368,11 @@ export class AppDataManager {
    * ファイルからのマージ読み込み
    */
   static async mergeFromFile(file: File): Promise<ImportResult> {
+    if (!file) {
+      return { success: false, errors: ['ファイルが選択されていません'] };
+    }
     try {
-      const text = await file.text();
+      const text = await this.readFileAsText(file);
       return this.mergeAllData(text);
     } catch (error) {
       console.error('Failed to read file:', error);
