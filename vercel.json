@@ -1,6 +1,16 @@
 {
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/v1/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
+    }
+  ],
   "functions": {
-    "api/**/*.ts": {
+    "api/v1/**/*.ts": {
       "runtime": "nodejs20.x",
       "maxDuration": 10,
       "memory": 1024
