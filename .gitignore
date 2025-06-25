@@ -105,6 +105,7 @@ cache/
 !package-lock.json
 !tsconfig.json
 !manifest.json
+!vercel.json
 gcp-credentials/
 
 # Firebase
