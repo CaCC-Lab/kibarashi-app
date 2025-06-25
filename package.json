@@ -39,7 +39,7 @@
     "concurrently": "^8.2.2"
   },
   "engines": {
-    "node": ">=20.10.0",
+    "node": "20.x",
     "npm": ">=10.2.5"
   },
   "repository": {

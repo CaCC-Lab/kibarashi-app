@@ -24,8 +24,7 @@ describe('ErrorMessage', () => {
   });
 
   it('onRetryが渡されている場合、再試行ボタンを表示する', () => {
-    let retryCount = 0;
-    const onRetry = () => { retryCount++; };
+    const onRetry = () => {};
     render(<ErrorMessage message="エラー" onRetry={onRetry} />);
     
     const retryButton = screen.getByText('もう一度試す');

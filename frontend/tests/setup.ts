@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { expect, afterEach, vi } from 'vitest';
+import { expect, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 
@@ -93,7 +93,7 @@ global.speechSynthesis = {
 } as any;
 
 // Vibration APIの実装
-navigator.vibrate = function(pattern?: number | number[]) {
+navigator.vibrate = function(_pattern?: number | number[]) {
   // 振動をシミュレート（実際には何もしない）
   return true;
 };

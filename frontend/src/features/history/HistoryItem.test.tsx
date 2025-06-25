@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import HistoryItem from './HistoryItem';
 import type { HistoryItem as HistoryItemType } from '../../types/history';
@@ -435,7 +435,7 @@ describe('HistoryItem', () => {
       const cognitiveTag = screen.getByText('認知的');
       expect(cognitiveTag).toHaveClass('bg-primary-100');
 
-      const { rerender } = render(
+      render(
         <HistoryItem
           item={{ ...defaultItem, category: '行動的' }}
           onDelete={mockOnDelete}

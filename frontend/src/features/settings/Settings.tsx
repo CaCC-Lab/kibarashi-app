@@ -156,7 +156,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         const totalImported = favorites + history + customSuggestions;
         const action = merge ? 'マージ' : 'インポート';
         setImportMessage(
-          `全データを${action}しました（お気に入り: ${favorites}件、履歴: ${history}件、カスタム: ${customSuggestions}件）`
+          `全データを${action}しました（合計: ${totalImported}件 - お気に入り: ${favorites}件、履歴: ${history}件、カスタム: ${customSuggestions}件）`
         );
       } else {
         const errorMessage = result.errors?.join(', ') || 'インポートに失敗しました';

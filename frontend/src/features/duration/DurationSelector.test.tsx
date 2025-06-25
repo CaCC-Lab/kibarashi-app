@@ -14,21 +14,17 @@ describe('DurationSelector', () => {
   // コールバック関数の呼び出しを追跡
   let selectCount = 0;
   let selectedValue: number | null = null;
-  let backCount = 0;
   
   const onSelect = (value: 5 | 15 | 30) => {
     selectCount++;
     selectedValue = value;
   };
   
-  const onBack = () => {
-    backCount++;
-  };
+  const onBack = () => {};
 
   beforeEach(() => {
     selectCount = 0;
     selectedValue = null;
-    backCount = 0;
   });
 
   describe('基本的な表示のテスト', () => {

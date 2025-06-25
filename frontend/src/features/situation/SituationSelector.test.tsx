@@ -14,21 +14,17 @@ describe('SituationSelector', () => {
   // コールバック関数の呼び出しを追跡
   let selectCount = 0;
   let selectedValue: string | null = null;
-  let backCount = 0;
   
   const onSelect = (value: 'workplace' | 'home' | 'outside') => {
     selectCount++;
     selectedValue = value;
   };
   
-  const onBack = () => {
-    backCount++;
-  };
+  const onBack = () => {};
 
   beforeEach(() => {
     selectCount = 0;
     selectedValue = null;
-    backCount = 0;
   });
 
   describe('基本的な表示のテスト', () => {

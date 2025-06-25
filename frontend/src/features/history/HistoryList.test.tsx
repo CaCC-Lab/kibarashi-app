@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import HistoryList from './HistoryList';
 import { useHistory } from '../../hooks/useHistory';
@@ -11,7 +11,7 @@ vi.mock('../../hooks/useHistory');
 
 // 子コンポーネントをモック
 vi.mock('./HistoryItem', () => ({
-  default: ({ item, onDelete, onUpdateRating, onUpdateNote }: any) => (
+  default: ({ item, onDelete: _onDelete, onUpdateRating: _onUpdateRating, onUpdateNote: _onUpdateNote }: any) => (
     <div data-testid="history-item">
       <div>{item.title}</div>
       <div>{item.description}</div>
@@ -29,7 +29,7 @@ vi.mock('./HistoryStats', () => ({
 }));
 
 vi.mock('./HistoryFilter', () => ({
-  default: ({ filterType, filterValue, onFilterTypeChange, onFilterValueChange }: any) => (
+  default: ({ filterType, onFilterTypeChange, onFilterValueChange }: any) => (
     <div data-testid="history-filter">
       <div>フィルター:</div>
       <button onClick={() => onFilterTypeChange('all')}>すべて</button>

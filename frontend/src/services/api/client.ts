@@ -199,7 +199,7 @@ class ApiClient {
     serverMessage?: string
   ): string {
     // デフォルトメッセージ
-    let message = serverMessage || `エラーが発生しました（コード: ${statusCode}）`;
+    const message = serverMessage || `エラーが発生しました（コード: ${statusCode}）`;
     let reason = '';
     let solution = '';
 

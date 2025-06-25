@@ -4,7 +4,6 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Settings from './Settings';
 import { FavoritesStorage } from '../../services/storage/favoritesStorage';
-import { HistoryStorage } from '../../services/storage/historyStorage';
 import { CustomStorage } from '../../services/storage/customStorage';
 import { AppDataManager } from '../../services/storage/appDataManager';
 
@@ -373,8 +372,6 @@ describe('Settings - 統合データ管理機能', () => {
 
   describe('実際のデータ流れの検証', () => {
     it('エクスポート→インポートのラウンドトリップが正しく動作する', async () => {
-      const user = userEvent.setup();
-
       // テストデータを追加
       FavoritesStorage.addFavorite({
         id: 'roundtrip-1',

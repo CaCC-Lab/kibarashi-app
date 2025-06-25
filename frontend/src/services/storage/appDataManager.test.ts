@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { AppDataManager, type AppDataExport, type ImportResult } from './appDataManager';
+import { AppDataManager, type AppDataExport } from './appDataManager';
 import { FavoritesStorage } from './favoritesStorage';
 import { HistoryStorage } from './historyStorage';
 import { CustomStorage } from './customStorage';

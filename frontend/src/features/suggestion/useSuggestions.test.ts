@@ -142,8 +142,6 @@ describe('useSuggestions', () => {
       });
       await waitFor(() => !result.current.loading, { timeout: 10000 });
       
-      const initialSuggestions = result.current.suggestions.length;
-      
       // エラーを発生させる
       (import.meta.env as any).VITE_API_URL = 'http://localhost:9999';
       
