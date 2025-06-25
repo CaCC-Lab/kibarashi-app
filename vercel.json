@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm install && npm run build -w frontend",
+  "buildCommand": "echo 'Starting build process' && ls -la && npm install && ls -la frontend && npm --prefix ./frontend install && npm --prefix ./frontend run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
   "rewrites": [
