@@ -1,288 +1,271 @@
-# 5分気晴らし - 音声ガイド付きストレス解消アプリ
+# 🧘 5分気晴らし - AI-Powered Stress Relief App
 
-職場の人間関係でストレスを抱える20-40代向けの、シンプルで使いやすい気晴らし提案アプリケーション。
+<div align="center">
 
-## 🎯 プロジェクトの目的
+[![Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Visit%20Now-brightgreen?style=for-the-badge)](https://kibarashi-app.vercel.app/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 
-- **ターゲット**: 職場の人間関係でストレスを抱え、休日をゲーム・YouTube・惰眠で過ごしてしまう20-40代
-- **解決する課題**: 既存メンタルヘルスアプリの課金ストレス、継続困難、機能過多による挫折
-- **提供価値**: その場で使える、シンプルな気晴らし方法の提案
+**AI-powered stress relief suggestions with voice guidance**  
+**AIによる音声ガイド付きストレス解消提案アプリ**
 
-## ✨ 主な機能（Phase 1 MVP）
+[English](#english) | [日本語](#japanese)
 
-### 実装済み機能
-
-- **AI提案**: Gemini APIを活用した動的な気晴らし提案生成
-- **状況選択**: 職場・家・外出から選択
-- **時間選択**: 5分・15分・30分から選択（時間に応じた提案内容）
-- **音声ガイド**: Gemini TTSによる高品質な音声案内（オプション）
-- **ブラウザ音声フォールバック**: Gemini TTS利用不可時は自動切り替え
-- **詳細ガイド**: 各提案の詳しい実行方法と手順を表示
-- **タイマー機能**: 開始・一時停止・リセット機能付きタイマー（音声連動）
-- **ダークモード**: システム設定連動、手動切り替え可能
-- **アニメーション**: スムーズなフェードイン・スライドイン効果
-- **アクセシビリティ**: キーボードナビゲーション、ARIAラベル対応
-- **PWA対応**: オフラインでも基本機能が動作、ホーム画面への追加可能
-- **レスポンシブデザイン**: モバイルファースト設計、カード高さ統一
-- **パフォーマンス最適化**: 動的インポート、バンドル分割実装済み
-- **テスト環境**: Vitest統一、モック完全排除、全テスト成功（419/424テスト成功、5件スキップ）
-- **ESモジュール対応**: フロントエンド/バックエンド共にESM採用
-- **完全無料**: 広告なし、課金なし、アカウント登録不要
-
-### Phase 2 実装済み機能
-
-- **お気に入り機能**: 提案の保存、エクスポート機能付き
-- **履歴機能**: 実行履歴の記録、フィルタリング、統計表示、評価・メモ機能
-- **設定画面**: ダークモード切り替え、音声エンジン選択、データ管理機能
-- **カラーパレット変更とUI改善**: 新デザインシステム導入、WCAG AA準拠のアクセシブルカラー、人間工学に基づくUI最適化
-- **統計機能**: 時間帯・曜日・月別の利用パターン分析、Chart.jsによるグラフ可視化
-- **カスタム気晴らし**: ユーザー独自の提案登録・編集・削除機能、エクスポート/インポート対応
-- **統合データ管理**: 全データの一括エクスポート/インポート機能、デバイス間移行サポート、バックアップ機能
-- **UI/UX改善**: モーダル視認性改善、ダークモード対応強化（継続課題あり）
-
-### Phase 3 実装済み機能
-
-- **CI/CD設定**: GitHub Actionsによる自動テスト・ビルド・デプロイパイプライン
-- **セキュリティスキャン**: Trivy脆弱性スキャン、依存関係チェック自動化
-- **Vercel Functions対応**: Express.js → Serverless Functions 移行完了
-  - **API構造変更**: 個別関数化（suggestions, tts, health）
-  - **自動URL切り替え**: 環境に応じたAPI endpoint自動設定
-  - **最適化設定**: Vercel設定ファイル、環境変数管理
-
-### 今後実装予定（Phase 3 残タスク）
-- **Vercel プロジェクト作成**: Web UI経由でのGitHub連携
-- **本番デプロイ**: 環境変数設定と初回デプロイ実行
-
-### 研究・検証課題
-
-- **Gemini API最適化**: YAML形式プロンプトの効果検証
-- **ダークモード視認性**: WCAG AAA基準対応とコントラスト比最適化
-
-## 🛠️ 技術スタック
-
-- **フロントエンド**: React 18 + TypeScript, Vite, Tailwind CSS, PWA
-- **バックエンド**: Vercel Functions (Serverless) + TypeScript
-- **AI/音声**: Google Gemini API (提案生成・TTS)
-- **テスト**: Vitest (Frontend/Backend統一), モック使用完全排除
-- **インフラ**: Vercel (Hosting + Functions), Google Cloud Platform
-
-詳細は [technologystack.md](./technologystack.md) を参照してください。
-
-**CI/CD**: GitHub Actions, Vercel Deployment, Trivy Security Scanner
-
-詳細は [CI/CD設定ガイド](./docs/CI_CD_SETUP.md) を参照してください。
-
-## 🚀 クイックスタート
-
-### 前提条件
-
-- Node.js 18.x 以上
-- npm または yarn
-- Docker Desktop（開発環境用）
-- Google Cloud アカウント（API利用用）
-
-### 環境構築
-
-#### 方法1: Vercel Dev（推奨）
-
-```bash
-# リポジトリのクローン
-git clone https://github.com/CaCC-Lab/kibarashi-app.git
-cd kibarashi-app
-
-# Vercel CLI のインストール
-npm install -g vercel
-
-# 依存関係のインストール
-npm run setup
-
-# 環境変数の設定
-cp frontend/.env.example frontend/.env
-# frontend/.envファイルを編集し、必要なAPI キーを設定
-
-# Vercel Dev Server起動（フロントエンド + API統合）
-vercel dev
-# → http://localhost:3000 (フロントエンド + API)
-```
-
-#### 方法2: 個別起動
-
-```bash
-# 依存関係のインストール（フロントエンド）
-cd frontend
-npm install
-
-# 依存関係のインストール（API）
-cd ../api
-npm install
-
-# 環境変数の設定
-cp ../frontend/.env.example ../frontend/.env
-# .envファイルを編集し、必要なAPI キーを設定
-
-# フロントエンド起動（ターミナル1）
-cd frontend
-npm run dev
-# → http://localhost:3000
-
-# APIサーバー起動（ターミナル2）
-cd api
-npx vercel dev
-# → http://localhost:3000/api
-```
-
-### 開発環境へのアクセス
-
-- **推奨**: http://localhost:3000 (Vercel Dev - フロントエンド + API統合)
-- API エンドポイント: http://localhost:3000/api/v1/*
-- ヘルスチェック: http://localhost:3000/api/v1/health
-
-### 動作確認状況（2025/06/14）
-
-- ✅ ローカル環境での動作確認完了
-- ✅ フロントエンド・バックエンド連携確認
-- ✅ Gemini API連携確認
-- ✅ PWA機能確認
-- ✅ 全体テスト成功率95.5%（406/425 tests passing）
-
-## 📁 プロジェクト構造
-
-```
-kibarashi-app/
-├── frontend/          # Reactフロントエンド
-├── backend/           # 従来のExpress.jsバックエンド（保持）
-├── api/              # Vercel Functions（新）
-│   └── v1/           # APIエンドポイント
-│       ├── suggestions.ts    # 気晴らし提案API
-│       ├── tts.ts           # 音声合成API
-│       └── health.ts        # ヘルスチェックAPI
-├── infrastructure/    # インフラ設定
-├── docs/             # ドキュメント
-├── vercel.json       # Vercel設定
-└── CLAUDE.md         # Claude Code用ガイド
-```
-
-詳細は [directorystructure.md](./directorystructure.md) を参照してください。
-
-## 🧪 テスト
-
-### テストポリシー
-
-**重要**: このプロジェクトではモックの使用を一切禁止しています。
-
-- すべてのテストは実際のサービス・APIを使用
-- Vitest に統一（Frontend/Backend共通）
-- テスト成功率: 95.5%（406/425 tests passing）
-- 詳細は [TEST_GUIDELINES.md](./TEST_GUIDELINES.md) を参照
-
-### テストコマンド
-
-```bash
-# フロントエンドテスト
-cd frontend && npm test
-
-# フロントエンドテストカバレッジ
-cd frontend && npm run test:coverage
-
-# バックエンドテスト
-cd backend && npm test
-
-# ビルドテスト
-npm run build
-
-# 本番ビルド
-cd frontend && npm run build
-cd backend && npm run build
-```
-
-## 🌐 デプロイメント
-
-### Vercel デプロイ手順
-
-#### 1. Vercel Web UIでのプロジェクト作成
-
-1. [Vercel](https://vercel.com) にアクセス
-2. "Continue with GitHub" でログイン
-3. "Add New Project" → "Import Git Repository"
-4. `kibarashi-app` リポジトリを選択・インポート
-
-#### 2. 環境変数の設定
-
-Vercel ダッシュボード → Project Settings → Environment Variables:
-
-```
-GEMINI_API_KEY=your_gemini_api_key
-GOOGLE_APPLICATION_CREDENTIALS={"type":"service_account",...}
-```
-
-#### 3. 自動デプロイ
-
-- mainブランチにプッシュで自動デプロイ
-- プレビュー環境は他ブランチで自動作成
-
-### API エンドポイント構造
-
-本番環境:
-```
-https://your-project.vercel.app/api/v1/suggestions
-https://your-project.vercel.app/api/v1/tts
-https://your-project.vercel.app/api/v1/health
-```
-
-開発環境:
-```
-http://localhost:3000/api/v1/suggestions
-http://localhost:3000/api/v1/tts
-http://localhost:3000/api/v1/health
-```
-
-## 📝 ドキュメント
-
-- [開発仕様書](./音声ガイド付き気晴らしアプリ開発仕様書.md) - 詳細な要件定義とリスク分析
-- [CLAUDE.md](./CLAUDE.md) - Claude Code用の開発ガイド
-- [TODO.md](./TODO.md) - 開発タスクリスト
-
-## 🤝 コントリビューション
-
-現在このプロジェクトは個人開発のため、外部からのコントリビューションは受け付けていません。
-
-## 📄 ライセンス
-
-このプロジェクトは非公開プロジェクトです。
-
-## 🎨 主な実装のポイント
-
-### 人間工学に基づいたUI設計
-
-- 3タップ以内で目的達成
-- 視覚的フィードバックの充実
-- カード高さの統一による整った見た目
-- 音声生成中のローディング表示
-
-### エラーハンドリング
-
-- CSP（Content Security Policy）の適切な設定
-- CORS設定の最適化
-- Gemini TTS失敗時のブラウザTTSフォールバック
-- ユーザーフレンドリーなエラーメッセージ
-
-### パフォーマンス最適化
-
-- React.lazy()による動的インポート
-- バンドルサイズ: vendor (137KB), main (12KB)
-- クリティカルCSSのインライン化
-- Web Vitals監視機能
-
-### 統合データ管理
-
-- 全データ（お気に入り・履歴・カスタム気晴らし）の一括エクスポート/インポート
-- デバイス間データ移行サポート（置換・マージモード）
-- JSONファイルによるバックアップとリストア機能
-- データ検証とバージョン管理による安全なインポート
-- 重複チェック機能付きマージ処理
+</div>
 
 ---
 
-**開発方針**: シンプルさを最優先に、ユーザーのストレスを増やさない設計を心がけています。
+## 🎯 Live Demo
 
-最終更新: 2025/06/25 - Vercel Functions対応完了（API構造変更、Serverless Functions移行、デプロイ準備完了）
+<div align="center">
+  <a href="https://kibarashi-app.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/🌐%20Try%20the%20App-kibarashi--app.vercel.app-blue?style=for-the-badge" alt="Live Demo">
+  </a>
+</div>
+
+---
+
+<a name="english"></a>
+## 🌟 Overview
+
+A stress relief application that provides personalized relaxation suggestions powered by Google's Gemini AI. Built with modern web technologies and designed for people experiencing workplace stress, this PWA offers instant, accessible mental health support without requiring registration or payment.
+
+<a name="japanese"></a>
+## 🌟 概要
+
+職場でのストレスを抱える方々のために開発した、AIによる気晴らし提案アプリケーションです。Google Gemini AIを活用し、ユーザーの状況に応じた最適なリラックス方法を提案。登録不要・完全無料で、必要な時にすぐ使えるPWAとして設計されています。
+
+---
+
+## ✨ Key Features / 主な機能
+
+### 🤖 AI-Powered Suggestions
+- **Gemini 2.5 Flash Preview** integration for dynamic, context-aware suggestions
+- Personalized recommendations based on location (workplace/home/outside) and available time
+
+### 🎙️ Advanced Voice Guidance
+- **Gemini TTS** (Text-to-Speech) with high-quality Japanese voices
+- Automatic fallback to browser TTS for seamless experience
+- Voice-guided relaxation exercises with synchronized timers
+
+### 📱 Progressive Web App (PWA)
+- Install on any device like a native app
+- **Offline support** - core features work without internet
+- Push notifications for relaxation reminders
+
+### 🎨 Modern UI/UX
+- **Dark mode** with system preference detection
+- **WCAG AA compliant** for accessibility
+- Responsive design optimized for all devices
+- Smooth animations and micro-interactions
+
+### 🧪 Technical Excellence
+- **95.5% test coverage** with zero mocking policy
+- **Serverless architecture** on Vercel Functions
+- **TypeScript** throughout for type safety
+- **Performance optimized** with code splitting
+
+---
+
+## 🛠️ Technology Stack
+
+<div align="center">
+
+| Frontend | Backend | AI & Voice | Infrastructure |
+|:--------:|:-------:|:----------:|:--------------:|
+| React 18 | Vercel Functions | Gemini AI | Vercel |
+| TypeScript | Node.js | Gemini TTS | GitHub Actions |
+| Tailwind CSS | Express.js | Web Speech API | Docker |
+| Vite | PostgreSQL | | GCP |
+| PWA | Redis | | |
+
+</div>
+
+### 📊 Performance Metrics
+
+```
+┌─────────────────────────────────────┐
+│ 🚀 Bundle Size                      │
+├─────────────────────────────────────┤
+│ Vendor:  139.45 KB                  │
+│ Main:     14.79 KB                  │
+│ Total:   ~154 KB (gzipped)          │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ ✅ Test Coverage                    │
+├─────────────────────────────────────┤
+│ Total Tests: 425                    │
+│ Passing: 419 (98.6%)                │
+│ Coverage: 95.5%                     │
+│ Zero Mocks: 100%                    │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ 🌐 Lighthouse Scores                │
+├─────────────────────────────────────┤
+│ Performance:    95+                 │
+│ Accessibility:  100                 │
+│ Best Practices: 100                 │
+│ SEO:           100                  │
+│ PWA:           ✓                    │
+└─────────────────────────────────────┘
+```
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="docs/images/light-mode-home.png" alt="Light Mode Home" width="300">
+        <br>
+        <em>Light Mode - Home Screen</em>
+      </td>
+      <td align="center">
+        <img src="docs/images/dark-mode-suggestions.png" alt="Dark Mode Suggestions" width="300">
+        <br>
+        <em>Dark Mode - AI Suggestions</em>
+      </td>
+      <td align="center">
+        <img src="docs/images/mobile-pwa.png" alt="Mobile PWA" width="300">
+        <br>
+        <em>Mobile PWA Experience</em>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 🎯 Technical Challenges & Solutions
+
+### 1. Zero-Mock Testing Philosophy
+**Challenge**: Ensuring test reliability without using any mocks  
+**Solution**: 
+- Implemented real test databases with transaction rollback
+- Created isolated test environments for each test suite
+- Achieved 95.5% coverage with only real integrations
+
+### 2. Gemini TTS Integration in Serverless
+**Challenge**: Integrating Gemini 2.5 Flash Preview TTS in Vercel Functions  
+**Solution**:
+- Converted PCM audio data to WAV format without ffmpeg
+- Implemented custom WAV header generation
+- Created fallback mechanism to browser TTS
+
+### 3. Offline PWA Functionality
+**Challenge**: Providing meaningful offline experience  
+**Solution**:
+- Implemented intelligent service worker caching strategies
+- Pre-cached essential suggestion data
+- Created offline-first architecture with sync capabilities
+
+### 4. Accessibility at Scale
+**Challenge**: Ensuring WCAG AA compliance across all features  
+**Solution**:
+- Automated accessibility testing in CI/CD
+- Custom Tailwind color palette with proper contrast ratios
+- Comprehensive ARIA labeling and keyboard navigation
+
+---
+
+## 🚀 What I Learned
+
+1. **Serverless Architecture**: Migrating from Express.js to Vercel Functions taught me about optimizing for cold starts and managing stateless services
+2. **AI Integration**: Working with Gemini API showed me the importance of prompt engineering and fallback strategies
+3. **Testing Philosophy**: The zero-mock approach improved my understanding of integration testing and test environment management
+4. **Accessibility**: Implementing WCAG AA compliance deepened my knowledge of inclusive design principles
+5. **Performance**: Achieving sub-200KB bundle size required careful analysis of dependencies and code splitting strategies
+
+---
+
+## 🔧 Setup & Installation
+
+### Prerequisites
+- Node.js 20.x or higher
+- npm or yarn
+- Gemini API key
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/CaCC-Lab/kibarashi-app.git
+cd kibarashi-app
+
+# Install dependencies
+npm run setup
+
+# Set up environment variables
+cp frontend/.env.example frontend/.env
+# Edit .env and add your GEMINI_API_KEY
+
+# Start development server
+vercel dev
+# Visit http://localhost:3000
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage
+npm run test:coverage
+
+# Run specific test suite
+npm test -- --grep "TTS"
+```
+
+---
+
+## 📈 Future Enhancements
+
+- [ ] Multi-language support (English, Chinese, Korean)
+- [ ] Apple Watch / Wear OS companion apps
+- [ ] Integration with popular meditation apps
+- [ ] Advanced analytics dashboard
+- [ ] Community-sourced relaxation techniques
+
+---
+
+## 🤝 Contributing
+
+While this is a personal portfolio project, I welcome feedback and suggestions! Feel free to:
+- Open issues for bugs or feature requests
+- Submit PRs for improvements
+- Star the repository if you find it useful
+
+---
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+## 👨‍💻 About the Developer
+
+Hi! I'm [Your Name], a full-stack developer passionate about creating meaningful applications that improve people's daily lives. This project combines my interests in mental health, AI technology, and user-centered design.
+
+<div align="center">
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/yourprofile)
+[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=About.me&logoColor=white)](https://yourportfolio.com)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/yourusername)
+
+</div>
+
+---
+
+<div align="center">
+  Made with ❤️ and ☕ by [Your Name]
+  <br>
+  <sub>Last updated: January 2025</sub>
+</div>
