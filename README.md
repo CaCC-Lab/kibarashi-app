@@ -309,19 +309,3 @@ kibarashi-app/
 
 **開発者**: CaCC-Lab
 **問い合わせ先**: https://cacc-lab.net/otoiawase/
-
-<div align="center">
-
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/yourprofile)
-[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=for-the-badge&logo=About.me&logoColor=white)](https://yourportfolio.com)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/yourusername)
-
-</div>
-
----
-
-<div align="center">
-  Made with ❤️ and ☕ by [Your Name]
-  <br>
-  <sub>最終更新: 2025年1月</sub>
-</div>
