@@ -1,6 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
-import { TextToSpeechClient } from '@google-cloud/text-to-speech';
 
 // バリデーションスキーマ
 const ttsRequestSchema = z.object({
@@ -9,61 +8,98 @@ const ttsRequestSchema = z.object({
   speed: z.number().min(0.25).max(4.0).optional().default(1.0),
 });
 
-// TTS クライアントの初期化
-let ttsClient: TextToSpeechClient | null = null;
+// Gemini TTS設定
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${GEMINI_API_KEY}`;
 
-function getTTSClient(): TextToSpeechClient {
-  if (!ttsClient) {
-    try {
-      // Google Cloud認証情報の設定
-      const credentials = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-      if (credentials) {
-        const parsedCredentials = JSON.parse(credentials);
-        ttsClient = new TextToSpeechClient({
-          credentials: parsedCredentials,
-          projectId: parsedCredentials.project_id,
-        });
-      } else {
-        // 環境変数から個別に認証情報を取得
-        ttsClient = new TextToSpeechClient();
-      }
-    } catch (error) {
-      console.error('Failed to initialize TTS client:', error);
-      throw new Error('TTS service is not available');
-    }
-  }
-  return ttsClient;
+// WAVヘッダーを作成する関数
+function createWavHeader(pcmDataLength: number, sampleRate: number = 24000, channels: number = 1, bitDepth: number = 16): Buffer {
+  const header = Buffer.alloc(44);
+  
+  // RIFF header
+  header.write('RIFF', 0);
+  header.writeUInt32LE(36 + pcmDataLength, 4); // file size - 8
+  header.write('WAVE', 8);
+  
+  // fmt chunk
+  header.write('fmt ', 12);
+  header.writeUInt32LE(16, 16); // fmt chunk size
+  header.writeUInt16LE(1, 20); // format (1 = PCM)
+  header.writeUInt16LE(channels, 22); // number of channels
+  header.writeUInt32LE(sampleRate, 24); // sample rate
+  header.writeUInt32LE(sampleRate * channels * (bitDepth / 8), 28); // byte rate
+  header.writeUInt16LE(channels * (bitDepth / 8), 32); // block align
+  header.writeUInt16LE(bitDepth, 34); // bits per sample
+  
+  // data chunk
+  header.write('data', 36);
+  header.writeUInt32LE(pcmDataLength, 40); // data size
+  
+  return header;
 }
 
-// 音声合成
-async function synthesizeSpeech(text: string, voice: string, speed: number): Promise<Buffer> {
-  const client = getTTSClient();
+// Gemini音声合成
+async function synthesizeSpeechWithGemini(text: string, voice: string, speed: number): Promise<Buffer> {
+  if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not configured');
+  }
 
-  const request = {
-    input: { text },
-    voice: {
-      languageCode: 'ja-JP',
-      name: voice,
+  // 音声名を選択（男性：Charon、女性：Kore）
+  const voiceName = voice.includes('Standard-B') || voice.includes('Standard-D') ? 'Charon' : 'Kore';
+
+  const requestBody = {
+    contents: [{
+      parts: [{
+        text: text
+      }]
+    }],
+    generationConfig: {
+      responseModalities: ["AUDIO"],
+      speechConfig: {
+        voiceConfig: {
+          prebuiltVoiceConfig: {
+            voiceName: voiceName
+          }
+        }
+      }
     },
-    audioConfig: {
-      audioEncoding: 'MP3' as const,
-      speakingRate: speed,
-      pitch: 0,
-      volumeGainDb: 0,
-    },
+    model: "gemini-2.5-flash-preview-tts",
   };
 
   try {
-    const [response] = await client.synthesizeSpeech(request);
-    
-    if (!response.audioContent) {
-      throw new Error('No audio content received from TTS service');
+    const response = await fetch(GEMINI_TTS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini TTS API error:', errorText);
+      throw new Error(`Gemini TTS API error: ${response.status}`);
     }
 
-    return Buffer.from(response.audioContent as Uint8Array);
+    const data = await response.json() as any;
+    const audioBase64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+
+    if (!audioBase64) {
+      throw new Error('No audio data in Gemini response');
+    }
+
+    // Base64データをBufferに変換（PCMフォーマット）
+    const pcmBuffer = Buffer.from(audioBase64, 'base64');
+    
+    // PCMデータにWAVヘッダーを追加
+    const wavHeader = createWavHeader(pcmBuffer.length);
+    const wavBuffer = Buffer.concat([wavHeader, pcmBuffer]);
+    
+    console.log(`Gemini TTS synthesis completed: ${wavBuffer.length} bytes (WAV format)`);
+    return wavBuffer;
   } catch (error) {
-    console.error('TTS synthesis error:', error);
-    throw new Error('Failed to synthesize speech');
+    console.error('Gemini TTS synthesis failed:', error);
+    throw error;
   }
 }
 
@@ -114,9 +150,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log(`TTS request: text length=${text.length}, voice=${voice}, speed=${speed}`);
 
-    // Google Cloud TTSを試行
+    // Gemini TTSを試行
     try {
-      const audioBuffer = await synthesizeSpeech(text, voice, speed);
+      const audioBuffer = await synthesizeSpeechWithGemini(text, voice, speed);
       
       // 音声データをBase64でエンコードして返す
       const audioBase64 = audioBuffer.toString('base64');
@@ -124,9 +160,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({
         success: true,
         data: {
-          type: 'google_tts',
+          type: 'gemini_tts',
           audio: audioBase64,
-          format: 'mp3',
+          format: 'wav', // WAVフォーマットで返す
+          sampleRate: 24000,
+          channels: 1,
           size: audioBuffer.length
         },
         metadata: {
@@ -134,11 +172,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           voice,
           speed,
           timestamp: new Date().toISOString(),
-          source: 'google_cloud_tts'
+          source: 'gemini_2.5_flash_preview_tts'
         }
       });
     } catch (ttsError) {
-      console.warn('Google Cloud TTS failed, falling back to browser TTS:', ttsError);
+      console.warn('Gemini TTS failed, falling back to browser TTS:', ttsError);
       
       // フォールバック: ブラウザTTS用の設定を返す
       const browserConfig = createBrowserTTSResponse(text, voice, speed);
@@ -152,7 +190,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           speed,
           timestamp: new Date().toISOString(),
           source: 'browser_tts_fallback',
-          fallback_reason: 'google_cloud_tts_unavailable'
+          fallback_reason: 'gemini_tts_unavailable'
         }
       });
     }
