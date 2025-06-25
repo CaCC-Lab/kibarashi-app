@@ -1,67 +1,32 @@
 # GitHub Actions ワークフロー
 
-このディレクトリには、CI/CDパイプライン用のGitHub Actionsワークフローが含まれています。
+## アクティブなワークフロー
 
-## ワークフロー一覧
+- **deploy-vercel.yml** - Vercelへの自動デプロイ（メインプラットフォーム）
+- **ci.yml** - CI/CD（テスト、ビルド、Lint）
+- **dependencies.yml** - 依存関係の自動更新
 
-### 1. azure-static-web-apps.yml
-Azure Static Web Appsへの自動デプロイを行うメインワークフロー。
+## 無効化されたワークフロー
 
-**トリガー:**
-- mainブランチへのpush
-- mainブランチへのPull Request
-- 手動実行（workflow_dispatch）
+以下のワークフローは現在使用していないため、`.disabled`拡張子を付けて無効化しています：
 
-**主な処理:**
-- Node.js 20.xでのビルドとテスト
-- Azure Static Web Appsへのデプロイ
-- PR環境の自動作成と削除
+- **azure-deploy.yml.disabled** - Azure Static Web Appsへのデプロイ
+- **azure-static-web-apps.yml.disabled** - Azure Static Web Appsへの詳細デプロイ
+- **deploy.yml.disabled** - Firebase Hostingへのデプロイ
 
-**必要なシークレット:**
-- `AZURE_STATIC_WEB_APPS_API_TOKEN`: Azureポータルから取得
-- `VITE_API_URL`: 本番環境のAPI URL（オプション）
+## 理由
 
-### 2. ci.yml
-開発中の継続的インテグレーション用ワークフロー。
+プロジェクトのデプロイメントプラットフォームをVercelに統一したため、他のプラットフォームへのデプロイワークフローは無効化しました。これにより：
 
-**トリガー:**
-- main/developブランチへのpush
-- main/developブランチへのPull Request
+1. 不要なビルドエラーを防止
+2. GitHub Actionsの実行時間を節約
+3. デプロイメント先の明確化
 
-**主な処理:**
-- ESLintによるコード品質チェック
-- Vitest/Jestによるユニットテスト実行
-- カバレッジレポートの生成
-- ビルドの検証
-- セキュリティスキャン（npm audit）
+## 再有効化方法
 
-## セットアップ手順
+必要に応じて、`.disabled`拡張子を削除することでワークフローを再有効化できます：
 
-1. **Azure Static Web Apps APIトークンの取得:**
-   - Azure Portalにログイン
-   - Static Web Appsリソースを作成/選択
-   - 「管理」→「デプロイトークン」からトークンをコピー
-
-2. **GitHubシークレットの設定:**
-   - GitHubリポジトリの「Settings」→「Secrets and variables」→「Actions」
-   - 以下のシークレットを追加:
-     - `AZURE_STATIC_WEB_APPS_API_TOKEN`: 上記で取得したトークン
-     - `VITE_API_URL`: 本番環境のAPI URL（例: https://kibarashi-app.azurestaticapps.net）
-
-3. **ワークフローの有効化:**
-   - mainブランチにpushすると自動的にワークフローが実行されます
-   - 手動実行する場合は「Actions」タブから実行可能
-
-## トラブルシューティング
-
-### ビルドエラー
-- Node.jsのバージョンが20.x以上であることを確認
-- package-lock.jsonが最新であることを確認
-
-### デプロイエラー
-- APIトークンが正しく設定されているか確認
-- Azure Static Web Appsのリソースが正しく作成されているか確認
-
-### テストエラー
-- ローカルでテストが通ることを確認
-- 環境変数が正しく設定されているか確認
+```bash
+# 例：Firebaseデプロイを再有効化
+mv deploy.yml.disabled deploy.yml
+```
