@@ -136,13 +136,29 @@
   - [x] セキュリティスキャン（Trivy）統合
   - [x] 品質ゲート実装
 
+- [x] **Vercel対応 (2025/06/25)**
+  - [x] API構造のServerless Functions化
+    - [x] Express.js → Vercel Functions 移行
+    - [x] `api/v1/suggestions.ts` - 気晴らし提案API
+    - [x] `api/v1/tts.ts` - 音声合成API  
+    - [x] `api/v1/health.ts` - ヘルスチェックAPI
+  - [x] Vercel設定ファイル作成 (`vercel.json`)
+  - [x] フロントエンド API URL自動切り替え実装
+  - [x] 環境変数設定の最適化
+  - [x] Vercel Functions用 package.json作成
+
 - [ ] **本番環境準備**
-  - [x] Firebase Hosting設定ファイル作成
-  - [ ] Firebase プロジェクト作成と初期化
-  - [ ] GitHub Secrets 設定
+  - [x] ~~Firebase Hosting設定ファイル作成~~ → Vercel移行
+  - [ ] Vercel プロジェクト作成（Web UI経由）
+  - [ ] GitHub Secrets 設定（Vercel用）
+    - [ ] `VERCEL_TOKEN`
+    - [ ] `VERCEL_ORG_ID` 
+    - [ ] `VERCEL_PROJECT_ID`
+    - [ ] `GEMINI_API_KEY`
+    - [ ] `GOOGLE_APPLICATION_CREDENTIALS`
   - [ ] 本番デプロイのテスト実行
   - [ ] ドメイン設定（必要に応じて）
-  - [ ] SSL証明書設定（Firebase Hostingで自動）
+  - [ ] SSL証明書設定（Vercelで自動）
 
 ### 🎉 完了した主要な機能・修正
 
@@ -212,8 +228,8 @@
 
 ---
 
-最終更新: 2025/06/15 - CI/CD設定完了（GitHub Actions、Firebase Hosting）
-次回レビュー予定: デプロイメント完了時
+最終更新: 2025/06/25 - Vercel Functions対応完了（API構造変更、デプロイ準備完了）
+次回レビュー予定: Vercelデプロイ完了時
 
 ## 📈 進捗状況
 
@@ -228,7 +244,7 @@
 - テスト実装: ✅ 100% 完了（モック完全排除、全テスト成功）
 - パフォーマンス最適化: ✅ 100% 完了
 - ローカル環境動作確認: ✅ 100% 完了
-- デプロイ準備: ✅ 85% 完了（CI/CD設定完了、Firebase設定待ち）
+- デプロイ準備: ✅ 95% 完了（CI/CD設定完了、Vercel Functions対応完了、デプロイ実行待ち）
 
 ## 🚀 Phase 2 機能拡張（開始: 2025/06/14）
 
@@ -367,3 +383,26 @@
   - [ ] トークン数増加 vs 精度向上のコストベネフィット分析
   - [ ] ハイブリッドアプローチの検討
   - [ ] 実装複雑性の評価
+
+## 🚀 Phase 3 本番環境デプロイ（開始: 2025/06/25）
+
+### 📊 Phase 3 進捗状況
+- API構造変更（Serverless Functions化): ✅ 100% 完了
+- Vercel設定: ✅ 100% 完了
+- フロントエンド対応: ✅ 100% 完了
+- 本番デプロイ: ⏳ 0% 未開始
+
+### 実装完了機能（2025/06/25）
+- ✅ **Vercel Functions対応** - 完全実装済み
+  - ✅ Express.js → Serverless Functions 移行
+  - ✅ API エンドポイントの個別関数化
+  - ✅ 環境変数とクライアント管理の最適化
+  - ✅ フロントエンドの自動URL切り替え実装
+  - ✅ Vercel設定ファイルの作成
+
+### 次のステップ
+- [ ] Vercel Web UIでのプロジェクト作成
+- [ ] GitHub連携設定
+- [ ] 環境変数の設定
+- [ ] 本番デプロイの実行
+- [ ] 動作確認とテスト

@@ -1,0 +1,170 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - preview
+
+env:
+  NODE_VERSION: '20.x'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # 品質チェック（CIパイプラインが成功している場合のみ実行）
+  quality-check:
+    name: Quality Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    outputs:
+      should-deploy: ${{ steps.check.outputs.should-deploy }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Check build
+        run: npm run build
+        env:
+          VITE_API_URL: "https://your-app.vercel.app/api"
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+
+      - name: Set deployment flag
+        id: check
+        run: echo "should-deploy=true" >> $GITHUB_OUTPUT
+
+  # ビルドとデプロイ
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [quality-check]
+    if: always() && (needs.quality-check.outputs.should-deploy == 'true' || github.event_name == 'workflow_dispatch')
+    environment: 
+      name: ${{ github.event.inputs.environment || 'production' }}
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=${{ github.event.inputs.environment || 'production' }} --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build ${{ github.event.inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VITE_API_URL: "https://${{ secrets.VERCEL_PROJECT_ID }}.vercel.app/api"
+          VITE_GEMINI_API_KEY: ${{ secrets.VITE_GEMINI_API_KEY }}
+
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          url=$(vercel deploy --prebuilt ${{ github.event.inputs.environment == 'production' && '--prod' || '' }} --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> $GITHUB_OUTPUT
+          echo "✅ デプロイ完了: $url"
+
+      - name: Update deployment status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Vercelデプロイが成功しました"
+            echo "🌐 URL: ${{ steps.deploy.outputs.url }}"
+          else
+            echo "❌ Vercelデプロイに失敗しました"
+          fi
+
+  # デプロイ後の健全性チェック
+  health-check:
+    name: Post-Deploy Health Check
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: success()
+
+    steps:
+      - name: Wait for deployment to be ready
+        run: sleep 30
+
+      - name: Health check - Frontend
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" ${{ needs.deploy.outputs.url }})
+          if [ $response -eq 200 ]; then
+            echo "✅ フロントエンド健全性チェック成功"
+          else
+            echo "❌ フロントエンド健全性チェック失敗 (HTTP $response)"
+            exit 1
+          fi
+
+      - name: Health check - API Endpoints
+        run: |
+          # API健全性チェック
+          api_health_response=$(curl -s -o /dev/null -w "%{http_code}" ${{ needs.deploy.outputs.url }}/api/v1/health)
+          if [ $api_health_response -eq 200 ]; then
+            echo "✅ API健全性チェック成功"
+          else
+            echo "❌ API健全性チェック失敗 (HTTP $api_health_response)"
+            exit 1
+          fi
+
+      - name: Functional test - Suggestions API
+        run: |
+          # 提案API のテスト
+          suggestions_response=$(curl -s -w "%{http_code}" "${{ needs.deploy.outputs.url }}/api/v1/suggestions?situation=workplace&duration=5" | tail -n1)
+          if [ $suggestions_response -eq 200 ]; then
+            echo "✅ 提案API機能テスト成功"
+          else
+            echo "❌ 提案API機能テスト失敗 (HTTP $suggestions_response)"
+            exit 1
+          fi
+
+  # デプロイ通知
+  notify:
+    name: Deployment Notification
+    runs-on: ubuntu-latest
+    needs: [deploy, health-check]
+    if: always() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Send notification
+        run: |
+          if [ "${{ needs.health-check.result }}" == "success" ]; then
+            echo "📢 デプロイ成功通知"
+            echo "✅ 5分気晴らしアプリがVercelに正常にデプロイされました"
+            echo "🌐 URL: ${{ needs.deploy.outputs.url }}"
+            echo "🚀 フロントエンド・バックエンド共に正常動作確認済み"
+          else
+            echo "📢 デプロイ失敗通知"
+            echo "❌ デプロイまたは健全性チェックに失敗しました"
+          fi

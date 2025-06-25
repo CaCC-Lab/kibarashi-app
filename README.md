@@ -44,11 +44,14 @@
 
 - **CI/CD設定**: GitHub Actionsによる自動テスト・ビルド・デプロイパイプライン
 - **セキュリティスキャン**: Trivy脆弱性スキャン、依存関係チェック自動化
-- **Firebase Hosting設定**: 本番環境への自動デプロイ準備完了
+- **Vercel Functions対応**: Express.js → Serverless Functions 移行完了
+  - **API構造変更**: 個別関数化（suggestions, tts, health）
+  - **自動URL切り替え**: 環境に応じたAPI endpoint自動設定
+  - **最適化設定**: Vercel設定ファイル、環境変数管理
 
 ### 今後実装予定（Phase 3 残タスク）
-- **Firebase プロジェクト初期化**: 本番環境への公開
-- **GitHub Secrets 設定**: 自動デプロイの有効化
+- **Vercel プロジェクト作成**: Web UI経由でのGitHub連携
+- **本番デプロイ**: 環境変数設定と初回デプロイ実行
 
 ### 研究・検証課題
 
@@ -58,14 +61,14 @@
 ## 🛠️ 技術スタック
 
 - **フロントエンド**: React 18 + TypeScript, Vite, Tailwind CSS, PWA
-- **バックエンド**: Node.js + Express.js + TypeScript
+- **バックエンド**: Vercel Functions (Serverless) + TypeScript
 - **AI/音声**: Google Gemini API (提案生成・TTS)
 - **テスト**: Vitest (Frontend/Backend統一), モック使用完全排除
-- **インフラ**: Google Cloud Platform, Firebase Hosting
+- **インフラ**: Vercel (Hosting + Functions), Google Cloud Platform
 
 詳細は [technologystack.md](./technologystack.md) を参照してください。
 
-**CI/CD**: GitHub Actions, Firebase Hosting, Trivy Security Scanner
+**CI/CD**: GitHub Actions, Vercel Deployment, Trivy Security Scanner
 
 詳細は [CI/CD設定ガイド](./docs/CI_CD_SETUP.md) を参照してください。
 
@@ -80,21 +83,41 @@
 
 ### 環境構築
 
+#### 方法1: Vercel Dev（推奨）
+
 ```bash
 # リポジトリのクローン
 git clone https://github.com/CaCC-Lab/kibarashi-app.git
 cd kibarashi-app
 
+# Vercel CLI のインストール
+npm install -g vercel
+
+# 依存関係のインストール
+npm run setup
+
+# 環境変数の設定
+cp frontend/.env.example frontend/.env
+# frontend/.envファイルを編集し、必要なAPI キーを設定
+
+# Vercel Dev Server起動（フロントエンド + API統合）
+vercel dev
+# → http://localhost:3000 (フロントエンド + API)
+```
+
+#### 方法2: 個別起動
+
+```bash
 # 依存関係のインストール（フロントエンド）
 cd frontend
 npm install
 
-# 依存関係のインストール（バックエンド）
-cd ../backend
+# 依存関係のインストール（API）
+cd ../api
 npm install
 
 # 環境変数の設定
-cp .env.example .env
+cp ../frontend/.env.example ../frontend/.env
 # .envファイルを編集し、必要なAPI キーを設定
 
 # フロントエンド起動（ターミナル1）
@@ -102,17 +125,17 @@ cd frontend
 npm run dev
 # → http://localhost:3000
 
-# バックエンド起動（ターミナル2）
-cd backend
-npm run dev
-# → http://localhost:8080
+# APIサーバー起動（ターミナル2）
+cd api
+npx vercel dev
+# → http://localhost:3000/api
 ```
 
 ### 開発環境へのアクセス
 
-- フロントエンド: http://localhost:3000
-- バックエンド API: http://localhost:8080
-- ヘルスチェック: http://localhost:8080/health
+- **推奨**: http://localhost:3000 (Vercel Dev - フロントエンド + API統合)
+- API エンドポイント: http://localhost:3000/api/v1/*
+- ヘルスチェック: http://localhost:3000/api/v1/health
 
 ### 動作確認状況（2025/06/14）
 
@@ -127,9 +150,15 @@ npm run dev
 ```
 kibarashi-app/
 ├── frontend/          # Reactフロントエンド
-├── backend/           # Node.jsバックエンド
+├── backend/           # 従来のExpress.jsバックエンド（保持）
+├── api/              # Vercel Functions（新）
+│   └── v1/           # APIエンドポイント
+│       ├── suggestions.ts    # 気晴らし提案API
+│       ├── tts.ts           # 音声合成API
+│       └── health.ts        # ヘルスチェックAPI
 ├── infrastructure/    # インフラ設定
 ├── docs/             # ドキュメント
+├── vercel.json       # Vercel設定
 └── CLAUDE.md         # Claude Code用ガイド
 ```
 
@@ -168,7 +197,44 @@ cd backend && npm run build
 
 ## 🌐 デプロイメント
 
-本番環境へのデプロイは今後 Firebase Hosting と GitHub Actions で自動化予定です。
+### Vercel デプロイ手順
+
+#### 1. Vercel Web UIでのプロジェクト作成
+
+1. [Vercel](https://vercel.com) にアクセス
+2. "Continue with GitHub" でログイン
+3. "Add New Project" → "Import Git Repository"
+4. `kibarashi-app` リポジトリを選択・インポート
+
+#### 2. 環境変数の設定
+
+Vercel ダッシュボード → Project Settings → Environment Variables:
+
+```
+GEMINI_API_KEY=your_gemini_api_key
+GOOGLE_APPLICATION_CREDENTIALS={"type":"service_account",...}
+```
+
+#### 3. 自動デプロイ
+
+- mainブランチにプッシュで自動デプロイ
+- プレビュー環境は他ブランチで自動作成
+
+### API エンドポイント構造
+
+本番環境:
+```
+https://your-project.vercel.app/api/v1/suggestions
+https://your-project.vercel.app/api/v1/tts
+https://your-project.vercel.app/api/v1/health
+```
+
+開発環境:
+```
+http://localhost:3000/api/v1/suggestions
+http://localhost:3000/api/v1/tts
+http://localhost:3000/api/v1/health
+```
 
 ## 📝 ドキュメント
 
@@ -219,4 +285,4 @@ cd backend && npm run build
 
 **開発方針**: シンプルさを最優先に、ユーザーのストレスを増やさない設計を心がけています。
 
-最終更新: 2025/06/15 - CI/CD設定完了（GitHub Actions、Firebase Hosting、セキュリティスキャン）
+最終更新: 2025/06/25 - Vercel Functions対応完了（API構造変更、Serverless Functions移行、デプロイ準備完了）

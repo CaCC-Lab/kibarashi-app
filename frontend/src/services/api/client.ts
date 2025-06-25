@@ -1,7 +1,18 @@
 // APIクライアントの設定
 // なぜ必要か：外部APIとの通信を一元管理し、タイムアウトやエラーハンドリングを統一するため
 // 環境変数から設定を読み込むことで、環境ごとの設定変更を容易にする
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+// Vercel Functions対応：本番環境では相対パス、開発環境では絶対パスを使用
+const getApiBaseUrl = (): string => {
+  // 本番環境（Vercel）では相対パスを使用
+  if (import.meta.env.PROD) {
+    return window.location.origin;
+  }
+  
+  // 開発環境での設定
+  return import.meta.env.VITE_API_URL || 'http://localhost:3000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '30000');
 
 // Fetchオプションの拡張インターフェース
