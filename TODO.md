@@ -444,6 +444,10 @@
   - [x] SuggestionDetailコンポーネントの動的クラス名を修正
   - [x] テンプレートリテラル内の条件分岐を完全なクラス名文字列に変更
   - [x] Tailwind設定にsafelistを追加
+  - [x] safelistに追加のクラス（transform、transition、shadow等）を拡張
+  - [x] 動的クラス名生成部分にデバッグログを追加
+  - [x] PostCSS content設定に.cssファイルを追加
+  - [x] デバッグエンドポイントにビルド情報を追加
 
 ### 改善内容の詳細
 - **シャッフルアルゴリズムの改善**: `Math.random() - 0.5`による不適切なソートをFisher-Yatesアルゴリズムに変更
@@ -476,3 +480,6 @@
   - 動的クラス名での`undefined.bg`エラーを解決
   - テンプレートリテラル内の条件分岐を修正
   - safelist設定で本番ビルドでのクラス削除を防止
+  - safelistに追加のユーティリティクラス（transform、transition、shadow、cursor等）を追加
+  - デバッグログで動的クラス名生成を監視
+  - PostCSS content設定を拡張してCSSファイルも含める
