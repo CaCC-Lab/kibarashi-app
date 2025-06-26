@@ -10,9 +10,9 @@ export async function fetchSuggestions(
   situation: 'workplace' | 'home' | 'outside',
   duration: 5 | 15 | 30
 ): Promise<SuggestionsResponse> {
-  const response = await apiClient.get<{ success: boolean; data: SuggestionsResponse }>(
+  const response = await apiClient.get<SuggestionsResponse>(
     `/api/v1/suggestions?situation=${situation}&duration=${duration}`
   );
   
-  return response.data;
+  return response;
 }

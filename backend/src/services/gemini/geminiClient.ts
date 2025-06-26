@@ -92,18 +92,34 @@ class GeminiClient {
   }
 ]
 
-JSON形式のみを返し、他の説明文は不要です。`;
+重要: コードブロック記法(\\\`\\\`\\\`)を使わず、純粋なJSON配列のみを返してください。説明文や余計な文字を含めないでください。`;
   }
 
   private parseResponse(text: string, duration: number): any[] {
     try {
-      // JSONの部分を抽出（前後の説明文を除去）
-      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      // Markdownコードブロックを除去
+      let jsonText = text;
+      
+      // ```json ... ``` または ``` ... ``` の形式を処理
+      const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+      if (codeBlockMatch) {
+        jsonText = codeBlockMatch[1];
+      }
+      
+      // JSONの配列部分を抽出
+      const jsonMatch = jsonText.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
         throw new Error('No JSON found in response');
       }
+      
+      // 不正なJSONを修正（末尾のカンマを除去）
+      let cleanJson = jsonMatch[0];
+      // 配列やオブジェクトの末尾のカンマを除去
+      cleanJson = cleanJson.replace(/,(\s*[}\]])/g, '$1');
+      // 空白や改行を正規化
+      cleanJson = cleanJson.replace(/\n\s*\n/g, '\n');
 
-      const suggestions = JSON.parse(jsonMatch[0]);
+      const suggestions = JSON.parse(cleanJson);
       
       // バリデーション
       if (!Array.isArray(suggestions) || suggestions.length === 0) {
