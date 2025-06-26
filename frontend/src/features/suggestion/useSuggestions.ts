@@ -35,9 +35,11 @@ export const useSuggestions = () => {
     
     try {
       const data = await fetchSuggestions(situation, duration);
+      console.log('API Response:', data); // デバッグログ追加
       
       // リクエストがキャンセルされていない場合のみ状態を更新
       if (!abortController.signal.aborted) {
+        console.log('Setting suggestions:', data.suggestions); // デバッグログ追加
         setSuggestions(data.suggestions);
       }
     } catch (err) {

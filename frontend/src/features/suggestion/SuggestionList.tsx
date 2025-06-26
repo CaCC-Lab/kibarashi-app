@@ -35,6 +35,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
 
   // コンポーネントマウント時と条件変更時に提案を取得
   useEffect(() => {
+    console.log('Fetching suggestions for:', { situation, duration }); // デバッグログ追加
     fetchSuggestions(situation, duration);
   }, [situation, duration, fetchSuggestions]);
 
@@ -57,6 +58,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
   }
 
   if (!suggestions || suggestions.length === 0) {
+    console.log('No suggestions found, suggestions state:', suggestions); // デバッグログ追加
     return (
       <div className="text-center py-8">
         <p className="text-text-secondary">提案が見つかりませんでした</p>
