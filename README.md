@@ -242,6 +242,15 @@
 - 不要な`success`フィールドを削除し、データを直接返すように修正
 - suggestions、tts、healthの全エンドポイントでレスポンス形式を統一
 
+### 9. Vercel本番環境でのTailwind CSSエラー
+
+**課題**: SuggestionDetailコンポーネントで`Cannot read properties of undefined (reading 'bg')`エラー
+**解決策**:
+
+- テンプレートリテラル内での動的クラス名生成を修正
+- 条件分岐を完全なクラス名文字列に変更
+- Tailwind設定にsafelistを追加して動的クラスの削除を防止
+
 ---
 
 ## 🚀 学んだこと
