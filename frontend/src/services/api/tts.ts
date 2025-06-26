@@ -29,23 +29,46 @@ export const ttsService = {
     }
 
     try {
-      // バックエンドから直接バイナリ音声データを取得
-      const audioBlob = await apiClient.post<Blob>('/api/v1/tts', requestBody, {
+      // バックエンドからJSONレスポンスを取得
+      const response = await apiClient.post<any>('/api/v1/tts', requestBody, {
         timeout: 30000, // 30秒のタイムアウト
-        responseType: 'blob', // 重要: Blobとしてレスポンスを受け取る
+        // responseType は指定しない（JSONを受け取るため）
       });
 
-      // 正常なBlobが返されたか確認
-      if (!audioBlob || audioBlob.size === 0) {
-        throw new Error('No audio data received');
-      }
-
-      return audioBlob;
-    } catch (error) {
-      // エラーレスポンスがJSONの場合の処理
-      if (error instanceof Error && error.message.includes('TTS_DISABLED')) {
+      // レスポンスの型をチェック
+      if (response.type === 'browser_tts') {
+        // ブラウザTTSフォールバックの場合
         throw new Error('Browser TTS requested');
       }
+
+      // Gemini TTSの場合、Base64音声データをデコード
+      if (response.type === 'gemini_tts' && response.audio) {
+        // Base64文字列をバイナリに変換
+        const binaryString = atob(response.audio);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+
+        // WAVファイルとしてBlobを作成
+        const audioBlob = new Blob([bytes], { type: 'audio/wav' });
+
+        // 正常なBlobが返されたか確認
+        if (!audioBlob || audioBlob.size === 0) {
+          throw new Error('No audio data received');
+        }
+
+        return audioBlob;
+      }
+
+      // 予期しないレスポンス形式
+      throw new Error('Invalid response format from TTS API');
+    } catch (error) {
+      // エラーレスポンスがJSONの場合の処理
+      if (error instanceof Error && error.message.includes('Browser TTS requested')) {
+        throw error;
+      }
+      console.error('TTS synthesis error:', error);
       throw error;
     }
   },
