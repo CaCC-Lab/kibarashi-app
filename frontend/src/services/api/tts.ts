@@ -28,49 +28,26 @@ export const ttsService = {
       requestBody.voice = 'ja-JP-Standard-A';
     }
 
-    // APIからのレスポンスを受け取る
-    interface TTSResponse {
-      success: boolean;
-      data: {
-        type: string;
-        audio?: string; // Base64エンコードされた音声データ
-        format?: string;
-        config?: any; // ブラウザTTSの設定
-      };
-      metadata?: any;
-    }
-    
-    const response = await apiClient.post<TTSResponse>('/api/v1/tts', requestBody, {
-      timeout: 30000, // 30秒のタイムアウト
-    });
+    try {
+      // バックエンドから直接バイナリ音声データを取得
+      const audioBlob = await apiClient.post<Blob>('/api/v1/tts', requestBody, {
+        timeout: 30000, // 30秒のタイムアウト
+        responseType: 'blob', // 重要: Blobとしてレスポンスを受け取る
+      });
 
-    // レスポンスのタイプに応じて処理
-    if (response.data.type === 'browser_tts') {
-      // ブラウザTTSの場合はエラーを投げる（SuggestionDetailがハンドリング）
-      throw new Error('Browser TTS requested');
-    }
+      // 正常なBlobが返されたか確認
+      if (!audioBlob || audioBlob.size === 0) {
+        throw new Error('No audio data received');
+      }
 
-    // Gemini TTSまたはGoogle Cloud TTSの音声データを処理
-    if (!response.data.audio) {
-      throw new Error('No audio data received');
+      return audioBlob;
+    } catch (error) {
+      // エラーレスポンスがJSONの場合の処理
+      if (error instanceof Error && error.message.includes('TTS_DISABLED')) {
+        throw new Error('Browser TTS requested');
+      }
+      throw error;
     }
-
-    // Base64をBlobに変換
-    const binaryString = atob(response.data.audio);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-
-    // フォーマットに応じてMIMEタイプを設定
-    let mimeType = 'audio/wav'; // デフォルトはWAV
-    if (response.data.format === 'mp3') {
-      mimeType = 'audio/mpeg';
-    } else if (response.data.format === 'pcm') {
-      mimeType = 'audio/wav'; // PCMもWAVとして扱う
-    }
-
-    return new Blob([bytes], { type: mimeType });
   },
 
   /**
