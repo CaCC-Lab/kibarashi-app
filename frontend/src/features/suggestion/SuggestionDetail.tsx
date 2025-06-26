@@ -259,10 +259,15 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className={
-                isComplete ? 'text-5xl font-bold text-green-600' : 
-                timeRemaining < 60 ? 'text-5xl font-bold text-red-600' : 'text-5xl font-bold text-gray-800'
-              }>
+              <div className={(() => {
+                const className = isComplete 
+                  ? 'text-5xl font-bold text-green-600' 
+                  : timeRemaining < 60 
+                    ? 'text-5xl font-bold text-red-600' 
+                    : 'text-5xl font-bold text-gray-800';
+                console.log('Timer className:', className, { isComplete, timeRemaining });
+                return className;
+              })()}>
                 {formatTime(timeRemaining)}
               </div>
               {!isComplete && timeRemaining < 60 && (
@@ -285,11 +290,13 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
             <button
               onClick={handleStart}
               disabled={isLoadingAudio}
-              className={
-                isLoadingAudio 
+              className={(() => {
+                const className = isLoadingAudio 
                   ? 'bg-gray-400 cursor-not-allowed text-white font-medium py-4 px-10 rounded-xl text-lg shadow-lg transition-all duration-200 flex items-center space-x-2' 
-                  : 'bg-primary-500 hover:bg-primary-600 transform hover:-translate-y-0.5 hover:shadow-xl text-white font-medium py-4 px-10 rounded-xl text-lg shadow-lg transition-all duration-200 flex items-center space-x-2'
-              }
+                  : 'bg-primary-500 hover:bg-primary-600 transform hover:-translate-y-0.5 hover:shadow-xl text-white font-medium py-4 px-10 rounded-xl text-lg shadow-lg transition-all duration-200 flex items-center space-x-2';
+                console.log('Start button className:', className, { isLoadingAudio });
+                return className;
+              })()}
             >
               {isLoadingAudio ? (
                 <>

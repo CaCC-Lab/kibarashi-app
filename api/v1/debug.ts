@@ -51,6 +51,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       memory: process.memoryUsage(),
       uptime: process.uptime(),
       nodeVersion: process.version,
+      buildInfo: {
+        platform: process.platform,
+        arch: process.arch,
+        tailwindMode: 'jit',
+        tailwindVersion: '3.x', // Assuming Tailwind 3.x
+        postCSSConfig: 'default'
+      }
     };
 
     return res.status(200).json(debugInfo);

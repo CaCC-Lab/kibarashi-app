@@ -32,8 +32,13 @@
   }
   
   body {
-    @apply antialiased bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800;
+    @apply antialiased;
+    background: linear-gradient(to bottom right, #f4f4f8, #e8e8f0); /* from-primary-50 to-primary-100 */
     transition: background-color 0.3s ease;
+  }
+  
+  .dark body {
+    background: linear-gradient(to bottom right, #111827, #1f2937); /* dark:from-gray-900 dark:to-gray-800 */
   }
 }
 
@@ -82,7 +87,8 @@
 
 /* アクセシビリティ: スキップリンク */
 .skip-link {
-  @apply absolute left-0 top-0 bg-primary-600 text-white px-4 py-2 rounded-md transform -translate-y-full focus:translate-y-0 z-50 transition-transform;
+  @apply absolute left-0 top-0 text-white px-4 py-2 rounded-md transform -translate-y-full focus:translate-y-0 z-50 transition-transform;
+  background-color: #32325c; /* bg-primary-600 */
 }
 
 @media (prefers-contrast: high) {
@@ -116,5 +122,20 @@
   a {
     min-height: 48px;
     min-width: 48px;
+  }
+}
+
+/* Tailwindクラスの明示的な使用（パージ対策） */
+@layer utilities {
+  .bg-primary {
+    background-color: var(--color-primary-500);
+  }
+  
+  .text-primary {
+    color: var(--color-primary-500);
+  }
+  
+  .border-primary {
+    border-color: var(--color-primary-500);
   }
 }

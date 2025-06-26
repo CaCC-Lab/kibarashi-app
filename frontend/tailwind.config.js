@@ -3,16 +3,67 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.css",
   ],
   darkMode: 'class', // ダークモード対応
   safelist: [
     // 動的に使用される可能性のあるクラスを明示的に含める
+    // Primary colors
+    'bg-primary-50',
+    'bg-primary-100',
+    'bg-primary-200',
+    'bg-primary-300',
+    'bg-primary-400',
     'bg-primary-500',
+    'bg-primary-600',
+    'bg-primary-700',
+    'bg-primary-800',
+    'bg-primary-900',
+    'hover:bg-primary-500',
     'hover:bg-primary-600',
+    'hover:bg-primary-700',
+    'text-primary-500',
+    'text-primary-600',
+    'text-primary-700',
+    'border-primary-500',
+    'border-primary-600',
+    'focus:ring-primary-500',
+    'focus:border-primary-500',
+    // Gradients
+    'from-primary-50',
+    'to-primary-100',
+    'bg-gradient-to-br',
+    // Other dynamic classes
     'bg-gray-400',
     'text-green-600',
     'text-red-600',
     'text-gray-800',
+    'text-yellow-600',
+    'bg-yellow-500',
+    'hover:bg-yellow-600',
+    // Dark mode classes
+    'dark:from-gray-900',
+    'dark:to-gray-800',
+    // Transform and transition classes
+    'transform',
+    'hover:-translate-y-0.5',
+    'hover:shadow-xl',
+    'transition-all',
+    'duration-200',
+    'transition-colors',
+    'hover:scale-105',
+    // Specific component classes that might be purged
+    'antialiased',
+    'animate-pulse',
+    'animate-spin',
+    'animate-fadeIn',
+    // Cursor states
+    'cursor-not-allowed',
+    'cursor-pointer',
+    // Shadow variations
+    'shadow-lg',
+    'shadow-xl',
+    'hover:shadow-xl',
   ],
   theme: {
     extend: {
