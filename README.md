@@ -281,6 +281,19 @@ vercel dev
 # http://localhost:3000 にアクセス
 ```
 
+### Vercel環境のデバッグ
+
+```bash
+# デバッグエンドポイントで環境変数の状態を確認
+curl https://your-app.vercel.app/api/v1/debug?debug=true
+
+# Vercel CLIでログを確認
+vercel logs --follow
+
+# 環境変数の設定（Vercel Dashboard経由を推奨）
+vercel env add GEMINI_API_KEY
+```
+
 ### テストの実行
 
 ```bash

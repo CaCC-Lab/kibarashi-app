@@ -1,6 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { z } from 'zod';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { fallbackSuggestions } from './fallbackData';
 
 // バリデーションスキーマ
 const suggestionsQuerySchema = z.object({
@@ -14,7 +15,9 @@ let geminiClient: GoogleGenerativeAI | null = null;
 function getGeminiClient(): GoogleGenerativeAI {
   if (!geminiClient) {
     const apiKey = process.env.GEMINI_API_KEY;
+    console.log('Initializing Gemini client, API key present:', !!apiKey);
     if (!apiKey) {
+      console.error('GEMINI_API_KEY is not set in environment variables');
       throw new Error('GEMINI_API_KEY is required');
     }
     geminiClient = new GoogleGenerativeAI(apiKey);
@@ -24,8 +27,12 @@ function getGeminiClient(): GoogleGenerativeAI {
 
 // 気晴らし提案生成
 async function generateSuggestions(situation: string, duration: number) {
-  const client = getGeminiClient();
-  const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  console.log(`Generating suggestions for situation: ${situation}, duration: ${duration}`);
+  
+  try {
+    const client = getGeminiClient();
+    const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    console.log('Gemini model initialized successfully');
 
   const situationMap = {
     workplace: '職場',
@@ -62,115 +69,68 @@ async function generateSuggestions(situation: string, duration: number) {
 
 実用的で、すぐに実行できる提案をお願いします。`;
 
-  try {
+    console.log('Sending request to Gemini API...');
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
+    console.log('Gemini API response received, length:', text.length);
     
     // JSONパースを試行
     try {
-      const parsed = JSON.parse(text);
+      // Markdownコードブロックを除去
+      const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```/);
+      const jsonText = jsonMatch ? jsonMatch[1] : text;
+      
+      const parsed = JSON.parse(jsonText);
+      console.log('Successfully parsed Gemini response, suggestions count:', parsed.suggestions?.length || 0);
       return parsed.suggestions || [];
     } catch (parseError) {
-      console.warn('Failed to parse Gemini response as JSON, using fallback');
+      console.warn('Failed to parse Gemini response as JSON:', parseError);
+      console.log('Raw response:', text.substring(0, 200) + '...');
+      console.log('Using fallback suggestions');
       return getFallbackSuggestions(situation, duration);
     }
   } catch (error) {
     console.error('Gemini API error:', error);
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    console.log('Using fallback suggestions due to Gemini API error');
     return getFallbackSuggestions(situation, duration);
   }
 }
 
 // フォールバック提案
 function getFallbackSuggestions(situation: string, duration: number) {
-  const fallbackData = {
-    workplace: {
-      5: [
-        {
-          id: 'workplace_5_1',
-          title: '深呼吸とポジティブ思考',
-          description: '5回深呼吸して、今日の良かったことを3つ思い浮かべる',
-          category: '認知的',
-          duration: 5,
-          steps: ['椅子に座って背筋を伸ばす', '鼻から4秒吸って8秒で吐く', '良かったことを3つ思い浮かべる']
-        },
-        {
-          id: 'workplace_5_2',
-          title: 'デスク周りの整理',
-          description: 'デスクの上を片付けて、気持ちもスッキリさせる',
-          category: '行動的',
-          duration: 5,
-          steps: ['不要な書類を片付ける', 'PC周りを拭く', 'お気に入りのアイテムを飾る']
-        },
-        {
-          id: 'workplace_5_3',
-          title: '温かい飲み物を味わう',
-          description: 'コーヒーやお茶を丁寧に味わって、心を落ち着かせる',
-          category: '行動的',
-          duration: 5,
-          steps: ['お気に入りの飲み物を用意', '香りを楽しむ', '一口ずつゆっくり味わう']
-        }
-      ]
-    },
-    home: {
-      5: [
-        {
-          id: 'home_5_1',
-          title: '感謝の気持ちを思い返す',
-          description: '今日感謝したいことを3つ心の中で唱える',
-          category: '認知的',
-          duration: 5,
-          steps: ['静かな場所に座る', '感謝したいことを思い浮かべる', '心の中で「ありがとう」と唱える']
-        },
-        {
-          id: 'home_5_2',
-          title: '軽いストレッチ',
-          description: '肩や首のコリをほぐして、体の緊張を和らげる',
-          category: '行動的',
-          duration: 5,
-          steps: ['首をゆっくり回す', '肩を上下に動かす', '腕を大きく回す']
-        },
-        {
-          id: 'home_5_3',
-          title: '好きな音楽を聴く',
-          description: 'お気に入りの曲を聴いて、心を癒す',
-          category: '行動的',
-          duration: 5,
-          steps: ['リラックスできる曲を選ぶ', '目を閉じて聴く', '歌詞や音に集中する']
-        }
-      ]
-    },
-    outside: {
-      5: [
-        {
-          id: 'outside_5_1',
-          title: '自然の音に耳を傾ける',
-          description: '鳥の声や風の音など、自然の音に集中する',
-          category: '認知的',
-          duration: 5,
-          steps: ['静かな場所を見つける', '目を閉じる', '自然の音に集中する']
-        },
-        {
-          id: 'outside_5_2',
-          title: 'ゆっくり歩く',
-          description: '急がずに周りの景色を眺めながら歩く',
-          category: '行動的',
-          duration: 5,
-          steps: ['歩くペースを落とす', '周りの景色を観察', '足の感覚に意識を向ける']
-        },
-        {
-          id: 'outside_5_3',
-          title: '空を見上げる',
-          description: '空の雲や色の変化を眺めて、心を広げる',
-          category: '認知的',
-          duration: 5,
-          steps: ['空を見上げる', '雲の形や動きを観察', '大きな空間を感じる']
-        }
-      ]
+  console.log(`Getting fallback suggestions for ${situation}, ${duration} minutes`);
+  
+  const suggestions = fallbackSuggestions[situation as keyof typeof fallbackSuggestions]?.[duration as keyof any] || [];
+  
+  // Fisher-Yatesシャッフルで順番をランダマイズ
+  function shuffle<T>(array: T[]): T[] {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-  };
-
-  return fallbackData[situation as keyof typeof fallbackData]?.[duration as keyof any] || [];
+    return shuffled;
+  }
+  
+  // ユニークなIDを生成（タイムスタンプ + ランダム値）
+  function generateUniqueId(baseId: string): string {
+    const timestamp = Date.now();
+    const random = Math.floor(Math.random() * 1000);
+    return `${baseId}_${timestamp}_${random}`;
+  }
+  
+  // シャッフルして最初の3つを選択し、ユニークなIDを付与
+  const shuffled = shuffle(suggestions);
+  const selected = shuffled.slice(0, 3).map(suggestion => ({
+    ...suggestion,
+    id: generateUniqueId(suggestion.id)
+  }));
+  
+  console.log(`Returning ${selected.length} fallback suggestions`);
+  return selected;
 }
 
 // メインハンドラー
@@ -198,10 +158,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const validatedQuery = suggestionsQuerySchema.parse(req.query);
     const { situation, duration } = validatedQuery;
 
-    console.log(`Generating suggestions for situation: ${situation}, duration: ${duration}`);
+    console.log(`API endpoint called - Generating suggestions for situation: ${situation}, duration: ${duration}`);
 
     // 提案生成
     const suggestions = await generateSuggestions(situation, duration);
+    
+    console.log(`Returning ${suggestions.length} suggestions, source: ${suggestions.length > 0 ? 'gemini or fallback' : 'empty'}`);
 
     return res.status(200).json({
       suggestions,
