@@ -5,6 +5,15 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   darkMode: 'class', // ダークモード対応
+  safelist: [
+    // 動的に使用される可能性のあるクラスを明示的に含める
+    'bg-primary-500',
+    'hover:bg-primary-600',
+    'bg-gray-400',
+    'text-green-600',
+    'text-red-600',
+    'text-gray-800',
+  ],
   theme: {
     extend: {
       colors: {
