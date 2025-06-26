@@ -5,21 +5,24 @@ import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/',
   build: {
+    manifest: true, // マニフェストファイルを生成
     // バンドルサイズ最適化
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          utils: ['web-vitals'],
-        },
+        // 一時的にmanualChunksを無効化
+        // manualChunks: {
+        //   vendor: ['react', 'react-dom'],
+        //   utils: ['web-vitals'],
+        // },
       },
     },
     // 圧縮設定
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: false, // 一時的にconsole.logを残す
         drop_debugger: true,
       },
     },
@@ -31,7 +34,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt', // autoUpdateからpromptに変更
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
         name: '5分気晴らし',
@@ -72,13 +75,17 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,txt,woff,woff2}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
+        skipWaiting: true, // Service Workerを即座に更新
+        runtimeCaching: [], // 一時的にランタイムキャッシュを無効化
       },
       devOptions: {
-        enabled: true,
+        enabled: false, // 一時的にPWAを無効化
         suppressWarnings: true,
         navigateFallback: 'index.html',
         type: 'module',
       },
+      selfDestroying: true, // 既存のService Workerを削除
+      disabled: false, // PWA機能自体は有効（Service Workerのみ無効）
     })
   ],
   resolve: {
