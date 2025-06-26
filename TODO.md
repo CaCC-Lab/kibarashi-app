@@ -509,3 +509,10 @@
   - Base64エンコードされた音声データを正しくデコードしてBlobに変換
   - MIMEタイプを'audio/wav'に設定してブラウザが音声フォーマットを認識できるように修正
   - ブラウザTTSフォールバック時の適切なエラーハンドリング
+
+- [x] **Tailwind CSSエラーの再発と修正（2025/06/26）**
+  - [x] SuggestionCardコンポーネントで`Cannot read properties of undefined (reading 'bg')`エラーが再発
+  - [x] categoryStylesオブジェクトの各プロパティへのアクセスでundefinedエラー
+  - [x] オプショナルチェイニング（`?.`）を使用して安全なプロパティアクセスに修正
+  - [x] フォールバック値として`categoryStyles['認知的']`を設定
+  - [x] ダークモードクラスを各プロパティに統合（darkBg, darkBorderプロパティを削除）

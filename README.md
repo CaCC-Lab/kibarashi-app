@@ -251,6 +251,15 @@
 - 条件分岐を完全なクラス名文字列に変更
 - Tailwind設定にsafelistを追加して動的クラスの削除を防止
 
+### 10. Tailwind CSSエラーの再発（SuggestionCardコンポーネント）
+
+**課題**: SuggestionCardで`Cannot read properties of undefined (reading 'bg')`エラーが再発
+**解決策**:
+
+- categoryStylesオブジェクトのプロパティアクセスにオプショナルチェイニング（`?.`）を追加
+- フォールバック値として`categoryStyles['認知的']`を設定して想定外のcategory値に対応
+- ダークモードクラスを各プロパティに統合（darkBg, darkBorderプロパティを削除）
+
 ---
 
 ## 🚀 学んだこと

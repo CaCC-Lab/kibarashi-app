@@ -58,7 +58,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
     },
   };
 
-  const style = categoryStyles[category];
+  const style = categoryStyles[category] || categoryStyles['認知的']; // フォールバック
 
   return (
     <div className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col">
@@ -71,9 +71,9 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
             </div>
             <p className="text-gray-600 dark:text-gray-100 text-sm">{description}</p>
           </div>
-          <div className={`ml-4 px-3 py-1 rounded-full ${style.bg} ${style.border} border`}>
-            <div className={`flex items-center space-x-1 ${style.text}`}>
-              {style.icon}
+          <div className={`ml-4 px-3 py-1 rounded-full ${style?.bg || ''} ${style?.border || ''} border`}>
+            <div className={`flex items-center space-x-1 ${style?.text || ''}`}>
+              {style?.icon}
               <span className="text-sm font-medium">{category}</span>
             </div>
           </div>
