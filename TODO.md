@@ -449,6 +449,14 @@
   - [x] PostCSS content設定に.cssファイルを追加
   - [x] デバッグエンドポイントにビルド情報を追加
 
+- [x] **Vercel動的インポート404エラーの修正（2025/06/26）**
+  - [x] vercel.jsonにSPAルーティングのrewritesを追加
+  - [x] キャッシュヘッダーの設定（index.html、sw.js等のキャッシュ無効化）
+  - [x] Vite設定でbase: '/'を明示的に設定
+  - [x] PWA Service Workerを一時的に無効化（キャッシュ問題の排除）
+  - [x] manual chunksを無効化（チャンク分割の簡素化）
+  - [x] manifestファイル生成を有効化
+
 ### 改善内容の詳細
 - **シャッフルアルゴリズムの改善**: `Math.random() - 0.5`による不適切なソートをFisher-Yatesアルゴリズムに変更
 - **フォールバックデータの拡充**: 
@@ -483,3 +491,9 @@
   - safelistに追加のユーティリティクラス（transform、transition、shadow、cursor等）を追加
   - デバッグログで動的クラス名生成を監視
   - PostCSS content設定を拡張してCSSファイルも含める
+- **動的インポート404エラーの修正**:
+  - SPAルーティングのためのrewritesルールを追加
+  - キャッシュ制御ヘッダーでindex.htmlとService Worker関連ファイルのキャッシュを無効化
+  - Viteのbase設定を明示的に'/'に設定
+  - PWA Service Workerを一時的に無効化してキャッシュ問題を排除
+  - Rollupのmanual chunksを無効化して動的インポートの問題を回避
