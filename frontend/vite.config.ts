@@ -85,7 +85,7 @@ export default defineConfig({
         type: 'module',
       },
       selfDestroying: true, // 既存のService Workerを削除
-      disabled: false, // PWA機能自体は有効（Service Workerのみ無効）
+      disable: false, // PWA機能自体は有効（Service Workerのみ無効）
     })
   ],
   resolve: {
