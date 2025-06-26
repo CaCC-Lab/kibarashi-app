@@ -186,7 +186,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method !== 'GET') {
     return res.status(405).json({
-      success: false,
       error: {
         message: 'Method not allowed',
         code: 'METHOD_NOT_ALLOWED'
@@ -205,10 +204,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const suggestions = await generateSuggestions(situation, duration);
 
     return res.status(200).json({
-      success: true,
-      data: {
-        suggestions
-      },
+      suggestions,
       metadata: {
         situation,
         duration,
@@ -221,7 +217,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
-        success: false,
         error: {
           message: 'Invalid request parameters',
           code: 'VALIDATION_ERROR',
@@ -231,7 +226,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     return res.status(500).json({
-      success: false,
       error: {
         message: 'Internal server error',
         code: 'INTERNAL_SERVER_ERROR'

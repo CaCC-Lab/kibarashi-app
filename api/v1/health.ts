@@ -46,7 +46,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method !== 'GET') {
     return res.status(405).json({
-      success: false,
       error: {
         message: 'Method not allowed',
         code: 'METHOD_NOT_ALLOWED'
@@ -62,28 +61,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const statusCode = hasFailedServices ? 503 : 200;
 
     return res.status(statusCode).json({
-      success: !hasFailedServices,
-      data: healthData,
+      ...healthData,
       metadata: {
         timestamp: new Date().toISOString(),
         version: '1.0.0',
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
+        success: !hasFailedServices
       }
     });
   } catch (error) {
     console.error('Health check error:', error);
     
     return res.status(500).json({
-      success: false,
       error: {
         message: 'Health check failed',
         code: 'HEALTH_CHECK_ERROR'
       },
-      data: {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      }
+      status: 'unhealthy',
+      timestamp: new Date().toISOString(),
+      error_detail: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }

@@ -135,7 +135,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method !== 'POST') {
     return res.status(405).json({
-      success: false,
       error: {
         message: 'Method not allowed',
         code: 'METHOD_NOT_ALLOWED'
@@ -158,15 +157,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const audioBase64 = audioBuffer.toString('base64');
       
       return res.status(200).json({
-        success: true,
-        data: {
-          type: 'gemini_tts',
-          audio: audioBase64,
-          format: 'wav', // WAVフォーマットで返す
-          sampleRate: 24000,
-          channels: 1,
-          size: audioBuffer.length
-        },
+        type: 'gemini_tts',
+        audio: audioBase64,
+        format: 'wav', // WAVフォーマットで返す
+        sampleRate: 24000,
+        channels: 1,
+        size: audioBuffer.length,
         metadata: {
           text_length: text.length,
           voice,
@@ -182,8 +178,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const browserConfig = createBrowserTTSResponse(text, voice, speed);
       
       return res.status(200).json({
-        success: true,
-        data: browserConfig,
+        ...browserConfig,
         metadata: {
           text_length: text.length,
           voice,
@@ -199,7 +194,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (error instanceof z.ZodError) {
       return res.status(400).json({
-        success: false,
         error: {
           message: 'Invalid request parameters',
           code: 'VALIDATION_ERROR',
@@ -217,8 +211,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       );
       
       return res.status(200).json({
-        success: true,
-        data: browserConfig,
+        ...browserConfig,
         metadata: {
           timestamp: new Date().toISOString(),
           source: 'browser_tts_fallback',
@@ -228,7 +221,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     return res.status(500).json({
-      success: false,
       error: {
         message: 'Internal server error',
         code: 'INTERNAL_SERVER_ERROR'
