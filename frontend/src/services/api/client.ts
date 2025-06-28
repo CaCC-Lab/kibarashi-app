@@ -69,6 +69,7 @@ class ApiClient {
       const response = await fetch(url, {
         ...fetchOptions,
         signal: controller.signal,
+        cache: 'no-store', // ブラウザのキャッシュを無効化
       });
       clearTimeout(timeoutId);
       return response;
@@ -115,6 +116,8 @@ class ApiClient {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
           ...options?.headers,
         },
       });
@@ -155,6 +158,8 @@ class ApiClient {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
           ...options?.headers,
         },
         body: JSON.stringify(data),

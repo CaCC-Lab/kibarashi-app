@@ -24,6 +24,13 @@ export const getSuggestions = async (
     // 提案の生成
     const suggestions = await generateSuggestions(situation, duration);
 
+    // キャッシュを無効化するヘッダーを設定
+    res.set({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    });
+
     res.json({
       suggestions,
       metadata: {
