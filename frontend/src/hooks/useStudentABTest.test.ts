@@ -6,24 +6,7 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useStudentABTest } from './useStudentABTest';
 import { ABTestService } from '../services/abtest/ABTestService';
 
-// LocalStorageのモック化
-const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-  length: 0,
-  key: vi.fn()
-};
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-});
-
-// グローバルなlocalStorageも定義
-Object.defineProperty(global, 'localStorage', {
-  value: localStorageMock
-});
+// LocalStorageモックは setup.ts で定義されているので削除
 
 // ABTestServiceをモック化
 vi.mock('../services/abtest/ABTestService', () => ({
@@ -40,7 +23,7 @@ describe('useStudentABTest hook', () => {
     // 各テスト前にモックをリセット
     vi.clearAllMocks();
     // LocalStorageもクリア
-    localStorageMock.clear();
+    localStorage.clear();
   });
 
   afterEach(() => {

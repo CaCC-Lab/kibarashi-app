@@ -80,10 +80,10 @@ export class ABTestService {
    * 現在のA/Bテスト設定を取得
    */
   static getCurrentTests(): ABTestConfig[] {
-    const stored = localStorage.getItem(this.STORAGE_KEY);
-    if (!stored) return this.getDefaultTests();
-    
     try {
+      const stored = localStorage.getItem(this.STORAGE_KEY);
+      if (!stored) return this.getDefaultTests();
+      
       return JSON.parse(stored);
     } catch {
       return this.getDefaultTests();
@@ -160,12 +160,17 @@ export class ABTestService {
    * セッションIDの生成または取得
    */
   static getSessionId(): string {
-    let sessionId = sessionStorage.getItem(this.SESSION_KEY);
-    if (!sessionId) {
-      sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      sessionStorage.setItem(this.SESSION_KEY, sessionId);
+    try {
+      let sessionId = sessionStorage.getItem(this.SESSION_KEY);
+      if (!sessionId) {
+        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        sessionStorage.setItem(this.SESSION_KEY, sessionId);
+      }
+      return sessionId;
+    } catch {
+      // SSR環境などでsessionStorageが使えない場合はランダムIDを生成
+      return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
-    return sessionId;
   }
   
   /**
@@ -199,25 +204,30 @@ export class ABTestService {
    * メトリクスイベントの保存
    */
   private static saveMetricEvent(event: MetricEvent): void {
-    const stored = localStorage.getItem(this.METRICS_KEY);
-    let events: MetricEvent[] = [];
-    
-    if (stored) {
-      try {
-        events = JSON.parse(stored);
-      } catch {
-        events = [];
+    try {
+      const stored = localStorage.getItem(this.METRICS_KEY);
+      let events: MetricEvent[] = [];
+      
+      if (stored) {
+        try {
+          events = JSON.parse(stored);
+        } catch {
+          events = [];
+        }
       }
+      
+      events.push(event);
+      
+      // 最大1000イベントまで保存（容量制限）
+      if (events.length > 1000) {
+        events = events.slice(-1000);
+      }
+      
+      localStorage.setItem(this.METRICS_KEY, JSON.stringify(events));
+    } catch (error) {
+      // SSR環境やlocalStorageが無効な場合は静かに失敗
+      console.warn('Failed to save metric event:', error);
     }
-    
-    events.push(event);
-    
-    // 最大1000イベントまで保存（容量制限）
-    if (events.length > 1000) {
-      events = events.slice(-1000);
-    }
-    
-    localStorage.setItem(this.METRICS_KEY, JSON.stringify(events));
   }
   
   /**
@@ -302,10 +312,10 @@ export class ABTestService {
    * 収集したメトリクスを取得
    */
   static getMetrics(): MetricEvent[] {
-    const stored = localStorage.getItem(this.METRICS_KEY);
-    if (!stored) return [];
-    
     try {
+      const stored = localStorage.getItem(this.METRICS_KEY);
+      if (!stored) return [];
+      
       return JSON.parse(stored);
     } catch {
       return [];
@@ -452,8 +462,13 @@ export class ABTestService {
    * メトリクスデータのクリア（テスト用）
    */
   static clearMetrics(): void {
-    localStorage.removeItem(this.METRICS_KEY);
-    localStorage.removeItem(this.STORAGE_KEY);
-    sessionStorage.removeItem(this.SESSION_KEY);
+    try {
+      localStorage.removeItem(this.METRICS_KEY);
+      localStorage.removeItem(this.STORAGE_KEY);
+      sessionStorage.removeItem(this.SESSION_KEY);
+    } catch (error) {
+      // SSR環境やlocalStorageが無効な場合は静かに失敗
+      console.warn('Failed to clear metrics data:', error);
+    }
   }
 }

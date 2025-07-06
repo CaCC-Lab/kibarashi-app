@@ -219,20 +219,28 @@ describe('useABTest hook', () => {
 
   describe('サーバーサイドレンダリング対応', () => {
     it('should handle SSR environment gracefully', () => {
-      // Arrange - LocalStorageが使えない環境をシミュレート
-      const originalLocalStorage = global.localStorage;
-      // @ts-ignore
-      delete global.localStorage;
+      // Arrange - LocalStorageでエラーが発生する環境をシミュレート
+      const originalGetItem = Storage.prototype.getItem;
+      const originalSetItem = Storage.prototype.setItem;
+      
+      // localStorage でエラーが発生するようにモック
+      Storage.prototype.getItem = vi.fn(() => {
+        throw new Error('localStorage is not available');
+      });
+      Storage.prototype.setItem = vi.fn(() => {
+        throw new Error('localStorage is not available');
+      });
 
       // Act
       const { result } = renderHook(() => useABTest());
 
-      // Assert - デフォルト値が返される
+      // Assert - デフォルト値が返される（エラーでも動作する）
       expect(result.current.testGroup).toBe('A');
       expect(result.current.isStudentOptimized).toBe(false);
 
       // Cleanup
-      global.localStorage = originalLocalStorage;
+      Storage.prototype.getItem = originalGetItem;
+      Storage.prototype.setItem = originalSetItem;
     });
   });
 });

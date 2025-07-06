@@ -7,26 +7,7 @@ import { render, renderHook, act, screen } from '@testing-library/react';
 import { AudioProvider, useAudio, useAudioSettings, useAudioPlayback, useAudioAvailability } from './AudioContext';
 import React from 'react';
 
-// localStorageのモック
-const localStorageMock = (() => {
-  let store: Record<string, string> = {};
-  return {
-    getItem: vi.fn((key: string) => store[key] || null),
-    setItem: vi.fn((key: string, value: string) => {
-      store[key] = value;
-    }),
-    clear: vi.fn(() => {
-      store = {};
-    }),
-    removeItem: vi.fn((key: string) => {
-      delete store[key];
-    })
-  };
-})();
-
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-});
+// LocalStorageモックは setup.ts で定義されているので削除
 
 // Audio APIのモック
 Object.defineProperty(window, 'Audio', {
@@ -47,7 +28,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 describe('AudioContext', () => {
   beforeEach(() => {
-    localStorageMock.clear();
+    localStorage.clear();
     vi.clearAllMocks();
   });
 
@@ -84,7 +65,7 @@ describe('AudioContext', () => {
         detailLevel: 'detailed'
       };
       
-      localStorageMock.setItem('kibarashi_audio_settings', JSON.stringify(savedSettings));
+      localStorage.setItem('kibarashi_audio_settings', JSON.stringify(savedSettings));
 
       const { result } = renderHook(() => useAudio(), {
         wrapper: TestWrapper
@@ -98,9 +79,24 @@ describe('AudioContext', () => {
 
   describe('useAudio hook', () => {
     it('プロバイダー外で使用するとエラーを投げる', () => {
-      expect(() => {
-        renderHook(() => useAudio());
-      }).toThrow('useAudio must be used within AudioProvider');
+      // console.errorを一時的にモック（Reactのエラー警告を抑制）
+      const originalError = console.error;
+      console.error = vi.fn();
+
+      try {
+        // TestComponentでエラーをキャッチ
+        const TestComponent = () => {
+          useAudio(); // これはエラーを投げるはず
+          return null;
+        };
+
+        expect(() => {
+          render(<TestComponent />);
+        }).toThrow('useAudio must be used within AudioProvider');
+      } finally {
+        // console.errorを復元
+        console.error = originalError;
+      }
     });
 
     it('設定更新が正常に動作する', () => {
@@ -124,10 +120,8 @@ describe('AudioContext', () => {
         result.current.updateSettings({ enabled: false });
       });
 
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'kibarashi_audio_settings',
-        expect.stringContaining('"enabled":false')
-      );
+      const savedData = localStorage.getItem('kibarashi_audio_settings');
+      expect(savedData).toContain('"enabled":false');
     });
   });
 
@@ -240,7 +234,8 @@ describe('AudioContext', () => {
 
   describe('Error handling', () => {
     it('localStorage書き込み失敗時も動作する', () => {
-      localStorageMock.setItem.mockImplementation(() => {
+      const originalSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = vi.fn(() => {
         throw new Error('Storage quota exceeded');
       });
 
@@ -256,10 +251,14 @@ describe('AudioContext', () => {
 
       // 設定は更新される（localStorage保存は失敗するが）
       expect(result.current.settings.volume).toBe(0.5);
+      
+      // Cleanup
+      Storage.prototype.setItem = originalSetItem;
     });
 
     it('localStorage読み込み失敗時はデフォルト設定を使用', () => {
-      localStorageMock.getItem.mockImplementation(() => {
+      const originalGetItem = Storage.prototype.getItem;
+      Storage.prototype.getItem = vi.fn(() => {
         throw new Error('Storage not available');
       });
 
@@ -275,6 +274,9 @@ describe('AudioContext', () => {
         subtitles: true,
         detailLevel: 'standard'
       });
+      
+      // Cleanup
+      Storage.prototype.getItem = originalGetItem;
     });
   });
 });

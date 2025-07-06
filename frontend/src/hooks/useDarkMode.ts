@@ -4,10 +4,12 @@ export function useDarkMode() {
   // システムの設定を取得
   const getInitialMode = () => {
     try {
-      // ローカルストレージに保存された設定があるかチェック
-      const savedMode = localStorage.getItem('theme');
-      if (savedMode !== null) {
-        return savedMode === 'dark';
+      // ローカルストレージが利用可能かチェック
+      if (typeof localStorage !== 'undefined' && localStorage !== null) {
+        const savedMode = localStorage.getItem('theme');
+        if (savedMode !== null) {
+          return savedMode === 'dark';
+        }
       }
     } catch (error) {
       // localStorageが利用できない場合は無視
@@ -30,7 +32,9 @@ export function useDarkMode() {
 
     // ローカルストレージに保存
     try {
-      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+      if (typeof localStorage !== 'undefined' && localStorage !== null) {
+        localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+      }
     } catch (error) {
       // localStorageが利用できない場合は無視
       console.error('Failed to save dark mode preference:', error);
@@ -44,8 +48,13 @@ export function useDarkMode() {
     const handleChange = (e: MediaQueryListEvent) => {
       try {
         // ローカルストレージに設定がない場合のみシステム設定に従う
-        const savedMode = localStorage.getItem('theme');
-        if (savedMode === null) {
+        if (typeof localStorage !== 'undefined' && localStorage !== null) {
+          const savedMode = localStorage.getItem('theme');
+          if (savedMode === null) {
+            setIsDarkMode(e.matches);
+          }
+        } else {
+          // localStorageが利用できない場合はシステム設定に従う
           setIsDarkMode(e.matches);
         }
       } catch (error) {

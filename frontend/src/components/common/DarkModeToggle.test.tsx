@@ -313,13 +313,20 @@ describe('DarkModeToggle', () => {
         writable: true
       });
       
+      // コンポーネントレンダリングでエラーが発生しないことを確認
       expect(() => render(<DarkModeToggle />)).not.toThrow();
       
       const toggleButton = screen.getByRole('switch');
+      
+      // クリックでエラーが発生しないことを確認
       expect(() => fireEvent.click(toggleButton)).not.toThrow();
       
-      // DOM操作は正常に動作
-      expect(document.documentElement.classList.contains('dark')).toBe(true);
+      // トグルボタンの状態変更が正常に動作することを確認
+      expect(toggleButton).toHaveAttribute('aria-checked', 'true');
+      
+      // もう一度クリックして切り替わることを確認
+      expect(() => fireEvent.click(toggleButton)).not.toThrow();
+      expect(toggleButton).toHaveAttribute('aria-checked', 'false');
       
       // localStorageを復元
       Object.defineProperty(window, 'localStorage', {

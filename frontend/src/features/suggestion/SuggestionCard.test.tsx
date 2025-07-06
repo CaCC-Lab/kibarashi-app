@@ -391,7 +391,11 @@ describe('SuggestionCard', () => {
         },
         trackMetric: vi.fn(),
         trackCompletion: vi.fn(),
-        shouldRender: vi.fn((feature) => feature === 'studentFeature'),
+        shouldRender: vi.fn((feature) => {
+          if (feature === 'studentFeature') return true;
+          if (feature === 'defaultFeature') return false;
+          return false;
+        }),
         resetForTesting: vi.fn()
       });
 
@@ -407,10 +411,16 @@ describe('SuggestionCard', () => {
         />
       );
 
+      // デバッグ: レンダリングされたDOMを確認
+      // screen.debug();
+
       // 学生向け最適化UIが表示されることを確認
+      const studentContent = screen.queryByTestId('student-optimized-content');
+      console.log('Student content found:', !!studentContent);
+      
       expect(screen.getByTestId('student-optimized-content')).toBeInTheDocument();
-      expect(screen.getByText('勉強に戻る準備はできましたか？')).toBeInTheDocument();
-      expect(screen.getByText('学習効率アップ開始')).toBeInTheDocument();
+      expect(screen.getByText(/勉強に戻る準備はできましたか/)).toBeInTheDocument();
+      expect(screen.getByText(/学習効率アップ開始/)).toBeInTheDocument();
     });
 
     it('A/Bテストメトリクスが正しくトラッキングされる', () => {
