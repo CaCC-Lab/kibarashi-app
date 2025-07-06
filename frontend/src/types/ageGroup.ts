@@ -105,7 +105,7 @@ export const AGE_GROUPS: Record<AgeGroup, AgeGroupInfo> = {
     emoji: '🏠',
     description: '家事や育児のストレスを抱える方向け',
     ageRange: '25-45歳',
-    isAvailable: false,
+    isAvailable: true,
     releasePhase: 'Phase A-2'
   },
   elderly: {

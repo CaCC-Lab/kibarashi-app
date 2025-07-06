@@ -26,7 +26,7 @@ export interface Feature {
  */
 export const features: Record<string, Feature> = {
   enhancedVoiceGuide: {
-    enabled: process.env.REACT_APP_ENHANCED_VOICE === 'true',
+    enabled: import.meta.env.VITE_ENHANCED_VOICE === 'true',
     rolloutPercentage: 100,
     description: '音声ガイド機能（SSML対応、セグメント分割）',
     dependencies: []
@@ -40,7 +40,7 @@ export const features: Record<string, Feature> = {
   },
   
   offlineVoiceCache: {
-    enabled: process.env.REACT_APP_OFFLINE_VOICE === 'true',
+    enabled: import.meta.env.VITE_OFFLINE_VOICE === 'true',
     rolloutPercentage: 50,
     description: 'Service Workerによる音声キャッシュ',
     dependencies: ['enhancedVoiceGuide']

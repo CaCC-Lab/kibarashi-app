@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { useDarkMode } from '../../hooks/useDarkMode';
 import { useFavorites } from '../../hooks/useFavorites';
 import { useHistory } from '../../hooks/useHistory';
+import { useAgeGroup } from '../../hooks/useAgeGroup';
 import { FavoritesStorage } from '../../services/storage/favoritesStorage';
 import { HistoryStorage } from '../../services/storage/historyStorage';
 import { AppDataManager, type ExportStats, type ImportResult } from '../../services/storage/appDataManager';
 import { ABTestDashboard } from '../../components/analytics/ABTestDashboard';
+import { AgeGroupSelector } from '../../components/ageGroup/AgeGroupSelector';
+import { AgeGroup } from '../../types/ageGroup';
 
 interface SettingsProps {
   onBack: () => void;
@@ -15,6 +18,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { clearFavorites } = useFavorites();
   const { clearHistory } = useHistory();
+  const { updateAgeGroup } = useAgeGroup();
   const [defaultTTS, setDefaultTTS] = useState<'gemini' | 'browser'>(
     localStorage.getItem('defaultTTS') as 'gemini' | 'browser' || 'gemini'
   );
@@ -24,10 +28,17 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const [exportStats, setExportStats] = useState<ExportStats | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showABTestDashboard, setShowABTestDashboard] = useState(false);
+  const [ageGroupChangeMessage, setAgeGroupChangeMessage] = useState<string | null>(null);
 
   const handleTTSChange = (value: 'gemini' | 'browser') => {
     setDefaultTTS(value);
     localStorage.setItem('defaultTTS', value);
+  };
+
+  const handleAgeGroupChange = (newAgeGroup: AgeGroup) => {
+    updateAgeGroup(newAgeGroup);
+    setAgeGroupChangeMessage('年齢層を更新しました');
+    setTimeout(() => setAgeGroupChangeMessage(null), 3000);
   };
 
   const handleExportFavorites = () => {
@@ -207,6 +218,20 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         <section className="mb-8">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">アプリ設定</h3>
           
+          {/* 年齢層設定 */}
+          <div className="mb-6">
+            <label className="block text-gray-700 dark:text-gray-300 mb-3">
+              年齢層の変更
+            </label>
+            <AgeGroupSelector 
+              onSelect={handleAgeGroupChange}
+              className="w-full"
+            />
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              年齢層に応じて最適化された気晴らし提案を受け取れます
+            </p>
+          </div>
+
           {/* ダークモード */}
           <div className="mb-6">
             <label className="flex items-center justify-between">
@@ -270,9 +295,9 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">データ管理</h3>
           
           {/* メッセージ表示 */}
-          {(exportMessage || importMessage) && (
+          {(exportMessage || importMessage || ageGroupChangeMessage) && (
             <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-lg animate-fadeIn">
-              {exportMessage || importMessage}
+              {exportMessage || importMessage || ageGroupChangeMessage}
             </div>
           )}
 

@@ -40,8 +40,13 @@ export const AgeGroupSelector: React.FC<AgeGroupSelectorProps> = ({
     });
     
     setTimeout(() => {
-      updateAgeGroup(ageGroup);
-      onSelect?.(ageGroup);
+      if (onSelect) {
+        // 外部からonSelectが提供されている場合は、それを使用
+        onSelect(ageGroup);
+      } else {
+        // デフォルトの動作：直接更新
+        updateAgeGroup(ageGroup);
+      }
       setIsExpanded(false);
       setSelectedGroup(null);
     }, 300);

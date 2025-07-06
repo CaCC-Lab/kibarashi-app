@@ -12,6 +12,8 @@ interface ImportMetaEnv {
   readonly VITE_DEFAULT_VOICE_PITCH: string;
   readonly VITE_ENABLE_DEBUG: string;
   readonly VITE_LOG_LEVEL: string;
+  readonly VITE_ENHANCED_VOICE: string;
+  readonly VITE_OFFLINE_VOICE: string;
 }
 
 interface ImportMeta {

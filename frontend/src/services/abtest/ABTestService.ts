@@ -21,12 +21,24 @@ export class ABTestService {
     const stored = localStorage.getItem(this.AB_TEST_KEY);
     if (stored) {
       try {
+        // 後方互換性: 古い形式（単純な文字列 'A' or 'B'）をチェック
+        if (stored === 'A' || stored === 'B') {
+          console.log('[A/B Test] Migrating legacy format:', stored);
+          return this.migrateLegacyFormat(stored);
+        }
+        
+        // 新しい形式のJSONオブジェクト
         const parsed: ABTestAssignment = JSON.parse(stored);
         if (parsed.version === this.AB_TEST_VERSION) {
           return parsed.group;
         }
       } catch (error) {
-        console.error('Failed to parse AB test assignment:', error);
+        console.error('[A/B Test] Failed to parse assignment, resetting:', {
+          storedValue: stored,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+        // データが破損している場合はクリアして新規振り分け
+        this.resetTestGroup();
       }
     }
     
@@ -68,6 +80,28 @@ export class ABTestService {
     localStorage.removeItem(this.AB_TEST_KEY);
   }
   
+  /**
+   * 古い形式（単純な文字列）を新しい形式にマイグレーション
+   */
+  private static migrateLegacyFormat(legacyGroup: 'A' | 'B'): 'A' | 'B' {
+    const assignment: ABTestAssignment = {
+      group: legacyGroup,
+      version: this.AB_TEST_VERSION,
+      assignedAt: new Date().toISOString(),
+      userId: this.generateAnonymousId()
+    };
+    
+    // 新しい形式で保存し直す
+    localStorage.setItem(this.AB_TEST_KEY, JSON.stringify(assignment));
+    
+    console.log('[A/B Test] Legacy format migrated successfully:', {
+      oldFormat: legacyGroup,
+      newFormat: assignment
+    });
+    
+    return legacyGroup;
+  }
+
   /**
    * 匿名ユーザーIDを生成
    */

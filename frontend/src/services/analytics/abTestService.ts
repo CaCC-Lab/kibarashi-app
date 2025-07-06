@@ -75,6 +75,9 @@ export class ABTestService {
   private static readonly STORAGE_KEY = 'ab_test_data';
   private static readonly METRICS_KEY = 'ab_test_metrics';
   private static readonly SESSION_KEY = 'ab_test_session';
+  private static readonly TEST_GROUP_KEY = 'ab_test_group';
+  private static readonly STUDENT_TEST_KEY = 'ab_test_student';
+  private static readonly HOUSEWIFE_TEST_KEY = 'ab_test_housewife';
   
   /**
    * 現在のA/Bテスト設定を取得
@@ -469,6 +472,97 @@ export class ABTestService {
     } catch (error) {
       // SSR環境やlocalStorageが無効な場合は静かに失敗
       console.warn('Failed to clear metrics data:', error);
+    }
+  }
+
+  // === シンプルA/Bテストグループ管理 ===
+  
+  /**
+   * A/Bテストグループ（A または B）を取得
+   */
+  static getTestGroup(): 'A' | 'B' {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return 'A'; // SSR環境ではデフォルトでコントロール群
+      }
+
+      let group = localStorage.getItem(this.TEST_GROUP_KEY) as 'A' | 'B' | null;
+      
+      if (!group || (group !== 'A' && group !== 'B')) {
+        // ランダムにグループを割り当て（50%ずつ）
+        group = Math.random() < 0.5 ? 'A' : 'B';
+        localStorage.setItem(this.TEST_GROUP_KEY, group);
+      }
+      
+      return group;
+    } catch (error) {
+      console.error('Failed to get test group:', error);
+      return 'A'; // エラー時はコントロール群
+    }
+  }
+
+  /**
+   * A/Bテストグループをリセット（開発・テスト用）
+   */
+  static resetTestGroup(): void {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        localStorage.removeItem(this.TEST_GROUP_KEY);
+        localStorage.removeItem(this.STUDENT_TEST_KEY);
+        localStorage.removeItem(this.HOUSEWIFE_TEST_KEY);
+      }
+    } catch (error) {
+      console.error('Failed to reset test group:', error);
+    }
+  }
+
+  /**
+   * 学生最適化機能が有効かどうか
+   */
+  static isStudentOptimized(): boolean {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return false; // SSR環境ではデフォルトで無効
+      }
+
+      const cached = localStorage.getItem(this.STUDENT_TEST_KEY);
+      if (cached !== null) {
+        return cached === 'true';
+      }
+
+      const group = this.getTestGroup();
+      const isOptimized = group === 'B'; // Bグループが処理群（学生最適化有効）
+      localStorage.setItem(this.STUDENT_TEST_KEY, String(isOptimized));
+      
+      return isOptimized;
+    } catch (error) {
+      console.error('Failed to check student optimization:', error);
+      return false;
+    }
+  }
+
+  /**
+   * 主婦・主夫最適化機能が有効かどうか
+   */
+  static isHousewifeOptimized(): boolean {
+    try {
+      if (typeof window === 'undefined' || !window.localStorage) {
+        return false; // SSR環境ではデフォルトで無効
+      }
+
+      const cached = localStorage.getItem(this.HOUSEWIFE_TEST_KEY);
+      if (cached !== null) {
+        return cached === 'true';
+      }
+
+      const group = this.getTestGroup();
+      const isOptimized = group === 'B'; // Bグループが処理群（主婦最適化有効）
+      localStorage.setItem(this.HOUSEWIFE_TEST_KEY, String(isOptimized));
+      
+      return isOptimized;
+    } catch (error) {
+      console.error('Failed to check housewife optimization:', error);
+      return false;
     }
   }
 }
