@@ -1,6 +1,9 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useEffect } from 'react';
 import MainLayout from './components/layout/MainLayout';
 import Loading from './components/common/Loading';
+import { SituationId } from './types/situation';
+import { useAgeGroup } from './hooks/useAgeGroup';
+import { AgeGroupOnboardingModal } from './components/ageGroup/AgeGroupSelector';
 
 // コンポーネントの遅延読み込み
 const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
@@ -12,15 +15,23 @@ const Settings = lazy(() => import('./features/settings/Settings'));
 const CustomSuggestionList = lazy(() => import('./features/custom/CustomSuggestionList'));
 
 type Step = 'situation' | 'duration' | 'suggestions' | 'favorites' | 'history' | 'settings' | 'custom';
-type Situation = 'workplace' | 'home' | 'outside' | null;
 type Duration = 5 | 15 | 30 | null;
 
 function App() {
+  const { isFirstTimeUser, isLoading: ageGroupLoading } = useAgeGroup();
   const [currentStep, setCurrentStep] = useState<Step>('situation');
-  const [situation, setSituation] = useState<Situation>(null);
+  const [situation, setSituation] = useState<SituationId | null>(null);
   const [duration, setDuration] = useState<Duration>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const handleSituationSelect = (selected: 'workplace' | 'home' | 'outside') => {
+  // 初回ユーザーの場合、オンボーディングモーダルを表示
+  useEffect(() => {
+    if (!ageGroupLoading && isFirstTimeUser) {
+      setShowOnboarding(true);
+    }
+  }, [ageGroupLoading, isFirstTimeUser]);
+
+  const handleSituationSelect = (selected: SituationId) => {
     setSituation(selected);
     setCurrentStep('duration');
   };
@@ -132,46 +143,67 @@ function App() {
     </div>
   );
 
-  return (
-    <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick} onSettingsClick={handleSettingsClick} onCustomClick={handleCustomClick}>
-      <div className="max-w-4xl mx-auto">
-        {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && currentStep !== 'custom' && renderBreadcrumb()}
-        
-        {currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom' ? (
-          <Suspense fallback={<Loading />}>
-            {renderStep()}
-          </Suspense>
-        ) : (
+  // 年齢層のローディング中は全体をローディング表示
+  if (ageGroupLoading) {
+    return (
+      <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick} onSettingsClick={handleSettingsClick} onCustomClick={handleCustomClick}>
+        <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <Loading />
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  return (
+    <>
+      <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick} onSettingsClick={handleSettingsClick} onCustomClick={handleCustomClick}>
+        <div className="max-w-4xl mx-auto">
+          {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && currentStep !== 'custom' && renderBreadcrumb()}
+          
+          {currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom' ? (
             <Suspense fallback={<Loading />}>
               {renderStep()}
             </Suspense>
-          </div>
-        )}
+          ) : (
+            <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+              <Suspense fallback={<Loading />}>
+                {renderStep()}
+              </Suspense>
+            </div>
+          )}
 
-        {currentStep === 'suggestions' && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={handleReset}
-              className="text-gray-600 hover:text-gray-800 underline"
-            >
-              最初からやり直す
-            </button>
-          </div>
-        )}
-        
-        {(currentStep === 'favorites' || currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom') && (
-          <div className="mt-6 text-center">
-            <button
-              onClick={handleBackToMain}
-              className="text-gray-600 hover:text-gray-800 underline"
-            >
-              気晴らし選択に戻る
-            </button>
-          </div>
-        )}
-      </div>
-    </MainLayout>
+          {currentStep === 'suggestions' && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={handleReset}
+                className="text-gray-600 hover:text-gray-800 underline"
+              >
+                最初からやり直す
+              </button>
+            </div>
+          )}
+          
+          {(currentStep === 'favorites' || currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom') && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={handleBackToMain}
+                className="text-gray-600 hover:text-gray-800 underline"
+              >
+                気晴らし選択に戻る
+              </button>
+            </div>
+          )}
+        </div>
+      </MainLayout>
+      
+      {/* 年齢層選択オンボーディングモーダル */}
+      <AgeGroupOnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+      />
+    </>
   );
 }
 

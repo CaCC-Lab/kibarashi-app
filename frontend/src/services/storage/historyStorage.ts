@@ -8,6 +8,7 @@
  */
 
 import { HistoryItem, HistoryData, HistoryStats } from '../../types/history';
+import { SituationId } from '../../types/situation';
 
 const STORAGE_KEY = 'kibarashi_history';
 const MAX_HISTORY_ITEMS = 100; // 最大保存件数
@@ -183,11 +184,15 @@ export class HistoryStorage {
       行動的: history.filter(item => item.category === '行動的').length,
     };
     
-    const situationCounts = {
-      workplace: history.filter(item => item.situation === 'workplace').length,
-      home: history.filter(item => item.situation === 'home').length,
-      outside: history.filter(item => item.situation === 'outside').length,
-    };
+    // 状況別の統計を動的に計算
+    const situationCounts = {} as Record<SituationId, number>;
+    history.forEach(item => {
+      if (situationCounts[item.situation]) {
+        situationCounts[item.situation]++;
+      } else {
+        situationCounts[item.situation] = 1;
+      }
+    });
 
     // 時間帯別の利用パターンを計算（0-23時）
     const hourlyPattern: { [hour: number]: number } = {};

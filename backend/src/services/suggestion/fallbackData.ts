@@ -26,7 +26,8 @@ function fisherYatesShuffle<T>(array: T[]): T[] {
 
 export function getFallbackSuggestions(
   situation: 'workplace' | 'home' | 'outside',
-  duration: number
+  duration: number,
+  ageGroup?: string
 ): Suggestion[] {
   // Filter suggestions based on situation and duration
   const filteredSuggestions = suggestionsData.suggestions.filter(

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { HistoryItem as HistoryItemType } from '../../types/history';
+import { getSituationLabel } from '../../types/situation';
 
 interface HistoryItemProps {
   item: HistoryItemType;
@@ -46,12 +47,6 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
     }).format(date);
   };
 
-  // 状況のラベル
-  const situationLabels = {
-    workplace: '職場',
-    home: '家',
-    outside: '外出先'
-  };
 
   // 評価の更新
   const handleRatingClick = (rating: 1 | 2 | 3 | 4 | 5) => {
@@ -100,7 +95,7 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
               {item.category}
             </span>
             <span className="text-sm text-text-secondary dark:text-gray-400">
-              {situationLabels[item.situation]}
+              {getSituationLabel(item.situation)}
             </span>
             {!item.completed && (
               <span className="inline-flex px-2 py-1 text-xs rounded-full bg-accent-100 text-accent-800 dark:bg-accent-900/30 dark:text-accent-300 shadow-sm">

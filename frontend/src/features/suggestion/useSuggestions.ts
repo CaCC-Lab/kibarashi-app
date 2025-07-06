@@ -1,5 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { fetchSuggestions } from '../../services/api/suggestions';
+import { SituationId } from '../../types/situation';
+import { AgeGroup } from '../../types/ageGroup';
 
 export interface Suggestion {
   id: string;
@@ -18,8 +20,10 @@ export const useSuggestions = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchSuggestionsHandler = useCallback(async (
-    situation: 'workplace' | 'home' | 'outside',
-    duration: 5 | 15 | 30
+    situation: SituationId,
+    duration: 5 | 15 | 30,
+    ageGroup?: AgeGroup,
+    studentContext?: { concern?: string; subject?: string }
   ) => {
     // 前回のリクエストをキャンセル
     if (abortControllerRef.current) {
@@ -34,7 +38,7 @@ export const useSuggestions = () => {
     setError(null);
     
     try {
-      const data = await fetchSuggestions(situation, duration);
+      const data = await fetchSuggestions(situation, duration, ageGroup, studentContext);
       console.log('API Response:', data); // デバッグログ追加
       
       // リクエストがキャンセルされていない場合のみ状態を更新

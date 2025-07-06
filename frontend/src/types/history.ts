@@ -7,6 +7,8 @@
  * - 統計機能の基礎データとしても活用
  */
 
+import { SituationId } from './situation';
+
 export interface HistoryItem {
   id: string;
   suggestionId: string;
@@ -15,7 +17,7 @@ export interface HistoryItem {
   category: '認知的' | '行動的';
   duration: number; // 設定時間（分）
   actualDuration?: number; // 実際の実行時間（秒）
-  situation: 'workplace' | 'home' | 'outside';
+  situation: SituationId;
   startedAt: string; // ISO 8601形式
   completedAt?: string; // ISO 8601形式
   completed: boolean;
@@ -37,11 +39,7 @@ export interface HistoryStats {
     認知的: number;
     行動的: number;
   };
-  situationCounts: {
-    workplace: number;
-    home: number;
-    outside: number;
-  };
+  situationCounts: Record<SituationId, number>;
   // 時間帯別の利用パターン（0-23時）
   hourlyPattern: {
     [hour: number]: number;

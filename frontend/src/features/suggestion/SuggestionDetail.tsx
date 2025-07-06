@@ -3,6 +3,7 @@ import AudioPlayer, { AudioPlayerHandle } from '../../components/audio/AudioPlay
 import { ttsService } from '../../services/api/tts';
 import { browserTTS } from '../../services/browserTTS';
 import { useHistory } from '../../hooks/useHistory';
+import { SituationId } from '../../types/situation';
 
 interface SuggestionDetailProps {
   id: string;
@@ -11,7 +12,7 @@ interface SuggestionDetailProps {
   duration: number;
   guide?: string;
   category: '認知的' | '行動的';
-  situation: 'workplace' | 'home' | 'outside';
+  situation: SituationId;
   onBack: () => void;
 }
 

@@ -11,6 +11,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { HistoryStorage } from '../services/storage/historyStorage';
 import { HistoryItem, HistoryStats } from '../types/history';
 import { Suggestion } from '../services/api/types';
+import { SituationId } from '../types/situation';
 
 export function useHistory() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -23,11 +24,7 @@ export function useHistory() {
       認知的: 0,
       行動的: 0,
     },
-    situationCounts: {
-      workplace: 0,
-      home: 0,
-      outside: 0,
-    },
+    situationCounts: {} as Record<SituationId, number>,
     hourlyPattern: {},
     weeklyPattern: {},
     monthlyTrend: [],
@@ -65,7 +62,7 @@ export function useHistory() {
    */
   const startHistory = useCallback((
     suggestion: Suggestion,
-    situation: 'workplace' | 'home' | 'outside'
+    situation: SituationId
   ): string => {
     const historyItem: HistoryItem = {
       id: `history-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,

@@ -4,12 +4,17 @@ import SuggestionDetail from './SuggestionDetail';
 import { useSuggestions } from './useSuggestions';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
+import GlobalAudioControls from '../audio/GlobalAudioControls';
 import type { Suggestion } from '../../services/api/suggestions';
+import { SituationId } from '../../types/situation';
+import { useAgeGroup } from '../../hooks/useAgeGroup';
+import { useFeature } from '../config/featureFlags';
+import { useStudentABTest } from '../../hooks/useStudentABTest';
 
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
 interface SuggestionListProps {
-  situation: 'workplace' | 'home' | 'outside'; // 場所：職場、家、外出先
+  situation: SituationId; // 場所：年齢層に応じた状況
   duration: 5 | 15 | 30; // 所要時間：5分、15分、30分
 }
 
@@ -28,6 +33,26 @@ interface SuggestionListProps {
  */
 const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
+  const { currentAgeGroup } = useAgeGroup();
+  
+  // A/Bテスト統合
+  const { 
+    testGroup, 
+    isStudentOptimized, 
+    features,
+    trackMetric,
+    trackCompletion
+  } = useStudentABTest({
+    onExposure: (event) => {
+      console.log('[A/B Test] Exposure:', event);
+    },
+    onMetric: (event) => {
+      console.log('[A/B Test] Metric:', event);
+    }
+  });
+  
+  // フィーチャーフラグ
+  const isVoiceGuideEnabled = useFeature('enhancedVoiceGuide');
   
   // 選択された提案の状態管理
   // なぜ必要か：ユーザーが選んだ提案の詳細画面を表示するため
@@ -35,13 +60,32 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
 
   // コンポーネントマウント時と条件変更時に提案を取得
   useEffect(() => {
-    console.log('Fetching suggestions for:', { situation, duration }); // デバッグログ追加
-    fetchSuggestions(situation, duration);
-  }, [situation, duration, fetchSuggestions]);
+    console.log('Fetching suggestions for:', { 
+      situation, 
+      duration, 
+      ageGroup: currentAgeGroup,
+      testGroup,
+      isStudentOptimized 
+    }); // デバッグログ追加
+    
+    // 学生最適化版の場合、学生向けコンテキストも渡す
+    const studentContext = isStudentOptimized && currentAgeGroup === 'student' ? {
+      concern: '勉強の合間のリフレッシュ',
+      // シチュエーションに応じた学生向けコンテキスト
+      subject: situation === 'workplace' ? '勉強全般' : undefined
+    } : undefined;
+    
+    fetchSuggestions(situation, duration, currentAgeGroup, studentContext);
+  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup]);
 
   // 再取得関数
   const refetch = () => {
-    fetchSuggestions(situation, duration);
+    const studentContext = isStudentOptimized && currentAgeGroup === 'student' ? {
+      concern: '勉強の合間のリフレッシュ',
+      subject: situation === 'workplace' ? '勉強全般' : undefined
+    } : undefined;
+    
+    fetchSuggestions(situation, duration, currentAgeGroup, studentContext);
   };
 
   if (loading) {
@@ -106,6 +150,13 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
         </p>
       </div>
 
+      {/* グローバル音声コントロール */}
+      {isVoiceGuideEnabled && (
+        <div className="mb-6">
+          <GlobalAudioControls />
+        </div>
+      )}
+
       {/* 提案カードのグリッド表示 */}
       {/* なぜグリッドか：3つの提案を均等に並べ、比較しやすくするため */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -117,6 +168,15 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
               // ユーザーが「始める」ボタンをクリックした時の処理
               // 選択された提案をstateに保存し、詳細表示へ遷移
               setSelectedSuggestion(suggestion);
+              
+              // A/Bテストメトリクス: 提案クリックを記録
+              trackMetric('suggestionClick', {
+                suggestionId: suggestion.id,
+                suggestionTitle: suggestion.title,
+                category: suggestion.category,
+                duration: suggestion.duration,
+                ageGroup: currentAgeGroup
+              });
             }}
           />
         ))}

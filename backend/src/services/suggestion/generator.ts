@@ -40,17 +40,19 @@ export interface Suggestion {
  */
 export async function generateSuggestions(
   situation: 'workplace' | 'home' | 'outside',
-  duration: number
+  duration: number,
+  ageGroup?: string,
+  studentContext?: { concern?: string; subject?: string }
 ): Promise<Suggestion[]> {
   try {
     // ステップ1: Gemini APIの有効性を確認
     // なぜAPIキーを確認するか：APIキーが設定されていない場合、
     // 無駄なAPI呼び出しを避け、即座にフォールバックを使用するため
     if (process.env.GEMINI_API_KEY) {
-      logger.info('Generating suggestions with Gemini API', { situation, duration });
+      logger.info('Generating suggestions with Gemini API', { situation, duration, ageGroup });
       
       // ステップ2: AIを使ってパーソナライズされた提案を生成
-      const suggestions = await geminiClient.generateSuggestions(situation, duration);
+      const suggestions = await geminiClient.generateSuggestions(situation, duration, ageGroup, studentContext);
       
       // ステップ3: 必ず3つの提案を返す
       // なぜ3つか：選択肢を提供しつつ、情報過多を避けるため
@@ -65,7 +67,7 @@ export async function generateSuggestions(
       reason: 'GEMINI_API_KEY environment variable not set'
     });
     
-    const suggestions = getFallbackSuggestions(situation, duration);
+    const suggestions = getFallbackSuggestions(situation, duration, ageGroup);
     return suggestions.slice(0, 3);
     
   } catch (error) {
@@ -78,10 +80,11 @@ export async function generateSuggestions(
       stack: error instanceof Error ? error.stack : undefined,
       situation,
       duration,
+      ageGroup,
     });
     
     // フォールバックデータを使用
     // ユーザーにはこの切り替えが透明に行われる
-    return getFallbackSuggestions(situation, duration).slice(0, 3);
+    return getFallbackSuggestions(situation, duration, ageGroup).slice(0, 3);
   }
 }

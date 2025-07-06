@@ -36,6 +36,10 @@ describe('suggestionController', () => {
       status: (code: number) => {
         responseStatus = code;
         return mockResponse as Response;
+      },
+      set: (headers: any) => {
+        // HTTPヘッダーの設定をモック
+        return mockResponse as Response;
       }
     };
     
@@ -193,6 +197,68 @@ describe('suggestionController', () => {
       expect(nextCalledWith).toBeDefined();
       expect(nextCalledWith.message).toBe('Invalid request parameters');
       expect(nextCalledWith.statusCode).toBe(400);
+    });
+  });
+
+  describe('年齢層と学生向けパラメータのテスト', () => {
+    it('年齢層パラメータが正しく処理される', async () => {
+      mockRequest.query = {
+        situation: 'workplace',
+        duration: '5',
+        ageGroup: 'student'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(responseJson.metadata.ageGroup).toBe('student');
+    });
+
+    it('学生向けコンテキストパラメータが正しく処理される', async () => {
+      mockRequest.query = {
+        situation: 'workplace',
+        duration: '5',
+        ageGroup: 'student',
+        studentConcern: '勉強の合間のリフレッシュ',
+        studentSubject: '数学'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(responseJson.metadata.ageGroup).toBe('student');
+      // 学生向けの最適化された提案が返されることを確認
+      const suggestion = responseJson.suggestions[0];
+      expect(suggestion.description).toBeDefined();
+    });
+
+    it('無効な年齢層パラメータは無視される', async () => {
+      mockRequest.query = {
+        situation: 'workplace',
+        duration: '5',
+        ageGroup: 'invalid_age_group'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      // エラーではなく、デフォルトの処理を行う
+      expect(nextCallCount).toBe(0);
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
     });
   });
 

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import FavoriteButton from '../../components/favorites/FavoriteButton';
-import { Suggestion } from '../../services/api/types';
+import { VoiceGuidePlayer } from '../audio/VoiceGuidePlayer';
+import { useFeature } from '../config/featureFlags';
+import { useStudentABTest } from '../../hooks/useStudentABTest';
+import { Suggestion, VoiceGuideScript } from '../../services/api/types';
 
 interface SuggestionCardProps {
   id: string;
@@ -9,6 +12,8 @@ interface SuggestionCardProps {
   duration: number;
   category: '認知的' | '行動的';
   steps?: string[];
+  voiceGuideScript?: VoiceGuideScript;
+  ageGroup?: string;
   onStart?: () => void;
 }
 
@@ -19,10 +24,37 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   duration,
   category,
   steps,
+  voiceGuideScript,
+  ageGroup,
   onStart,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   
+  // 学生向けA/Bテストフックの統合
+  const { isStudentOptimized, trackMetric, shouldRender } = useStudentABTest({
+    onMetric: (event) => {
+      console.log('[SuggestionCard] A/B Test Metric:', event);
+    }
+  });
+  
+  // フィーチャーフラグによる音声ガイド機能の制御
+  const isVoiceGuideEnabled = useFeature('enhancedVoiceGuide');
+  const shouldShowVoiceGuide = isVoiceGuideEnabled && voiceGuideScript;
+  
+  // A/Bテストメトリクストラッキング付きのonStartハンドラー
+  const handleStart = () => {
+    // A/Bテストメトリクスをトラッキング
+    trackMetric('suggestionStart', {
+      suggestionId: id,
+      ageGroup: ageGroup || 'unknown',
+      category,
+      duration
+    });
+    
+    // 元のonStartコールバックを実行
+    onStart?.();
+  };
+
   // FavoriteButton用のsuggestionオブジェクトを作成
   const suggestion: Suggestion = {
     id,
@@ -145,8 +177,52 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
           )}
         </div>
 
+        {/* 音声ガイドプレイヤー */}
+        {shouldShowVoiceGuide && (
+          <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-500">
+            <div className="flex items-center space-x-2 mb-3">
+              <svg className="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M9 9a3 3 0 013 3v3a3 3 0 01-6 0V9a3 3 0 013-3z" />
+              </svg>
+              <h4 className="font-medium text-gray-700 dark:text-gray-200">音声ガイド付き</h4>
+            </div>
+            <VoiceGuidePlayer 
+              voiceGuideScript={voiceGuideScript}
+              suggestionId={id}
+              onError={(error) => {
+                console.warn('Voice guide error:', error);
+                // エラー時は静かに無視（ユーザー体験を阻害しない）
+              }}
+              onComplete={() => {
+                // 音声ガイド完了時の処理（必要に応じて）
+                console.log('Voice guide completed for suggestion:', id);
+              }}
+            />
+          </div>
+        )}
+
+        {/* 学生向け最適化コンテンツ */}
+        {shouldRender('studentFeature') && (
+          <div data-testid="student-optimized-content" className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/30 dark:to-green-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
+            <div className="flex items-center space-x-2 mb-2">
+              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              <h4 className="font-medium text-blue-700 dark:text-blue-300">学習効率を高める気晴らし</h4>
+            </div>
+            <p className="text-sm text-blue-600 dark:text-blue-200 mb-3">
+              この活動で頭をリフレッシュして、集中力を回復しましょう。
+            </p>
+            <div className="text-xs text-blue-500 dark:text-blue-300">
+              💡 勉強に戻る準備はできましたか？
+            </div>
+          </div>
+        )}
+
         <button
-          onClick={onStart}
+          onClick={handleStart}
           className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 hover-scale focus-ring"
           aria-label={`${title}の気晴らしを開始`}
         >
@@ -156,7 +232,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
               d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <span>この気晴らしを始める</span>
+          <span>{shouldRender('studentFeature') ? '学習効率アップ開始' : 'この気晴らしを始める'}</span>
         </button>
       </div>
     </div>

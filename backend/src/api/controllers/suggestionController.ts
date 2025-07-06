@@ -7,6 +7,10 @@ import { generateSuggestions } from '../../services/suggestion/generator';
 const suggestionsQuerySchema = z.object({
   situation: z.enum(['workplace', 'home', 'outside']),
   duration: z.enum(['5', '15', '30']).transform(Number),
+  // オプショナルパラメータ
+  ageGroup: z.string().optional(),
+  studentConcern: z.string().optional(),
+  studentSubject: z.string().optional(),
 });
 
 export const getSuggestions = async (
@@ -17,12 +21,18 @@ export const getSuggestions = async (
   try {
     // パラメータのバリデーション
     const validatedQuery = suggestionsQuerySchema.parse(req.query);
-    const { situation, duration } = validatedQuery;
+    const { situation, duration, ageGroup, studentConcern, studentSubject } = validatedQuery;
 
-    logger.info(`Generating suggestions for situation: ${situation}, duration: ${duration}`);
+    logger.info(`Generating suggestions for situation: ${situation}, duration: ${duration}, ageGroup: ${ageGroup || 'default'}`);
+
+    // 学生向けコンテキストを構築
+    const studentContext = (ageGroup === 'student' && (studentConcern || studentSubject)) ? {
+      concern: studentConcern,
+      subject: studentSubject,
+    } : undefined;
 
     // 提案の生成
-    const suggestions = await generateSuggestions(situation, duration);
+    const suggestions = await generateSuggestions(situation, duration, ageGroup, studentContext);
 
     // キャッシュを無効化するヘッダーを設定
     res.set({
@@ -37,6 +47,7 @@ export const getSuggestions = async (
         situation,
         duration,
         timestamp: new Date().toISOString(),
+        ...(ageGroup && { ageGroup }),
       },
     });
   } catch (error) {

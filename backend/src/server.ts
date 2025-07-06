@@ -54,8 +54,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
 
-// レート制限
-app.use('/api/', rateLimiter);
+// 基本レート制限（全エンドポイント共通）
+app.use('/api/', rateLimiter.suggestions);
 
 // ルーティング
 app.use('/api/v1', routes);

@@ -5,6 +5,7 @@ import { useHistory } from '../../hooks/useHistory';
 import { FavoritesStorage } from '../../services/storage/favoritesStorage';
 import { HistoryStorage } from '../../services/storage/historyStorage';
 import { AppDataManager, type ExportStats, type ImportResult } from '../../services/storage/appDataManager';
+import { ABTestDashboard } from '../../components/analytics/ABTestDashboard';
 
 interface SettingsProps {
   onBack: () => void;
@@ -22,6 +23,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const [importMessage, setImportMessage] = useState<string | null>(null);
   const [exportStats, setExportStats] = useState<ExportStats | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showABTestDashboard, setShowABTestDashboard] = useState(false);
 
   const handleTTSChange = (value: 'gemini' | 'browser') => {
     setDefaultTTS(value);
@@ -445,6 +447,45 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
               </button>
             </div>
           </div>
+        </section>
+
+        {/* A/Bテスト分析（開発者向け） */}
+        <section className="mb-8">
+          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">A/Bテスト分析</h3>
+          
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-semibold text-blue-700 dark:text-blue-300 flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Phase A-1 効果測定
+              </h4>
+              <button
+                onClick={() => setShowABTestDashboard(!showABTestDashboard)}
+                className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
+                  showABTestDashboard
+                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    : 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30'
+                }`}
+              >
+                {showABTestDashboard ? '📊 ダッシュボードを閉じる' : '📈 ダッシュボードを開く'}
+              </button>
+            </div>
+            
+            <p className="text-sm text-blue-600 dark:text-blue-300">
+              年齢層機能の利用状況とユーザー行動の分析データを確認できます。
+              開発チーム向けの機能です。
+            </p>
+          </div>
+
+          {/* A/Bテストダッシュボード */}
+          {showABTestDashboard && (
+            <div className="animate-fadeIn">
+              <ABTestDashboard />
+            </div>
+          )}
         </section>
 
         {/* アプリ情報 */}
