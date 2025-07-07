@@ -5,9 +5,13 @@ import { fallbackSuggestions } from './fallbackData';
 
 // バリデーションスキーマ
 const suggestionsQuerySchema = z.object({
-  situation: z.enum(['workplace', 'home', 'outside', 'studying', 'school', 'commuting']),
+  situation: z.enum(['workplace', 'home', 'outside', 'studying', 'school', 'commuting', 'job_hunting']),
   duration: z.enum(['5', '15', '30']).transform(Number),
-  ageGroup: z.enum(['office_worker', 'student', 'middle_school', 'housewife', 'elderly']).optional().default('office_worker'),
+  ageGroup: z.enum(['office_worker', 'student', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']).optional().default('office_worker'),
+  // 就活・転職活動者向けパラメータ
+  jobHuntingPhase: z.enum(['preparation', 'applying', 'interviewing', 'waiting', 'rejected']).optional(),
+  jobHuntingConcern: z.string().optional(),
+  jobHuntingDuration: z.enum(['just_started', '1-3months', '3-6months', 'over_6months']).optional(),
 });
 
 // Geminiクライアントの初期化
