@@ -3,6 +3,7 @@ import suggestionsRouter from './suggestions';
 import { enhancedSuggestionsRouter } from './enhancedSuggestions';
 import ttsRouter from './tts';
 import contextRouter from '../../routes/context';
+import adminRouter from '../../routes/admin';
 
 const router = Router();
 
@@ -25,13 +26,16 @@ router.get('/', (_req, res) => {
     features: {
       suggestions: 'Basic mood-lifting suggestions',
       enhancedSuggestions: 'Advanced suggestions with voice guide',
-      tts: 'Text-to-speech conversion'
+      tts: 'Text-to-speech conversion',
+      context: 'Contextual data integration',
+      admin: 'Administrative endpoints'
     },
     endpoints: {
       suggestions: '/api/v1/suggestions',
       enhancedSuggestions: '/api/v1/enhanced-suggestions',
       tts: '/api/v1/tts',
       context: '/api/v1/context',
+      admin: '/api/v1/admin',
       health: '/api/v1/health'
     },
   });
@@ -42,5 +46,6 @@ router.use('/suggestions', suggestionsRouter);
 router.use('/enhanced-suggestions', enhancedSuggestionsRouter);
 router.use('/tts', ttsRouter);
 router.use('/context', contextRouter);
+router.use('/admin', adminRouter);
 
 export default router;

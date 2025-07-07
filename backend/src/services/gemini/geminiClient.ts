@@ -5,22 +5,55 @@ import { createStudentPrompt, StudentPromptInput } from '../suggestion/studentPr
 import { createJobSeekerPrompt, createCareerChangerPrompt, JobHuntingPromptInput } from '../suggestion/jobHuntingPromptTemplates';
 import { generateImprovedPrompt } from './improvedPromptTemplate';
 import { contextualPromptEnhancer, ContextualData } from '../context/contextualPromptEnhancer';
+import { apiKeyManager } from './apiKeyManager';
 
 class GeminiClient {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private genAI: GoogleGenerativeAI | null = null;
+  private model: any = null;
   private enhancedGenerator: EnhancedSuggestionGenerator;
   private previousSuggestions: Map<string, string[]> = new Map();
+  private currentApiKey: string | null = null;
 
   constructor() {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not set in environment variables');
-    }
-
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     this.enhancedGenerator = new EnhancedSuggestionGenerator();
+    this.initializeClient();
+  }
+
+  /**
+   * APIクライアントを初期化
+   */
+  private initializeClient(): void {
+    try {
+      this.currentApiKey = apiKeyManager.getCurrentApiKey();
+      this.genAI = new GoogleGenerativeAI(this.currentApiKey);
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      
+      logger.info('Gemini client initialized with API key manager');
+    } catch (error) {
+      logger.error('Failed to initialize Gemini client', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * APIキーをローテーションして新しいクライアントを作成
+   */
+  private rotateApiKeyAndReinitialize(): void {
+    try {
+      const newApiKey = apiKeyManager.forceRotation();
+      if (newApiKey === this.currentApiKey) {
+        throw new Error('No alternative API key available');
+      }
+
+      this.currentApiKey = newApiKey;
+      this.genAI = new GoogleGenerativeAI(newApiKey);
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      
+      logger.info('API key rotated and client reinitialized');
+    } catch (error) {
+      logger.error('Failed to rotate API key', { error });
+      throw error;
+    }
   }
 
   async generateSuggestions(
@@ -31,85 +64,165 @@ class GeminiClient {
     jobHuntingContext?: Partial<JobHuntingPromptInput>,
     useContextualEnhancement: boolean = true
   ): Promise<any[]> {
-    try {
-      let prompt: string;
+    const maxRetries = 3;
+    let lastError: Error | null = null;
 
-      // コンテキスト連携が有効な場合は強化されたプロンプトを使用
-      if (useContextualEnhancement && !studentContext && !jobHuntingContext) {
-        try {
-          logger.info('Using contextual prompt enhancement');
-          const context = await contextualPromptEnhancer.getCurrentContext();
-          const userHistory = this.previousSuggestions.get(`${situation}-${duration}-${ageGroup || 'default'}`) || [];
-          
-          prompt = contextualPromptEnhancer.generateEnhancedPrompt({
-            situation,
-            duration,
-            context,
-            userHistory
-          });
-          
-          logger.info('Contextual prompt generated successfully', {
-            hasWeatherData: !!context.weather,
-            season: context.seasonal.season,
-            historyCount: userHistory.length
-          });
-        } catch (contextError) {
-          logger.warn('Failed to generate contextual prompt, falling back to standard prompt', {
-            error: contextError instanceof Error ? contextError.message : 'Unknown error'
-          });
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        let prompt: string;
+
+        // コンテキスト連携が有効な場合は強化されたプロンプトを使用
+        if (useContextualEnhancement && !studentContext && !jobHuntingContext) {
+          try {
+            logger.info('Using contextual prompt enhancement');
+            const context = await contextualPromptEnhancer.getCurrentContext();
+            const userHistory = this.previousSuggestions.get(`${situation}-${duration}-${ageGroup || 'default'}`) || [];
+            
+            prompt = contextualPromptEnhancer.generateEnhancedPrompt({
+              situation,
+              duration,
+              context,
+              userHistory
+            });
+            
+            logger.info('Contextual prompt generated successfully', {
+              hasWeatherData: !!context.weather,
+              season: context.seasonal.season,
+              historyCount: userHistory.length
+            });
+          } catch (contextError) {
+            logger.warn('Failed to generate contextual prompt, falling back to standard prompt', {
+              error: contextError instanceof Error ? contextError.message : 'Unknown error'
+            });
+            prompt = this.createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext);
+          }
+        } else {
           prompt = this.createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext);
         }
-      } else {
-        prompt = this.createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext);
+        
+        // APIリクエスト実行（キーローテーション対応）
+        const suggestions = await this.executeApiRequest(prompt, situation, duration, ageGroup);
+        
+        // 成功をAPIキーマネージャーに報告
+        if (this.currentApiKey) {
+          apiKeyManager.markKeyAsSuccess(this.currentApiKey);
+        }
+        
+        return suggestions;
+
+      } catch (error) {
+        lastError = error as Error;
+        
+        logger.error(`Gemini API error (attempt ${attempt}/${maxRetries})`, { 
+          error: lastError.message,
+          situation, 
+          duration,
+          attempt
+        });
+
+        // APIキーマネージャーに失敗を報告
+        if (this.currentApiKey) {
+          const isRateLimit = this.isRateLimitError(lastError);
+          apiKeyManager.markKeyAsFailure(this.currentApiKey, isRateLimit);
+        }
+
+        // 最後の試行でない場合、キーローテーションを試す
+        if (attempt < maxRetries) {
+          try {
+            // 利用可能なキーがあるかチェック
+            if (apiKeyManager.getAvailableKeyCount() > 0) {
+              logger.info('Attempting to rotate API key and retry');
+              this.rotateApiKeyAndReinitialize();
+              
+              // 短い待機時間を設けてから再試行
+              await new Promise(resolve => setTimeout(resolve, 1000));
+              continue;
+            } else {
+              logger.warn('No available API keys for rotation');
+            }
+          } catch (rotationError) {
+            logger.error('Failed to rotate API key', { error: rotationError });
+          }
+        }
       }
-      
-      // タイムアウト付きでGemini APIを呼び出し
-      const timeoutMs = process.env.NODE_ENV === 'test' ? 3000 : 10000; // テスト環境では3秒、本番では10秒
-      const apiCall = this.model.generateContent(prompt);
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          reject(new Error(`Gemini API timeout after ${timeoutMs}ms`));
-        }, timeoutMs);
-      });
-      
-      const result = await Promise.race([apiCall, timeoutPromise]);
-      const response = await result.response;
-      const text = response.text();
-      
-      // JSON形式のレスポンスをパース
-      const suggestions = this.parseResponse(text, duration);
-      
-      // 提案履歴を保存（最新20件まで）
-      const key = `${situation}-${duration}-${ageGroup || 'default'}`;
-      const history = this.previousSuggestions.get(key) || [];
-      const titles = suggestions.map(s => s.title);
-      history.push(...titles);
-      
-      // 最新20件のみ保持
-      if (history.length > 20) {
-        this.previousSuggestions.set(key, history.slice(-20));
-      } else {
-        this.previousSuggestions.set(key, history);
-      }
-      
-      logger.info('Gemini API response received', { 
-        situation, 
-        duration, 
-        suggestionCount: suggestions.length,
-        responseTime: `< ${timeoutMs}ms`,
-        uniqueSuggestions: titles
-      });
-      
-      return suggestions;
-    } catch (error) {
-      logger.error('Gemini API error', { 
-        error: error instanceof Error ? error.message : 'Unknown error',
-        situation, 
-        duration,
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      throw error;
     }
+
+    // 全ての試行が失敗した場合
+    throw lastError || new Error('All retry attempts failed');
+  }
+
+  /**
+   * APIリクエストを実行
+   */
+  private async executeApiRequest(
+    prompt: string,
+    situation: string,
+    duration: number,
+    ageGroup?: string
+  ): Promise<any[]> {
+    // タイムアウト付きでGemini APIを呼び出し
+    const timeoutMs = process.env.NODE_ENV === 'test' ? 3000 : 10000;
+    const apiCall = this.model.generateContent(prompt);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error(`Gemini API timeout after ${timeoutMs}ms`));
+      }, timeoutMs);
+    });
+    
+    const result = await Promise.race([apiCall, timeoutPromise]);
+    const response = await result.response;
+    const text = response.text();
+    
+    // JSON形式のレスポンスをパース
+    const suggestions = this.parseResponse(text, duration);
+    
+    // 提案履歴を保存（最新20件まで）
+    const key = `${situation}-${duration}-${ageGroup || 'default'}`;
+    const history = this.previousSuggestions.get(key) || [];
+    const titles = suggestions.map(s => s.title);
+    history.push(...titles);
+    
+    // 最新20件のみ保持
+    if (history.length > 20) {
+      this.previousSuggestions.set(key, history.slice(-20));
+    } else {
+      this.previousSuggestions.set(key, history);
+    }
+    
+    logger.info('Gemini API response received', { 
+      situation, 
+      duration, 
+      suggestionCount: suggestions.length,
+      responseTime: `< ${timeoutMs}ms`,
+      uniqueSuggestions: titles,
+      apiKeyIndex: this.getCurrentApiKeyIndex()
+    });
+    
+    return suggestions;
+  }
+
+  /**
+   * レート制限エラーかどうかを判定
+   */
+  private isRateLimitError(error: Error): boolean {
+    const message = error.message.toLowerCase();
+    return message.includes('rate limit') || 
+           message.includes('quota') || 
+           message.includes('429') ||
+           message.includes('resource has been exhausted');
+  }
+
+  /**
+   * 現在のAPIキーのインデックスを取得
+   */
+  private getCurrentApiKeyIndex(): number | null {
+    if (!this.currentApiKey) return null;
+    const stats = apiKeyManager.getStats();
+    const keyDetail = stats.keyDetails.find(k => 
+      stats.keyDetails[k.index] && 
+      !k.isOnCooldown
+    );
+    return keyDetail?.index || null;
   }
 
   private createPrompt(situation: string, duration: number, ageGroup: string = 'office_worker', studentContext?: Partial<StudentPromptInput>, jobHuntingContext?: Partial<JobHuntingPromptInput>): string {
