@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../../utils/logger';
-import { EnhancedSuggestionGenerator } from '../suggestion/enhancedSuggestionGenerator.js';
-import { createStudentPrompt, StudentPromptInput } from '../suggestion/studentPromptTemplates.js';
-import { createJobSeekerPrompt, createCareerChangerPrompt, JobHuntingPromptInput } from '../suggestion/jobHuntingPromptTemplates.js';
+import { EnhancedSuggestionGenerator } from '../suggestion/enhancedSuggestionGenerator';
+import { createStudentPrompt, StudentPromptInput } from '../suggestion/studentPromptTemplates';
+import { createJobSeekerPrompt, createCareerChangerPrompt, JobHuntingPromptInput } from '../suggestion/jobHuntingPromptTemplates';
 
 class GeminiClient {
   private genAI: GoogleGenerativeAI;
