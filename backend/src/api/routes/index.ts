@@ -2,6 +2,7 @@ import { Router } from 'express';
 import suggestionsRouter from './suggestions';
 import { enhancedSuggestionsRouter } from './enhancedSuggestions';
 import ttsRouter from './tts';
+import contextRouter from '../../routes/context';
 
 const router = Router();
 
@@ -30,6 +31,7 @@ router.get('/', (_req, res) => {
       suggestions: '/api/v1/suggestions',
       enhancedSuggestions: '/api/v1/enhanced-suggestions',
       tts: '/api/v1/tts',
+      context: '/api/v1/context',
       health: '/api/v1/health'
     },
   });
@@ -39,5 +41,6 @@ router.get('/', (_req, res) => {
 router.use('/suggestions', suggestionsRouter);
 router.use('/enhanced-suggestions', enhancedSuggestionsRouter);
 router.use('/tts', ttsRouter);
+router.use('/context', contextRouter);
 
 export default router;

@@ -36,7 +36,8 @@
     "clean:root": "rm -rf node_modules"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "playwright": "^1.53.2"
   },
   "engines": {
     "node": "20.x",

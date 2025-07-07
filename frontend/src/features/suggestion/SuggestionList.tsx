@@ -5,6 +5,7 @@ import { useSuggestions } from './useSuggestions';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import GlobalAudioControls from '../audio/GlobalAudioControls';
+import ContextDisplay from '../../components/context/ContextDisplay';
 import type { Suggestion } from '../../services/api/suggestions';
 import { SituationId } from '../../types/situation';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
@@ -12,6 +13,7 @@ import { useFeature } from '../config/featureFlags';
 import { useStudentABTest } from '../../hooks/useStudentABTest';
 import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
 import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
+import { contextAPI, ContextualData } from '../../services/contextAPI';
 
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
@@ -80,9 +82,31 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
   // フィーチャーフラグ
   const isVoiceGuideEnabled = useFeature('enhancedVoiceGuide');
   
+  // コンテキストデータの管理
+  const [contextData, setContextData] = useState<ContextualData | null>(null);
+  const [contextLoading, setContextLoading] = useState(false);
+  
   // 選択された提案の状態管理
   // なぜ必要か：ユーザーが選んだ提案の詳細画面を表示するため
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
+
+  // コンテキストデータを取得
+  useEffect(() => {
+    const loadContextData = async () => {
+      setContextLoading(true);
+      try {
+        const context = await contextAPI.getCurrentContext();
+        setContextData(context);
+      } catch (error) {
+        console.error('Failed to load context data:', error);
+        // エラーが発生してもコンテキストなしで提案を表示
+      } finally {
+        setContextLoading(false);
+      }
+    };
+
+    loadContextData();
+  }, []); // 初回のみ実行
 
   // コンポーネントマウント時と条件変更時に提案を取得
   useEffect(() => {
@@ -190,6 +214,15 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
 
   return (
     <div className="w-full">
+      {/* コンテキスト情報表示 */}
+      {!contextLoading && contextData && (
+        <ContextDisplay 
+          weather={contextData.weather}
+          seasonal={contextData.seasonal}
+          className="mb-4"
+        />
+      )}
+
       <div className="mb-6">
         <h2 className="text-xl font-bold text-text-primary mb-2">
           あなたにおすすめの気晴らし方法
@@ -200,6 +233,11 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
           {situation === 'home' && '家で'}
           {situation === 'outside' && '外出先で'}
           {duration}分でできる気晴らしです
+          {contextData && (
+            <span className="ml-2 text-sm text-primary-600">
+              今の状況に合わせた提案を含んでいます
+            </span>
+          )}
         </p>
       </div>
 

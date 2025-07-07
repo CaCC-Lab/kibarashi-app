@@ -27,7 +27,8 @@ function App() {
   // 初回ユーザーの場合、オンボーディングモーダルを表示
   useEffect(() => {
     if (!ageGroupLoading && isFirstTimeUser) {
-      setShowOnboarding(true);
+      // 一時的に無効化して表示問題をテスト
+      // setShowOnboarding(true);
     }
   }, [ageGroupLoading, isFirstTimeUser]);
 

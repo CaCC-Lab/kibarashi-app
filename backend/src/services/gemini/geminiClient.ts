@@ -4,6 +4,7 @@ import { EnhancedSuggestionGenerator } from '../suggestion/enhancedSuggestionGen
 import { createStudentPrompt, StudentPromptInput } from '../suggestion/studentPromptTemplates';
 import { createJobSeekerPrompt, createCareerChangerPrompt, JobHuntingPromptInput } from '../suggestion/jobHuntingPromptTemplates';
 import { generateImprovedPrompt } from './improvedPromptTemplate';
+import { contextualPromptEnhancer, ContextualData } from '../context/contextualPromptEnhancer';
 
 class GeminiClient {
   private genAI: GoogleGenerativeAI;
@@ -27,10 +28,40 @@ class GeminiClient {
     duration: number,
     ageGroup?: string,
     studentContext?: Partial<StudentPromptInput>,
-    jobHuntingContext?: Partial<JobHuntingPromptInput>
+    jobHuntingContext?: Partial<JobHuntingPromptInput>,
+    useContextualEnhancement: boolean = true
   ): Promise<any[]> {
     try {
-      const prompt = this.createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext);
+      let prompt: string;
+
+      // コンテキスト連携が有効な場合は強化されたプロンプトを使用
+      if (useContextualEnhancement && !studentContext && !jobHuntingContext) {
+        try {
+          logger.info('Using contextual prompt enhancement');
+          const context = await contextualPromptEnhancer.getCurrentContext();
+          const userHistory = this.previousSuggestions.get(`${situation}-${duration}-${ageGroup || 'default'}`) || [];
+          
+          prompt = contextualPromptEnhancer.generateEnhancedPrompt({
+            situation,
+            duration,
+            context,
+            userHistory
+          });
+          
+          logger.info('Contextual prompt generated successfully', {
+            hasWeatherData: !!context.weather,
+            season: context.seasonal.season,
+            historyCount: userHistory.length
+          });
+        } catch (contextError) {
+          logger.warn('Failed to generate contextual prompt, falling back to standard prompt', {
+            error: contextError instanceof Error ? contextError.message : 'Unknown error'
+          });
+          prompt = this.createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext);
+        }
+      } else {
+        prompt = this.createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext);
+      }
       
       // タイムアウト付きでGemini APIを呼び出し
       const timeoutMs = process.env.NODE_ENV === 'test' ? 3000 : 10000; // テスト環境では3秒、本番では10秒
@@ -303,11 +334,11 @@ class GeminiClient {
 let instance: GeminiClient | null = null;
 
 export const geminiClient = {
-  generateSuggestions: async (situation: 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting', duration: number, ageGroup?: string, studentContext?: Partial<StudentPromptInput>, jobHuntingContext?: Partial<JobHuntingPromptInput>) => {
+  generateSuggestions: async (situation: 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting', duration: number, ageGroup?: string, studentContext?: Partial<StudentPromptInput>, jobHuntingContext?: Partial<JobHuntingPromptInput>, useContextualEnhancement?: boolean) => {
     if (!instance) {
       instance = new GeminiClient();
     }
-    return instance.generateSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
+    return instance.generateSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext, useContextualEnhancement);
   },
   
   generateEnhancedSuggestions: async (situation: 'workplace' | 'home' | 'outside', duration: number, ageGroup?: string) => {
