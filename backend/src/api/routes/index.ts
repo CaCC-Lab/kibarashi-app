@@ -9,12 +9,28 @@ const router = Router();
 
 // ヘルスチェックエンドポイント
 router.get('/health', (_req, res) => {
+  // 環境変数チェック
+  const envCheck = {
+    geminiKeysConfigured: [
+      'GEMINI_API_KEY_1',
+      'GEMINI_API_KEY_2', 
+      'GEMINI_API_KEY_3'
+    ].filter(key => !!process.env[key]).length,
+    rotationEnabled: process.env.GEMINI_KEY_ROTATION_ENABLED === 'true',
+    ttsEnabled: process.env.GCP_TTS_ENABLED === 'true'
+  };
+
+  const status = envCheck.geminiKeysConfigured > 0 ? 'ok' : 'warning';
+
   res.json({
-    status: 'ok',
+    status,
     timestamp: new Date().toISOString(),
     service: 'kibarashi-backend',
     version: '1.1.0',
-    ttsEnabled: process.env.GCP_TTS_ENABLED === 'true'
+    environment: {
+      ...envCheck,
+      hasMinimumKeys: envCheck.geminiKeysConfigured >= 2
+    }
   });
 });
 
