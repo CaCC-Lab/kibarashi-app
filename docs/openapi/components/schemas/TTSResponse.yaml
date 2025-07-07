@@ -1,0 +1,50 @@
+type: object
+description: 音声読み上げレスポンス
+required:
+  - audioContent
+  - metadata
+properties:
+  audioContent:
+    type: string
+    format: byte
+    description: Base64エンコードされた音声データ
+    example: "UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESWAAACABAAZGF0YQAAAAA="
+  metadata:
+    type: object
+    description: 音声データのメタデータ
+    required:
+      - contentType
+      - size
+    properties:
+      contentType:
+        type: string
+        description: 音声データのMIMEタイプ
+        enum: ['audio/mp3', 'audio/wav', 'audio/ogg']
+        default: 'audio/mp3'
+        example: "audio/mp3"
+      size:
+        type: integer
+        description: 音声データのサイズ（バイト）
+        minimum: 1
+        example: 45678
+      duration:
+        type: number
+        description: 音声の長さ（秒）- オプション
+        minimum: 0
+        example: 8.5
+      voiceInfo:
+        type: object
+        description: 使用された音声の情報
+        properties:
+          voiceName:
+            type: string
+            description: 使用された音声名
+            example: "ja-JP-Neural2-B"
+          gender:
+            type: string
+            description: 話者の性別
+            example: "FEMALE"
+          languageCode:
+            type: string
+            description: 言語コード
+            example: "ja-JP"

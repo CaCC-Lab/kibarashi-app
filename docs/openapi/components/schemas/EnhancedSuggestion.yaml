@@ -1,0 +1,48 @@
+allOf:
+  - $ref: './Suggestion.yaml'
+  - type: object
+    description: 拡張された提案（音声ガイド対応）
+    required:
+      - displaySteps
+      - displayGuide
+      - voiceGuideScript
+      - accessibility
+    properties:
+      displaySteps:
+        type: array
+        description: 画面表示用の簡潔なステップ
+        minItems: 1
+        items:
+          type: string
+          maxLength: 200
+        example:
+          - "楽な姿勢で座る"
+          - "呼吸に意識を向ける"
+          - "雑念が浮かんだら呼吸に戻る"
+      displayGuide:
+        type: string
+        description: 画面表示用の簡潔なガイド
+        maxLength: 500
+        example: "15分間の瞑想で心を落ち着けましょう"
+      voiceGuideScript:
+        $ref: './VoiceGuideScript.yaml'
+      accessibility:
+        type: object
+        description: アクセシビリティ対応情報
+        required:
+          - hasSubtitles
+          - keyboardNavigable
+          - screenReaderOptimized
+        properties:
+          hasSubtitles:
+            type: boolean
+            description: 字幕対応
+            example: true
+          keyboardNavigable:
+            type: boolean
+            description: キーボード操作対応
+            example: true
+          screenReaderOptimized:
+            type: boolean
+            description: スクリーンリーダー最適化
+            example: true

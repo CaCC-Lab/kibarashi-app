@@ -1,0 +1,52 @@
+type: object
+description: 基本的な気晴らし提案
+required:
+  - id
+  - title
+  - description
+  - duration
+  - category
+properties:
+  id:
+    type: string
+    format: uuid
+    description: 提案の一意識別子
+    example: "123e4567-e89b-12d3-a456-426614174000"
+  title:
+    type: string
+    description: 提案のタイトル
+    minLength: 1
+    maxLength: 100
+    example: "デスクで深呼吸"
+  description:
+    type: string
+    description: 提案の簡潔な説明
+    minLength: 1
+    maxLength: 500
+    example: "椅子に座ったまま、ゆっくりと深呼吸を繰り返します"
+  duration:
+    type: integer
+    description: 実施にかかる時間（分）
+    enum: [5, 15, 30]
+    example: 5
+  category:
+    type: string
+    description: 提案のカテゴリ
+    enum: ['認知的', '行動的']
+    example: "認知的"
+  steps:
+    type: array
+    description: 実施手順（オプション）
+    items:
+      type: string
+    example:
+      - "背筋を伸ばして座る"
+      - "鼻から4秒かけて息を吸う"
+      - "4秒間息を止める"
+      - "口から4秒かけて息を吐く"
+      - "これを5回繰り返す"
+  guide:
+    type: string
+    description: 追加のガイダンス（オプション）
+    maxLength: 1000
+    example: "リラックスして、呼吸に意識を集中させましょう"

@@ -1,0 +1,90 @@
+get:
+  summary: 拡張気晴らし提案の取得（音声ガイド付き）
+  description: |
+    音声ガイドスクリプトを含む詳細な気晴らし提案を返します。
+    画面表示用の簡潔な情報と、音声ガイド用の詳細な情報が分離されています。
+  operationId: getEnhancedSuggestions
+  tags:
+    - enhanced-suggestions
+  parameters:
+    - $ref: '../components/parameters/Situation.yaml'
+    - $ref: '../components/parameters/Duration.yaml'
+    - $ref: '../components/parameters/AgeGroup.yaml'
+    - name: detailLevel
+      in: query
+      description: 音声ガイドの詳細度
+      required: false
+      schema:
+        type: string
+        enum: ['simple', 'standard', 'detailed']
+        default: 'standard'
+    - name: includeVoiceGuide
+      in: query
+      description: 音声ガイドスクリプトを含めるか
+      required: false
+      schema:
+        type: boolean
+        default: true
+  responses:
+    '200':
+      description: 拡張提案の取得に成功
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/EnhancedSuggestionsResponse.yaml'
+          examples:
+            enhancedExample:
+              summary: 拡張提案の例
+              value:
+                suggestions:
+                  - id: "uuid-enhanced-1"
+                    title: "マインドフルネス瞑想"
+                    description: "呼吸に意識を向けた短い瞑想"
+                    duration: 15
+                    category: "認知的"
+                    displaySteps:
+                      - "楽な姿勢で座る"
+                      - "呼吸に意識を向ける"
+                      - "雑念が浮かんだら呼吸に戻る"
+                    displayGuide: "15分間の瞑想で心を落ち着けましょう"
+                    voiceGuideScript:
+                      totalDuration: 900
+                      segments:
+                        - id: "intro-1"
+                          type: "intro"
+                          text: "これから15分間のマインドフルネス瞑想を始めます。まず、楽な姿勢で座りましょう。"
+                          ssml: "<speak><prosody rate='slow'>これから15分間のマインドフルネス瞑想を始めます。<break time='1s'/>まず、楽な姿勢で座りましょう。</prosody></speak>"
+                          duration: 8
+                          autoPlay: true
+                        - id: "main-1"
+                          type: "main"
+                          text: "ゆっくりと目を閉じて、自然な呼吸に意識を向けます。"
+                          ssml: "<speak><prosody rate='slow'>ゆっくりと目を閉じて、<break time='0.5s'/>自然な呼吸に意識を向けます。</prosody></speak>"
+                          duration: 6
+                          startTime: 10
+                      settings:
+                        pauseBetweenSegments: 2
+                        detailLevel: "standard"
+                        includeEncouragement: true
+                        breathingCues: true
+                    accessibility:
+                      hasSubtitles: true
+                      keyboardNavigable: true
+                      screenReaderOptimized: true
+                metadata:
+                  situation: "workplace"
+                  duration: 15
+                  ageGroup: "adult"
+                  detailLevel: "standard"
+                  includeVoiceGuide: true
+                  timestamp: "2025-01-07T12:00:00.000Z"
+                  voiceGuideInfo:
+                    available: true
+                    totalSegments: 10
+                    totalDuration: 900
+    '400':
+      $ref: '../components/responses/BadRequest.yaml'
+    '429':
+      $ref: '../components/responses/TooManyRequests.yaml'
+    '500':
+      $ref: '../components/responses/InternalServerError.yaml'

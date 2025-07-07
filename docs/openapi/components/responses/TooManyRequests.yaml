@@ -1,0 +1,39 @@
+description: リクエスト数が制限を超過
+headers:
+  X-RateLimit-Limit:
+    description: 制限期間内の最大リクエスト数
+    schema:
+      type: integer
+    example: 100
+  X-RateLimit-Remaining:
+    description: 残りのリクエスト可能数
+    schema:
+      type: integer
+    example: 0
+  X-RateLimit-Reset:
+    description: 制限がリセットされる時刻（Unix timestamp）
+    schema:
+      type: integer
+    example: 1704628800
+  Retry-After:
+    description: 次のリクエストまでの待機時間（秒）
+    schema:
+      type: integer
+    example: 600
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/ErrorResponse.yaml'
+    example:
+      error:
+        code: "RATE_LIMIT_EXCEEDED"
+        message: "API利用制限を超過しました。しばらく待ってから再試行してください。"
+        details:
+          what: "リクエスト数が制限を超えました"
+          why: "15分間に100回を超えるリクエストが送信されました"
+          how: "10分後に再試行するか、利用頻度を減らしてください"
+          limit: 100
+          window: "15分"
+          resetTime: "2025-01-07T12:10:00.000Z"
+        timestamp: "2025-01-07T12:00:00.000Z"
+        requestId: "req-123e4567-e89b-12d3-a456-426614174003"

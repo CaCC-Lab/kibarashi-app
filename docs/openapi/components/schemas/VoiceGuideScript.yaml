@@ -1,0 +1,51 @@
+type: object
+description: 高度な音声ガイドスクリプト
+required:
+  - totalDuration
+  - segments
+  - settings
+properties:
+  totalDuration:
+    type: number
+    description: 合計時間（秒）
+    minimum: 60
+    maximum: 1800
+    example: 900
+  segments:
+    type: array
+    description: 音声ガイドセグメントのリスト
+    minItems: 1
+    items:
+      $ref: './VoiceSegment.yaml'
+  settings:
+    type: object
+    description: 音声ガイドの設定
+    required:
+      - pauseBetweenSegments
+      - detailLevel
+      - includeEncouragement
+      - breathingCues
+    properties:
+      pauseBetweenSegments:
+        type: number
+        description: セグメント間のポーズ（秒）
+        minimum: 0
+        maximum: 10
+        default: 2
+        example: 2
+      detailLevel:
+        type: string
+        description: ガイドの詳細度
+        enum: ['simple', 'standard', 'detailed']
+        default: 'standard'
+        example: "standard"
+      includeEncouragement:
+        type: boolean
+        description: 励ましの言葉を含むか
+        default: true
+        example: true
+      breathingCues:
+        type: boolean
+        description: 呼吸指示を含むか
+        default: false
+        example: true

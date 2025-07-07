@@ -1,0 +1,44 @@
+type: object
+description: 音声読み上げリクエスト
+required:
+  - text
+properties:
+  text:
+    type: string
+    description: 読み上げるテキスト
+    minLength: 1
+    maxLength: 5000
+    example: "これから5分間のリラックスタイムを始めましょう。"
+  voiceSettings:
+    type: object
+    description: 音声設定（オプション）
+    properties:
+      gender:
+        type: string
+        description: 話者の性別
+        enum: ['MALE', 'FEMALE']
+        default: 'FEMALE'
+        example: "FEMALE"
+      speed:
+        type: number
+        description: 読み上げ速度（0.25-4.0）
+        minimum: 0.25
+        maximum: 4.0
+        default: 1.0
+        example: 1.0
+      pitch:
+        type: number
+        description: 音声のピッチ（-20.0-20.0）
+        minimum: -20.0
+        maximum: 20.0
+        default: 0.0
+        example: 0.0
+      languageCode:
+        type: string
+        description: 言語コード
+        default: "ja-JP"
+        example: "ja-JP"
+      voiceName:
+        type: string
+        description: 特定の音声名（Google Cloud TTS）
+        example: "ja-JP-Neural2-B"

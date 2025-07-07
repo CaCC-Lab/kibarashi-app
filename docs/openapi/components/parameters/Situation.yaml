@@ -1,0 +1,21 @@
+name: situation
+in: query
+description: |
+  現在の状況・場所
+  - workplace: 職場（オフィス、会議室など）
+  - home: 自宅
+  - outside: 外出先（カフェ、公園など）
+required: true
+schema:
+  type: string
+  enum: ['workplace', 'home', 'outside']
+examples:
+  workplace:
+    value: "workplace"
+    summary: "職場での利用"
+  home:
+    value: "home"
+    summary: "自宅での利用"
+  outside:
+    value: "outside"
+    summary: "外出先での利用"

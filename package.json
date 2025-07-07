@@ -33,7 +33,9 @@
     "clean": "npm run clean:frontend && npm run clean:backend && npm run clean:root",
     "clean:frontend": "cd frontend && rm -rf node_modules dist .parcel-cache",
     "clean:backend": "cd backend && rm -rf node_modules dist",
-    "clean:root": "rm -rf node_modules"
+    "clean:root": "rm -rf node_modules",
+    "check:env": "node scripts/check-env.js",
+    "validate:openapi": "node scripts/validate-openapi.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

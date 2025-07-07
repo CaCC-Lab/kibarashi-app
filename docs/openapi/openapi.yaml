@@ -1,0 +1,140 @@
+openapi: 3.0.3
+info:
+  title: 5分気晴らしアプリ API
+  description: |
+    ストレス解消のための気晴らし提案APIです。
+    職場・家・外出先で使える5分～30分の気晴らし方法を提案します。
+    
+    ## 主な機能
+    - **気晴らし提案**: 状況と時間に応じた気晴らし方法の提案
+    - **音声ガイド**: 提案内容の音声読み上げ機能
+    - **拡張提案**: 音声ガイドスクリプト付きの詳細な提案
+    
+    ## 利用方法
+    1. 現在の状況（職場、家、外出）を選択
+    2. 利用可能な時間（5分、15分、30分）を選択
+    3. 3つの気晴らし提案から好きなものを選択
+    4. 必要に応じて音声ガイドを再生
+  version: 1.1.0
+  contact:
+    name: API サポート
+    email: support@kibarashi-app.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.kibarashi-app.com/api/v1
+    description: 本番環境
+  - url: https://kibarashi-app.vercel.app/api/v1
+    description: Vercelステージング環境
+  - url: http://localhost:8080/api/v1
+    description: ローカル開発環境
+
+tags:
+  - name: health
+    description: システムヘルスチェック
+  - name: suggestions
+    description: 気晴らし提案の取得
+  - name: enhanced-suggestions
+    description: 拡張気晴らし提案（音声ガイド付き）
+  - name: tts
+    description: 音声読み上げ機能
+  - name: context
+    description: コンテキストデータ統合
+  - name: admin
+    description: 管理機能
+
+paths:
+  /health:
+    $ref: './paths/health.yaml'
+  
+  /suggestions:
+    $ref: './paths/suggestions.yaml'
+  
+  /enhanced-suggestions:
+    $ref: './paths/enhanced-suggestions.yaml'
+  
+  /tts:
+    $ref: './paths/tts.yaml'
+
+components:
+  schemas:
+    # 基本データモデル
+    Suggestion:
+      $ref: './components/schemas/Suggestion.yaml'
+    
+    EnhancedSuggestion:
+      $ref: './components/schemas/EnhancedSuggestion.yaml'
+    
+    VoiceGuideScript:
+      $ref: './components/schemas/VoiceGuideScript.yaml'
+    
+    VoiceSegment:
+      $ref: './components/schemas/VoiceSegment.yaml'
+    
+    # リクエスト/レスポンス
+    SuggestionsResponse:
+      $ref: './components/schemas/SuggestionsResponse.yaml'
+    
+    EnhancedSuggestionsResponse:
+      $ref: './components/schemas/EnhancedSuggestionsResponse.yaml'
+    
+    TTSRequest:
+      $ref: './components/schemas/TTSRequest.yaml'
+    
+    TTSResponse:
+      $ref: './components/schemas/TTSResponse.yaml'
+    
+    HealthResponse:
+      $ref: './components/schemas/HealthResponse.yaml'
+    
+    # エラーレスポンス
+    ErrorResponse:
+      $ref: './components/schemas/ErrorResponse.yaml'
+  
+  responses:
+    BadRequest:
+      $ref: './components/responses/BadRequest.yaml'
+    
+    NotFound:
+      $ref: './components/responses/NotFound.yaml'
+    
+    InternalServerError:
+      $ref: './components/responses/InternalServerError.yaml'
+    
+    TooManyRequests:
+      $ref: './components/responses/TooManyRequests.yaml'
+  
+  parameters:
+    Situation:
+      $ref: './components/parameters/Situation.yaml'
+    
+    Duration:
+      $ref: './components/parameters/Duration.yaml'
+    
+    AgeGroup:
+      $ref: './components/parameters/AgeGroup.yaml'
+
+# API全体の設定
+x-rate-limits:
+  suggestions:
+    window: 900000  # 15分
+    max: 100
+  tts:
+    window: 900000  # 15分
+    max: 50
+
+x-cors:
+  allowOrigins:
+    - https://kibarashi-app.com
+    - https://kibarashi-app.vercel.app
+    - http://localhost:3000
+  allowMethods:
+    - GET
+    - POST
+    - OPTIONS
+  allowHeaders:
+    - Content-Type
+    - Authorization
+    - X-Request-ID

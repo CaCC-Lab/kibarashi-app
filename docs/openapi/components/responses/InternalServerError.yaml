@@ -1,0 +1,30 @@
+description: サーバー内部エラー
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/ErrorResponse.yaml'
+    examples:
+      generalError:
+        summary: 一般的なサーバーエラー
+        value:
+          error:
+            code: "INTERNAL_ERROR"
+            message: "サーバーでエラーが発生しました。しばらく待ってから再試行してください。"
+            details:
+              what: "予期しないエラーが発生しました"
+              why: "サーバー内部で問題が発生しています"
+              how: "5分後に再試行するか、問題が続く場合はサポートにご連絡ください"
+            timestamp: "2025-01-07T12:00:00.000Z"
+            requestId: "req-123e4567-e89b-12d3-a456-426614174004"
+      geminiApiError:
+        summary: Gemini API エラー
+        value:
+          error:
+            code: "EXTERNAL_API_ERROR"
+            message: "AIサービスとの通信に失敗しました。フォールバック提案を表示します。"
+            details:
+              what: "Gemini APIとの通信エラー"
+              why: "外部APIサービスが一時的に利用できません"
+              how: "そのまま表示される代替提案をご利用いただくか、しばらく待ってから再試行してください"
+            timestamp: "2025-01-07T12:00:00.000Z"
+            requestId: "req-123e4567-e89b-12d3-a456-426614174005"

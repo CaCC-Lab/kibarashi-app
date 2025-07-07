@@ -1,0 +1,22 @@
+name: ageGroup
+in: query
+description: |
+  年齢層（オプション）
+  - student: 学生（18-24歳）- 就職活動中の人を含む
+  - adult: 社会人（25-49歳）- 転職活動中の人を含む
+  - senior: シニア（50歳以上）
+required: false
+schema:
+  type: string
+  enum: ['student', 'adult', 'senior']
+  default: 'adult'
+examples:
+  student:
+    value: "student"
+    summary: "学生・就活生向け"
+  adult:
+    value: "adult"
+    summary: "社会人・転職活動中の人向け"
+  senior:
+    value: "senior"
+    summary: "シニア向け"

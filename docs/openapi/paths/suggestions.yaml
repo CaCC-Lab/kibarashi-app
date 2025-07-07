@@ -1,0 +1,71 @@
+get:
+  summary: 気晴らし提案の取得
+  description: |
+    指定された状況と利用可能時間に基づいて、3つの気晴らし提案を返します。
+    提案はGemini APIを使用して生成され、フォールバックデータも用意されています。
+  operationId: getSuggestions
+  tags:
+    - suggestions
+  parameters:
+    - $ref: '../components/parameters/Situation.yaml'
+    - $ref: '../components/parameters/Duration.yaml'
+    - name: ageGroup
+      in: query
+      description: 年齢層（オプション）
+      required: false
+      schema:
+        type: string
+        enum: ['student', 'adult', 'senior']
+        default: 'adult'
+  responses:
+    '200':
+      description: 提案の取得に成功
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/SuggestionsResponse.yaml'
+          examples:
+            workplace5min:
+              summary: 職場で5分の提案例
+              value:
+                suggestions:
+                  - id: "uuid-1"
+                    title: "デスクで深呼吸"
+                    description: "椅子に座ったまま、ゆっくりと深呼吸を繰り返します"
+                    duration: 5
+                    category: "認知的"
+                    steps:
+                      - "背筋を伸ばして座る"
+                      - "鼻から4秒かけて息を吸う"
+                      - "4秒間息を止める"
+                      - "口から4秒かけて息を吐く"
+                      - "これを5回繰り返す"
+                  - id: "uuid-2"
+                    title: "軽いストレッチ"
+                    description: "席を立って、簡単な全身ストレッチを行います"
+                    duration: 5
+                    category: "行動的"
+                    steps:
+                      - "立ち上がって深呼吸"
+                      - "両手を上に伸ばす"
+                      - "左右に体を傾ける"
+                      - "肩を回す"
+                  - id: "uuid-3"
+                    title: "ポジティブ思考"
+                    description: "今日の良かったことを3つ思い出します"
+                    duration: 5
+                    category: "認知的"
+                    steps:
+                      - "目を閉じてリラックス"
+                      - "今日の良い出来事を思い出す"
+                      - "感謝の気持ちを持つ"
+                metadata:
+                  situation: "workplace"
+                  duration: 5
+                  timestamp: "2025-01-07T12:00:00.000Z"
+    '400':
+      $ref: '../components/responses/BadRequest.yaml'
+    '429':
+      $ref: '../components/responses/TooManyRequests.yaml'
+    '500':
+      $ref: '../components/responses/InternalServerError.yaml'

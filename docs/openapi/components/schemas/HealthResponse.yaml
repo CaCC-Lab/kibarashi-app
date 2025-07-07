@@ -1,0 +1,84 @@
+type: object
+description: ヘルスチェックレスポンス
+required:
+  - status
+  - timestamp
+  - service
+  - version
+  - environment
+properties:
+  status:
+    type: string
+    description: サービスの状態
+    enum: ['ok', 'degraded', 'error']
+    example: "ok"
+  timestamp:
+    type: string
+    format: date-time
+    description: チェック時刻
+    example: "2025-01-07T12:00:00.000Z"
+  service:
+    type: string
+    description: サービス名
+    example: "kibarashi-backend"
+  version:
+    type: string
+    description: APIバージョン
+    example: "1.1.0"
+  environment:
+    type: object
+    description: 環境設定の状態
+    required:
+      - geminiKeysConfigured
+      - rotationEnabled
+      - ttsEnabled
+      - hasMinimumKeys
+    properties:
+      geminiKeysConfigured:
+        type: integer
+        description: 設定されているGemini APIキーの数
+        minimum: 0
+        example: 3
+      rotationEnabled:
+        type: boolean
+        description: APIキーローテーションが有効か
+        example: true
+      ttsEnabled:
+        type: boolean
+        description: 音声読み上げ機能が有効か
+        example: true
+      hasMinimumKeys:
+        type: boolean
+        description: 最小限のAPIキーが設定されているか
+        example: true
+      nodeEnv:
+        type: string
+        description: Node.js環境
+        enum: ['development', 'production', 'test']
+        example: "production"
+  dependencies:
+    type: object
+    description: 外部依存サービスの状態（オプション）
+    properties:
+      geminiApi:
+        type: object
+        properties:
+          status:
+            type: string
+            enum: ['ok', 'error', 'unknown']
+            example: "ok"
+          latency:
+            type: number
+            description: レスポンス時間（ミリ秒）
+            example: 250.5
+      googleCloudTts:
+        type: object
+        properties:
+          status:
+            type: string
+            enum: ['ok', 'error', 'unknown']
+            example: "ok"
+          latency:
+            type: number
+            description: レスポンス時間（ミリ秒）
+            example: 180.3

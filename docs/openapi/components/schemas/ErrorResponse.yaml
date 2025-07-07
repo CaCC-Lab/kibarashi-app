@@ -1,0 +1,57 @@
+type: object
+description: エラーレスポンス
+required:
+  - error
+properties:
+  error:
+    type: object
+    required:
+      - code
+      - message
+      - timestamp
+    properties:
+      code:
+        type: string
+        description: エラーコード
+        example: "INVALID_PARAMETER"
+      message:
+        type: string
+        description: エラーメッセージ（ユーザー向け）
+        example: "場所の指定が正しくありません。workplace、home、outsideのいずれかを指定してください。"
+      details:
+        type: object
+        description: エラーの詳細情報
+        properties:
+          what:
+            type: string
+            description: 何が起きたか
+            example: "パラメータの値が無効です"
+          why:
+            type: string
+            description: なぜ起きたか
+            example: "指定された値'office'は有効な場所ではありません"
+          how:
+            type: string
+            description: どうすればよいか
+            example: "workplace、home、outsideのいずれかを指定してください"
+          field:
+            type: string
+            description: エラーが発生したフィールド
+            example: "situation"
+          value:
+            description: 実際に送信された値
+            example: "office"
+      timestamp:
+        type: string
+        format: date-time
+        description: エラー発生時刻
+        example: "2025-01-07T12:00:00.000Z"
+      requestId:
+        type: string
+        description: リクエストID（デバッグ用）
+        example: "req-123e4567-e89b-12d3-a456-426614174000"
+      documentation:
+        type: string
+        format: uri
+        description: エラーに関するドキュメントURL
+        example: "https://api.kibarashi-app.com/docs/errors#INVALID_PARAMETER"

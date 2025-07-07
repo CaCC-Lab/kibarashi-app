@@ -1,0 +1,16 @@
+description: リソースが見つからない
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/ErrorResponse.yaml'
+    example:
+      error:
+        code: "RESOURCE_NOT_FOUND"
+        message: "指定されたリソースが見つかりません。"
+        details:
+          what: "APIエンドポイントが存在しません"
+          why: "URLが正しくないか、廃止されたエンドポイントです"
+          how: "APIドキュメントで正しいエンドポイントを確認してください"
+        timestamp: "2025-01-07T12:00:00.000Z"
+        requestId: "req-123e4567-e89b-12d3-a456-426614174002"
+        documentation: "https://api.kibarashi-app.com/docs"

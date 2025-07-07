@@ -1,0 +1,33 @@
+description: リクエストが不正
+content:
+  application/json:
+    schema:
+      $ref: '../schemas/ErrorResponse.yaml'
+    examples:
+      invalidParameter:
+        summary: 無効なパラメータ
+        value:
+          error:
+            code: "INVALID_PARAMETER"
+            message: "場所の指定が正しくありません。workplace、home、outsideのいずれかを指定してください。"
+            details:
+              what: "パラメータの値が無効です"
+              why: "指定された値'office'は有効な場所ではありません"
+              how: "workplace、home、outsideのいずれかを指定してください"
+              field: "situation"
+              value: "office"
+            timestamp: "2025-01-07T12:00:00.000Z"
+            requestId: "req-123e4567-e89b-12d3-a456-426614174000"
+      missingParameter:
+        summary: 必須パラメータ不足
+        value:
+          error:
+            code: "MISSING_PARAMETER"
+            message: "必須パラメータが不足しています。"
+            details:
+              what: "必須パラメータが送信されていません"
+              why: "situationパラメータは必須です"
+              how: "URLにsituation=workplace等を追加してください"
+              field: "situation"
+            timestamp: "2025-01-07T12:00:00.000Z"
+            requestId: "req-123e4567-e89b-12d3-a456-426614174001"

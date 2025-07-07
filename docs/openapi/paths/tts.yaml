@@ -1,0 +1,87 @@
+post:
+  summary: テキストを音声に変換
+  description: |
+    指定されたテキストをGoogle Cloud Text-to-Speechを使用して音声データに変換します。
+    音声はBase64エンコードされたデータとして返されます。
+  operationId: convertTextToSpeech
+  tags:
+    - tts
+  requestBody:
+    description: 音声化するテキストと設定
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/TTSRequest.yaml'
+        examples:
+          basicRequest:
+            summary: 基本的なリクエスト
+            value:
+              text: "これから5分間のリラックスタイムを始めましょう。"
+          customVoiceRequest:
+            summary: カスタム音声設定
+            value:
+              text: "深呼吸をしながら、ゆっくりと体の力を抜いていきましょう。"
+              voiceSettings:
+                gender: "FEMALE"
+                speed: 0.9
+                pitch: -2.0
+                languageCode: "ja-JP"
+                voiceName: "ja-JP-Neural2-B"
+  responses:
+    '200':
+      description: 音声変換に成功
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/TTSResponse.yaml'
+          example:
+            audioContent: "UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAAESWAAACABAAZGF0YQAAAAA="
+            metadata:
+              contentType: "audio/mp3"
+              size: 45678
+              duration: 8.5
+              voiceInfo:
+                voiceName: "ja-JP-Neural2-B"
+                gender: "FEMALE"
+                languageCode: "ja-JP"
+    '400':
+      $ref: '../components/responses/BadRequest.yaml'
+    '413':
+      description: テキストが長すぎる
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/ErrorResponse.yaml'
+          example:
+            error:
+              code: "TEXT_TOO_LONG"
+              message: "テキストが長すぎます。5000文字以内に収めてください。"
+              details:
+                what: "入力テキストが制限を超えています"
+                why: "テキストの長さが5000文字を超えています"
+                how: "テキストを短くして再試行してください"
+                maxLength: 5000
+                actualLength: 6234
+              timestamp: "2025-01-07T12:00:00.000Z"
+              requestId: "req-123e4567-e89b-12d3-a456-426614174006"
+    '429':
+      $ref: '../components/responses/TooManyRequests.yaml'
+    '500':
+      $ref: '../components/responses/InternalServerError.yaml'
+    '503':
+      description: 音声変換サービスが利用できない
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/ErrorResponse.yaml'
+          example:
+            error:
+              code: "TTS_SERVICE_UNAVAILABLE"
+              message: "音声変換サービスが一時的に利用できません。"
+              details:
+                what: "Google Cloud TTSサービスに接続できません"
+                why: "外部サービスが一時的に利用不可能です"
+                how: "しばらく待ってから再試行するか、テキストを直接読んでください"
+              timestamp: "2025-01-07T12:00:00.000Z"
+              requestId: "req-123e4567-e89b-12d3-a456-426614174007"

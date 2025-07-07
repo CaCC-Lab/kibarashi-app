@@ -1,0 +1,41 @@
+type: object
+description: 気晴らし提案APIのレスポンス
+required:
+  - suggestions
+  - metadata
+properties:
+  suggestions:
+    type: array
+    description: 提案のリスト（通常3つ）
+    minItems: 1
+    maxItems: 5
+    items:
+      $ref: './Suggestion.yaml'
+  metadata:
+    type: object
+    description: レスポンスのメタデータ
+    required:
+      - situation
+      - duration
+      - timestamp
+    properties:
+      situation:
+        type: string
+        description: リクエストされた状況
+        enum: ['workplace', 'home', 'outside']
+        example: "workplace"
+      duration:
+        type: integer
+        description: リクエストされた時間（分）
+        enum: [5, 15, 30]
+        example: 5
+      timestamp:
+        type: string
+        format: date-time
+        description: レスポンス生成時刻
+        example: "2025-01-07T12:00:00.000Z"
+      ageGroup:
+        type: string
+        description: 年齢層（オプション）
+        enum: ['student', 'adult', 'senior']
+        example: "adult"

@@ -1,0 +1,44 @@
+type: object
+description: 音声ガイドのセグメント（SSML対応）
+required:
+  - id
+  - type
+  - text
+  - ssml
+  - duration
+properties:
+  id:
+    type: string
+    description: セグメントの一意識別子
+    example: "intro-1"
+  type:
+    type: string
+    description: セグメントの種類
+    enum: ['intro', 'main', 'transition', 'encouragement', 'closing']
+    example: "intro"
+  text:
+    type: string
+    description: 読み上げるテキスト（プレーンテキスト）
+    minLength: 1
+    maxLength: 1000
+    example: "これから15分間のマインドフルネス瞑想を始めます。まず、楽な姿勢で座りましょう。"
+  ssml:
+    type: string
+    description: SSML形式の音声指示
+    example: "<speak><prosody rate='slow'>これから15分間のマインドフルネス瞑想を始めます。<break time='1s'/>まず、楽な姿勢で座りましょう。</prosody></speak>"
+  duration:
+    type: number
+    description: セグメントの長さ（秒）
+    minimum: 1
+    maximum: 300
+    example: 8
+  startTime:
+    type: number
+    description: 開始時間（秒）- オプション
+    minimum: 0
+    example: 10
+  autoPlay:
+    type: boolean
+    description: 自動再生するか
+    default: false
+    example: true

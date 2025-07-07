@@ -1,0 +1,76 @@
+type: object
+description: 拡張気晴らし提案APIのレスポンス
+required:
+  - suggestions
+  - metadata
+properties:
+  suggestions:
+    type: array
+    description: 拡張提案のリスト（通常3つ）
+    minItems: 1
+    maxItems: 5
+    items:
+      $ref: './EnhancedSuggestion.yaml'
+  metadata:
+    type: object
+    description: レスポンスのメタデータ
+    required:
+      - situation
+      - duration
+      - ageGroup
+      - detailLevel
+      - includeVoiceGuide
+      - timestamp
+      - voiceGuideInfo
+    properties:
+      situation:
+        type: string
+        description: リクエストされた状況
+        enum: ['workplace', 'home', 'outside']
+        example: "workplace"
+      duration:
+        type: integer
+        description: リクエストされた時間（分）
+        enum: [5, 15, 30]
+        example: 15
+      ageGroup:
+        type: string
+        description: 年齢層
+        enum: ['student', 'adult', 'senior']
+        example: "adult"
+      detailLevel:
+        type: string
+        description: ガイドの詳細度
+        enum: ['simple', 'standard', 'detailed']
+        example: "standard"
+      includeVoiceGuide:
+        type: boolean
+        description: 音声ガイドを含むか
+        example: true
+      timestamp:
+        type: string
+        format: date-time
+        description: レスポンス生成時刻
+        example: "2025-01-07T12:00:00.000Z"
+      voiceGuideInfo:
+        type: object
+        description: 音声ガイド情報
+        required:
+          - available
+          - totalSegments
+          - totalDuration
+        properties:
+          available:
+            type: boolean
+            description: 音声ガイドが利用可能か
+            example: true
+          totalSegments:
+            type: integer
+            description: 総セグメント数
+            minimum: 1
+            example: 10
+          totalDuration:
+            type: number
+            description: 総時間（秒）
+            minimum: 60
+            example: 900

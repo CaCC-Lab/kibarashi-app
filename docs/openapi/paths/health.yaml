@@ -1,0 +1,31 @@
+get:
+  summary: ヘルスチェック
+  description: |
+    APIサーバーの稼働状況と設定状態を確認します。
+    環境変数の設定状況やサービスの利用可能状態を返します。
+  operationId: getHealth
+  tags:
+    - health
+  responses:
+    '200':
+      description: サービスが正常に稼働している
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/HealthResponse.yaml'
+          example:
+            status: "ok"
+            timestamp: "2025-01-07T12:00:00.000Z"
+            service: "kibarashi-backend"
+            version: "1.1.0"
+            environment:
+              geminiKeysConfigured: 3
+              rotationEnabled: true
+              ttsEnabled: true
+              hasMinimumKeys: true
+    '503':
+      description: サービスが利用できない
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/ErrorResponse.yaml'

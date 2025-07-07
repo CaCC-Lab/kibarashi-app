@@ -1,0 +1,21 @@
+name: duration
+in: query
+description: |
+  利用可能な時間（分）
+  - 5: 短い休憩（5分）
+  - 15: 中程度の休憩（15分）
+  - 30: 長めの休憩（30分）
+required: true
+schema:
+  type: integer
+  enum: [5, 15, 30]
+examples:
+  short:
+    value: 5
+    summary: "5分の短い休憩"
+  medium:
+    value: 15
+    summary: "15分の中程度の休憩"
+  long:
+    value: 30
+    summary: "30分の長めの休憩"

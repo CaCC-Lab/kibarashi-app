@@ -136,15 +136,38 @@
 
 ### 📝 ドキュメント作成
 
-- [ ] **技術ドキュメント**
-  - [ ] API仕様書（OpenAPI/Swagger）
-  - [ ] アーキテクチャ図
-  - [ ] デプロイメント手順書
+- [x] **技術ドキュメント**
+  - [x] API仕様書（OpenAPI/Swagger）（完了: 2025-01-07）
+    - OpenAPI 3.0.3仕様書を作成
+    - モジュラー構造で管理（paths、schemas、responses、parameters）
+    - 検証スクリプトも作成済み（scripts/validate-openapi.js）
+    - docs/openapi/に配置
+  - [x] アーキテクチャ図（完了: 2025-01-07）
+    - Mermaidダイアグラムで作成
+    - システム全体図、データフロー、エラーハンドリング、キャッシュ戦略等
+    - docs/architecture.mdに配置
+  - [x] デプロイメント手順書（完了: 2025-01-07）
+    - Vercelへのデプロイ手順を詳細に記載
+    - CI/CDパイプライン、環境変数設定、トラブルシューティング含む
+    - docs/deployment-guide.mdに配置
 
 - [ ] **運用ドキュメント**
-  - [ ] 環境構築手順
-  - [ ] トラブルシューティングガイド
-  - [ ] 監視・ログ設定
+  - [x] 環境構築手順（完了: 2025-01-07）
+    - Windows/macOS/Linux(WSL)対応の詳細な手順書
+    - Google Cloud Platform設定ガイド含む
+    - check:envスクリプトも作成（scripts/check-env.js）
+    - docs/environment-setup.mdに配置
+  - [x] トラブルシューティングガイド（完了: 2025-01-07）
+    - フロントエンド、バックエンド、外部API、デプロイメント関連の問題診断手順
+    - パフォーマンス問題とセキュリティ関連のトラブルシューティング
+    - 自動復旧スクリプトとエスカレーション手順を含む
+    - docs/troubleshooting.mdに配置
+  - [x] 監視・ログ設定（完了: 2025-01-07）
+    - Winston + Morganによる構造化ログ設定
+    - Sentry、Vercel Analytics、Cloud Monitoring統合
+    - アラート設定とビジネスメトリクス収集
+    - パフォーマンス監視とセキュリティ監視の実装
+    - docs/monitoring-and-logging.mdに配置
 
 ### 🚀 デプロイメント準備
 
