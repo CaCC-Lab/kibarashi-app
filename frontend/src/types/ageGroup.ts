@@ -11,7 +11,9 @@ export type AgeGroup =
   | 'office_worker'  // 社会人（20-40代）※現在のデフォルト
   | 'middle_school'  // 中学生（13-15歳）
   | 'housewife'      // 主婦（25-45歳）
-  | 'elderly';       // 高齢者（65歳以上）
+  | 'elderly'        // 高齢者（65歳以上）
+  | 'job_seeker'     // 就職活動者（20-24歳）
+  | 'career_changer';// 転職活動者（25-49歳）
 
 /**
  * 年齢層の詳細情報
@@ -116,6 +118,24 @@ export const AGE_GROUPS: Record<AgeGroup, AgeGroupInfo> = {
     ageRange: '65歳以上',
     isAvailable: false,
     releasePhase: 'Phase B'
+  },
+  job_seeker: {
+    id: 'job_seeker',
+    label: '就職活動中',
+    emoji: '📝',
+    description: '就職活動の不安やストレスを抱える方向け',
+    ageRange: '20-24歳',
+    isAvailable: true,
+    releasePhase: 'Phase A-3'
+  },
+  career_changer: {
+    id: 'career_changer',
+    label: '転職活動中',
+    emoji: '🚀',
+    description: '転職活動の悩みやプレッシャーを抱える方向け',
+    ageRange: '25-49歳',
+    isAvailable: true,
+    releasePhase: 'Phase A-3'
   }
 };
 
@@ -167,6 +187,22 @@ export const AGE_GROUP_PROMPT_CONFIGS: Record<AgeGroup, AgeGroupPromptConfig> = 
     scientificExplanationLevel: 'simple',
     safetyLevel: 'high',
     culturalContext: ['健康への不安', '孤独感', '昭和・平成の文化']
+  },
+  job_seeker: {
+    ageGroup: 'job_seeker',
+    tone: '前向きで励ます感じ、具体的でアクション志向',
+    emojiUsage: 'moderate',
+    scientificExplanationLevel: 'simple',
+    safetyLevel: 'high',
+    culturalContext: ['就活プレッシャー', '不採用の落ち込み', '将来への不安']
+  },
+  career_changer: {
+    ageGroup: 'career_changer',
+    tone: '理解と共感を示しつつ、経験を活かす視点',
+    emojiUsage: 'minimal',
+    scientificExplanationLevel: 'moderate',
+    safetyLevel: 'standard',
+    culturalContext: ['キャリアチェンジの不安', '年齢へのプレッシャー', '家族との兼ね合い']
   }
 };
 
@@ -227,6 +263,28 @@ export const AGE_GROUP_CONSTRAINTS: Record<AgeGroup, AgeGroupConstraints> = {
     },
     environmentConstraints: ['自宅', '公園', '公民館'],
     contentRestrictions: ['激しい運動', '複雑なデジタル操作'],
+    parentalConsiderationRequired: false
+  },
+  job_seeker: {
+    ageGroup: 'job_seeker',
+    timeConstraints: {
+      minDuration: 5,
+      maxDuration: 30,
+      recommendedDurations: [5, 15, 30]
+    },
+    environmentConstraints: ['自宅', 'カフェ', '図書館', 'ハローワーク'],
+    contentRestrictions: [],
+    parentalConsiderationRequired: false
+  },
+  career_changer: {
+    ageGroup: 'career_changer',
+    timeConstraints: {
+      minDuration: 5,
+      maxDuration: 30,
+      recommendedDurations: [5, 15, 30]
+    },
+    environmentConstraints: ['職場', '自宅', 'カフェ', '移動中'],
+    contentRestrictions: [],
     parentalConsiderationRequired: false
   }
 };

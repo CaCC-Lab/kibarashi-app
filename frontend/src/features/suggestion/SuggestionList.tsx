@@ -10,6 +10,8 @@ import { SituationId } from '../../types/situation';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
 import { useFeature } from '../config/featureFlags';
 import { useStudentABTest } from '../../hooks/useStudentABTest';
+import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
+import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
 
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
@@ -49,6 +51,32 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
     }
   });
   
+  // 就職活動者向けA/Bテスト
+  const {
+    isJobSeekerOptimized,
+    trackMetric: trackJobSeekerMetric
+  } = useJobSeekerABTest({
+    onExposure: (event) => {
+      console.log('[Job Seeker A/B Test] Exposure:', event);
+    },
+    onMetric: (event) => {
+      console.log('[Job Seeker A/B Test] Metric:', event);
+    }
+  });
+  
+  // 転職活動者向けA/Bテスト
+  const {
+    isCareerChangerOptimized,
+    trackMetric: trackCareerChangerMetric
+  } = useCareerChangerABTest({
+    onExposure: (event) => {
+      console.log('[Career Changer A/B Test] Exposure:', event);
+    },
+    onMetric: (event) => {
+      console.log('[Career Changer A/B Test] Metric:', event);
+    }
+  });
+  
   // フィーチャーフラグ
   const isVoiceGuideEnabled = useFeature('enhancedVoiceGuide');
   
@@ -73,8 +101,23 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
       subject: situation === 'workplace' ? '勉強全般' : undefined
     } : undefined;
     
-    fetchSuggestions(situation, duration, currentAgeGroup, studentContext);
-  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup]);
+    // 就職活動者最適化版の場合、就活向けコンテキストも渡す
+    const jobSeekerContext = isJobSeekerOptimized && currentAgeGroup === 'job_seeker' ? {
+      concern: '就職活動の合間のリフレッシュ',
+      phase: situation === 'workplace' ? '面接準備' : situation === 'home' ? '書類作成' : '説明会・面接'
+    } : undefined;
+    
+    // 転職活動者最適化版の場合、転職向けコンテキストも渡す
+    const careerChangerContext = isCareerChangerOptimized && currentAgeGroup === 'career_changer' ? {
+      concern: '転職活動の合間のリフレッシュ',
+      phase: situation === 'workplace' ? '業務と転職活動の両立' : situation === 'home' ? '転職準備' : '面接・ネットワーキング'
+    } : undefined;
+    
+    // コンテキストを統合
+    const context = studentContext || jobSeekerContext || careerChangerContext;
+    
+    fetchSuggestions(situation, duration, currentAgeGroup, context);
+  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized]);
 
   // 再取得関数
   const refetch = () => {
@@ -83,7 +126,19 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
       subject: situation === 'workplace' ? '勉強全般' : undefined
     } : undefined;
     
-    fetchSuggestions(situation, duration, currentAgeGroup, studentContext);
+    const jobSeekerContext = isJobSeekerOptimized && currentAgeGroup === 'job_seeker' ? {
+      concern: '就職活動の合間のリフレッシュ',
+      phase: situation === 'workplace' ? '面接準備' : situation === 'home' ? '書類作成' : '説明会・面接'
+    } : undefined;
+    
+    const careerChangerContext = isCareerChangerOptimized && currentAgeGroup === 'career_changer' ? {
+      concern: '転職活動の合間のリフレッシュ',
+      phase: situation === 'workplace' ? '業務と転職活動の両立' : situation === 'home' ? '転職準備' : '面接・ネットワーキング'
+    } : undefined;
+    
+    const context = studentContext || jobSeekerContext || careerChangerContext;
+    
+    fetchSuggestions(situation, duration, currentAgeGroup, context);
   };
 
   if (loading) {
@@ -175,6 +230,26 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
                 duration: suggestion.duration,
                 ageGroup: currentAgeGroup
               });
+              
+              // 就職活動者向けメトリクス
+              if (currentAgeGroup === 'job_seeker') {
+                trackJobSeekerMetric('suggestionClick', {
+                  suggestionId: suggestion.id,
+                  suggestionTitle: suggestion.title,
+                  category: suggestion.category,
+                  duration: suggestion.duration
+                });
+              }
+              
+              // 転職活動者向けメトリクス
+              if (currentAgeGroup === 'career_changer') {
+                trackCareerChangerMetric('suggestionClick', {
+                  suggestionId: suggestion.id,
+                  suggestionTitle: suggestion.title,
+                  category: suggestion.category,
+                  duration: suggestion.duration
+                });
+              }
             }}
           />
         ))}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SituationId, getSituationsForAgeGroup, getStudentContextDescription } from '../../types/situation';
+import { SituationId, getSituationsForAgeGroup, getStudentContextDescription, getJobHuntingContextDescription } from '../../types/situation';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
 
 interface SituationSelectorProps {
@@ -33,6 +33,16 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
         return {
           title: 'どちらにいらっしゃいますか？',
           message: '現在の場所をお選びください'
+        };
+      case 'job_seeker':
+        return {
+          title: 'どちらでリフレッシュしますか？ 💼',
+          message: '就活の合間に、少し息抜きしましょう'
+        };
+      case 'career_changer':
+        return {
+          title: 'どちらでリフレッシュされますか？ 🌟',
+          message: '転職活動の合間に、少し気分転換しましょう'
         };
       default: // office_worker
         return {
@@ -92,6 +102,13 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
                 {currentAgeGroup === 'student' && option.id !== 'home' && (
                   <p className="text-xs text-primary-600 mt-1 opacity-90">
                     {getStudentContextDescription(option.id as any)}
+                  </p>
+                )}
+                
+                {/* 就職・転職活動者向けの詳細説明 */}
+                {(currentAgeGroup === 'job_seeker' || currentAgeGroup === 'career_changer') && (
+                  <p className="text-xs text-primary-600 mt-1 opacity-90">
+                    {getJobHuntingContextDescription(option.id, currentAgeGroup)}
                   </p>
                 )}
               </div>

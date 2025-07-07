@@ -16,9 +16,14 @@ export type BaseSituationId = 'workplace' | 'home' | 'outside';
 export type StudentSituationId = 'studying' | 'school' | 'home' | 'commuting';
 
 /**
+ * 就職・転職活動者向けの状況ID
+ */
+export type JobHuntingSituationId = 'job_hunting';
+
+/**
  * 全ての状況IDの統合型
  */
-export type SituationId = BaseSituationId | StudentSituationId;
+export type SituationId = BaseSituationId | StudentSituationId | JobHuntingSituationId;
 
 /**
  * 状況の詳細情報
@@ -68,6 +73,16 @@ export const AGE_GROUP_SITUATIONS: Record<AgeGroup, AgeGroupSituations> = {
     ageGroup: 'elderly',
     situations: ['home', 'outside'],
     defaultSituation: 'home'
+  },
+  job_seeker: {
+    ageGroup: 'job_seeker',
+    situations: ['job_hunting', 'home', 'outside', 'workplace'],
+    defaultSituation: 'job_hunting'
+  },
+  career_changer: {
+    ageGroup: 'career_changer',
+    situations: ['job_hunting', 'workplace', 'home', 'outside'],
+    defaultSituation: 'job_hunting'
   }
 };
 
@@ -118,6 +133,13 @@ export const SITUATION_ICONS: Record<SituationId, React.ReactNode> = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
         d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
     </svg>
+  ),
+  // 就職・転職活動向け
+  job_hunting: (
+    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+        d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    </svg>
   )
 };
 
@@ -130,20 +152,20 @@ export const ALL_SITUATIONS: Record<SituationId, Omit<SituationOption, 'icon'>> 
     id: 'workplace',
     label: '職場',
     description: 'オフィスや仕事場で',
-    availableFor: ['office_worker']
+    availableFor: ['office_worker', 'job_seeker', 'career_changer']
   },
   // 汎用（複数の年齢層で使用）
   home: {
     id: 'home',
     label: '家',
     description: '自宅でリラックス',
-    availableFor: ['office_worker', 'student', 'middle_school', 'housewife', 'elderly']
+    availableFor: ['office_worker', 'student', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']
   },
   outside: {
     id: 'outside',
     label: '外出先',
     description: '外出中や移動中に',
-    availableFor: ['office_worker', 'middle_school', 'housewife', 'elderly']
+    availableFor: ['office_worker', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']
   },
   // 学生向け
   studying: {
@@ -163,6 +185,13 @@ export const ALL_SITUATIONS: Record<SituationId, Omit<SituationOption, 'icon'>> 
     label: '通学中',
     description: '電車やバスで',
     availableFor: ['student']
+  },
+  // 就職・転職活動向け
+  job_hunting: {
+    id: 'job_hunting',
+    label: '就職・転職活動',
+    description: '面接や説明会、書類作成中に',
+    availableFor: ['job_seeker', 'career_changer']
   }
 };
 
@@ -205,5 +234,38 @@ export function getStudentContextDescription(situation: StudentSituationId): str
       return '電車やバスでの通学中、混雑した車内でも';
     default:
       return '';
+  }
+}
+
+/**
+ * 就職・転職活動向けの状況説明を生成
+ */
+export function getJobHuntingContextDescription(situation: SituationId, ageGroup: 'job_seeker' | 'career_changer'): string {
+  if (ageGroup === 'job_seeker') {
+    switch (situation) {
+      case 'job_hunting':
+        return '面接前の待ち時間、説明会の合間、ESの作成で疲れた時';
+      case 'home':
+        return '企業研究の休憩中、面接練習の合間、不採用通知後の気分転換';
+      case 'outside':
+        return '面接会場への移動中、説明会場での待ち時間';
+      case 'workplace':
+        return 'インターンシップの休憩時間、アルバイト先での息抜き';
+      default:
+        return '';
+    }
+  } else { // career_changer
+    switch (situation) {
+      case 'job_hunting':
+        return '転職エージェントとの面談後、面接の待ち時間、職務経歴書作成の合間';
+      case 'workplace':
+        return '現職の昼休み、転職活動でストレスを感じた時';
+      case 'home':
+        return '求人検索の休憩中、面接準備の合間、家族に相談した後';
+      case 'outside':
+        return '面接会場への移動中、転職フェアの合間';
+      default:
+        return '';
+    }
   }
 }

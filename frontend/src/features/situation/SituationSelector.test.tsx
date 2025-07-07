@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { AgeGroupProvider } from '../../hooks/useAgeGroup';
 import SituationSelector from './SituationSelector';
 
 /**
@@ -15,7 +16,7 @@ describe('SituationSelector', () => {
   let selectCount = 0;
   let selectedValue: string | null = null;
   
-  const onSelect = (value: 'workplace' | 'home' | 'outside') => {
+  const onSelect = (value: 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting') => {
     selectCount++;
     selectedValue = value;
   };
@@ -297,6 +298,176 @@ describe('SituationSelector', () => {
       expect(gridContainer?.className).toContain('grid');
       expect(gridContainer?.className).toContain('grid-cols-1');
       expect(gridContainer?.className).toContain('md:grid-cols-3');
+    });
+  });
+
+  describe('就職活動関連状況のテスト', () => {
+    it('就職活動者(job_seeker)の場合、就職・転職活動オプションが表示される', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="job_seeker">
+          <SituationSelector 
+            selected={null} 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      // 就職・転職活動オプションが表示される
+      expect(screen.getByText('就職・転職活動')).toBeInTheDocument();
+      
+      // 基本オプションも表示される
+      expect(screen.getByText('職場')).toBeInTheDocument();
+      expect(screen.getByText('家')).toBeInTheDocument();
+      expect(screen.getByText('外出先')).toBeInTheDocument();
+    });
+
+    it('転職活動者(career_changer)の場合、就職・転職活動オプションが表示される', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="career_changer">
+          <SituationSelector 
+            selected={null} 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      // 就職・転職活動オプションが表示される
+      expect(screen.getByText('就職・転職活動')).toBeInTheDocument();
+    });
+
+    it('job_hunting状況が選択されている場合、ハイライトされる', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="job_seeker">
+          <SituationSelector 
+            selected="job_hunting" 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      const jobHuntingButton = screen.getByText('就職・転職活動').closest('button');
+      expect(jobHuntingButton?.className).toContain('border-primary-500');
+      expect(jobHuntingButton?.className).toContain('shadow-lg');
+    });
+
+    it('就職・転職活動オプションをクリックするとonSelectが呼ばれる', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="job_seeker">
+          <SituationSelector 
+            selected={null} 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      const jobHuntingButton = screen.getByText('就職・転職活動');
+      fireEvent.click(jobHuntingButton);
+      
+      expect(selectCount).toBe(1);
+      expect(selectedValue).toBe('job_hunting');
+    });
+
+    it('就職活動者の場合、適切なタイトルとメッセージが表示される', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="job_seeker">
+          <SituationSelector 
+            selected={null} 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      // job_seeker向けのタイトルとメッセージを確認
+      expect(screen.getByText('どちらでリフレッシュしますか？ 💼')).toBeInTheDocument();
+      expect(screen.getByText('就活の合間に、少し息抜きしましょう')).toBeInTheDocument();
+    });
+
+    it('転職活動者の場合、適切なタイトルとメッセージが表示される', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="career_changer">
+          <SituationSelector 
+            selected={null} 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      // career_changer向けのタイトルとメッセージを確認
+      expect(screen.getByText('どちらでリフレッシュされますか？ 🌟')).toBeInTheDocument();
+      expect(screen.getByText('転職活動の合間に、少し気分転換しましょう')).toBeInTheDocument();
+    });
+
+    it('job_hunting状況選択時にコンテキスト説明が表示される', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="job_seeker">
+          <SituationSelector 
+            selected="job_hunting" 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      // job_seekerのjob_hunting状況に対する説明文が表示される
+      expect(screen.getByText('面接前の待ち時間、説明会の合間、ESの作成で疲れた時')).toBeInTheDocument();
+    });
+
+    it('通常の年齢層では就職・転職活動オプションが表示されない', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="office_worker">
+          <SituationSelector 
+            selected={null} 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      // 就職・転職活動オプションは表示されない
+      expect(screen.queryByText('就職・転職活動')).not.toBeInTheDocument();
+      
+      // 基本オプションは表示される
+      expect(screen.getByText('職場')).toBeInTheDocument();
+      expect(screen.getByText('家')).toBeInTheDocument();
+      expect(screen.getByText('外出先')).toBeInTheDocument();
+    });
+  });
+
+  describe('年齢層に応じた状況コンテキスト説明のテスト', () => {
+    it('job_seekerの場合、各状況に適切なコンテキスト説明が表示される', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="job_seeker">
+          <SituationSelector 
+            selected="workplace" 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      // workplace状況でのjob_seeker向け説明
+      expect(screen.getByText('アルバイト先、インターン先での休憩時間')).toBeInTheDocument();
+    });
+
+    it('career_changerの場合、各状況に適切なコンテキスト説明が表示される', () => {
+      render(
+        <AgeGroupProvider initialAgeGroup="career_changer">
+          <SituationSelector 
+            selected="home" 
+            onSelect={onSelect} 
+            onBack={onBack} 
+          />
+        </AgeGroupProvider>
+      );
+      
+      // home状況でのcareer_changer向け説明
+      expect(screen.getByText('自宅での転職準備、面接準備の合間')).toBeInTheDocument();
     });
   });
 });

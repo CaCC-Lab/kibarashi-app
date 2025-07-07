@@ -4,6 +4,8 @@ import { VoiceGuidePlayer } from '../audio/VoiceGuidePlayer';
 import { useFeature } from '../config/featureFlags';
 import { useStudentABTest } from '../../hooks/useStudentABTest';
 import { useHousewifeABTest } from '../../hooks/useHousewifeABTest';
+import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
+import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
 import { Suggestion, VoiceGuideScript } from '../../services/api/types';
 
 interface SuggestionCardProps {
@@ -48,6 +50,26 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
     }
   });
   
+  // 就職活動者向けA/Bテストフックの統合
+  const {
+    trackMetric: trackJobSeekerMetric,
+    shouldRender: shouldRenderJobSeeker
+  } = useJobSeekerABTest({
+    onMetric: (event) => {
+      console.log('[SuggestionCard] Job Seeker A/B Test Metric:', event);
+    }
+  });
+  
+  // 転職活動者向けA/Bテストフックの統合
+  const {
+    trackMetric: trackCareerChangerMetric,
+    shouldRender: shouldRenderCareerChanger
+  } = useCareerChangerABTest({
+    onMetric: (event) => {
+      console.log('[SuggestionCard] Career Changer A/B Test Metric:', event);
+    }
+  });
+  
   // フィーチャーフラグによる音声ガイド機能の制御
   const isVoiceGuideEnabled = useFeature('enhancedVoiceGuide');
   const shouldShowVoiceGuide = isVoiceGuideEnabled && voiceGuideScript;
@@ -69,6 +91,24 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
       category,
       duration,
       isHousewife: ageGroup === 'housewife'
+    });
+    
+    // 就職活動者向けA/Bテストメトリクスをトラッキング
+    trackJobSeekerMetric('suggestionStart', {
+      suggestionId: id,
+      ageGroup: ageGroup || 'unknown',
+      category,
+      duration,
+      isJobSeeker: ageGroup === 'job_seeker'
+    });
+    
+    // 転職活動者向けA/Bテストメトリクスをトラッキング
+    trackCareerChangerMetric('suggestionStart', {
+      suggestionId: id,
+      ageGroup: ageGroup || 'unknown',
+      category,
+      duration,
+      isCareerChanger: ageGroup === 'career_changer'
     });
     
     // 元のonStartコールバックを実行
@@ -260,6 +300,44 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
           </div>
         )}
 
+        {/* 就職活動者向け最適化コンテンツ */}
+        {shouldRenderJobSeeker('jobSeekerFeature') && ageGroup === 'job_seeker' && (
+          <div data-testid="job-seeker-optimized-content" className="mb-4 p-4 bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-900/30 dark:to-blue-900/30 rounded-lg border border-indigo-200 dark:border-indigo-700">
+            <div className="flex items-center space-x-2 mb-2">
+              <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                  d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <h4 className="font-medium text-indigo-700 dark:text-indigo-300">就活の合間のリフレッシュタイム</h4>
+            </div>
+            <p className="text-sm text-indigo-600 dark:text-indigo-200 mb-3">
+              面接や書類作成で疲れた心と頭をリセットしましょう。
+            </p>
+            <div className="text-xs text-indigo-500 dark:text-indigo-300">
+              💼 次の挑戦への活力を充電する時間です
+            </div>
+          </div>
+        )}
+
+        {/* 転職活動者向け最適化コンテンツ */}
+        {shouldRenderCareerChanger('careerChangerFeature') && ageGroup === 'career_changer' && (
+          <div data-testid="career-changer-optimized-content" className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/30 dark:to-indigo-900/30 rounded-lg border border-purple-200 dark:border-purple-700">
+            <div className="flex items-center space-x-2 mb-2">
+              <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                  d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              <h4 className="font-medium text-purple-700 dark:text-purple-300">キャリアチェンジの不安を和らげる時間</h4>
+            </div>
+            <p className="text-sm text-purple-600 dark:text-purple-200 mb-3">
+              新しいキャリアへの一歩を踏み出すあなたを応援します。
+            </p>
+            <div className="text-xs text-purple-500 dark:text-purple-300">
+              🚀 経験を活かして、新たな挑戦への準備を整えましょう
+            </div>
+          </div>
+        )}
+
         <button
           onClick={handleStart}
           className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 hover-scale focus-ring"
@@ -274,7 +352,13 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
           <span>
             {shouldRender('studentFeature') && '学習効率アップ開始'}
             {shouldRenderHousewife('housewifeFeature') && ageGroup === 'housewife' && 'ストレス解消を始める'}
-            {!shouldRender('studentFeature') && (!shouldRenderHousewife('housewifeFeature') || ageGroup !== 'housewife') && 'この気晴らしを始める'}
+            {shouldRenderJobSeeker('jobSeekerFeature') && ageGroup === 'job_seeker' && '就活疲れをリフレッシュ'}
+            {shouldRenderCareerChanger('careerChangerFeature') && ageGroup === 'career_changer' && '転職ストレスを解消'}
+            {!shouldRender('studentFeature') && 
+             (!shouldRenderHousewife('housewifeFeature') || ageGroup !== 'housewife') && 
+             (!shouldRenderJobSeeker('jobSeekerFeature') || ageGroup !== 'job_seeker') &&
+             (!shouldRenderCareerChanger('careerChangerFeature') || ageGroup !== 'career_changer') &&
+             'この気晴らしを始める'}
           </span>
         </button>
       </div>
