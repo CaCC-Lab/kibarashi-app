@@ -72,6 +72,7 @@
 - **サーバーレスアーキテクチャ** （Vercel Functions）
 - **TypeScript** による完全な型安全性
 - **パフォーマンス最適化** （コード分割実装）
+- **APIキーローテーション** （自動フェイルオーバー機能でレート制限対策）
 
 ### 📊 実装済み機能一覧
 
@@ -92,6 +93,7 @@
 - ✅ Vercel Functions移行（サーバーレス化）
 - ✅ CI/CD パイプライン構築
 - ✅ セキュリティスキャン自動化
+- ✅ **APIキーローテーションシステム**（レート制限対策・高可用性確保）
 
 #### Phase A 完了（年齢層別展開戦略）
 
@@ -304,6 +306,18 @@
 - 既存機能（社会人向け）との完全な後方互換性を確保
 - A/Bテストシステムとの統合でデータ整合性を実現
 
+### 14. APIキーローテーションシステムの実装
+
+**課題**: Gemini APIのレート制限によるサービス停止リスク
+**解決策**:
+
+- 複数のGoogleアカウントから取得したAPIキーの自動ローテーション機能
+- APIKeyManagerクラスによる中央集権的なキー管理とシングルトンパターン
+- 失敗したキーのクールダウン機能（60分間の自動無効化）
+- 使用統計追跡とリアルタイム監視システム
+- 管理画面での可視化とVercel環境変数設定ガイド
+- 既存のGeminiClientとの完全統合（後方互換性確保）
+
 ---
 
 ## 🚀 学んだこと
@@ -315,6 +329,7 @@
 5. **パフォーマンス**: 200KB未満のバンドルサイズ達成には、依存関係の慎重な分析とコード分割戦略が必要
 6. **年齢層別展開戦略**: ペルソナベース設計からA/Bテスト実装まで、データ駆動型プロダクト開発の全プロセスを実践
 7. **フロントエンド・バックエンド統合**: TypeScript型定義とzodスキーマの一貫性管理、API仕様の進化管理を経験
+8. **高可用性システム設計**: APIキーローテーションによる障害耐性、シングルトンパターンとフェイルオーバー機構の実装を習得
 
 ---
 
@@ -324,7 +339,7 @@
 
 - Node.js 20.x 以上
 - npm または yarn
-- Gemini API キー
+- **複数の**Gemini API キー（最低3つ推奨）
 
 ### クイックスタート
 
@@ -338,7 +353,8 @@ npm run setup
 
 # 環境変数の設定
 cp frontend/.env.example frontend/.env
-# .envファイルを編集してGEMINI_API_KEYを追加
+# .envファイルを編集してGEMINI_API_KEY_1, GEMINI_API_KEY_2, GEMINI_API_KEY_3を追加
+# 詳細はdocs/vercel-env-setup.mdを参照
 
 # 開発サーバーの起動
 vercel dev
@@ -355,7 +371,12 @@ curl https://your-app.vercel.app/api/v1/debug?debug=true
 vercel logs --follow
 
 # 環境変数の設定（Vercel Dashboard経由を推奨）
-vercel env add GEMINI_API_KEY
+# 複数APIキーとローテーション設定が必要
+# 詳細は docs/vercel-env-setup.md を参照
+vercel env add GEMINI_API_KEY_1
+vercel env add GEMINI_API_KEY_2
+vercel env add GEMINI_API_KEY_3
+vercel env add GEMINI_KEY_ROTATION_ENABLED true
 ```
 
 ### テストの実行
@@ -386,6 +407,7 @@ kibarashi-app/
 │       └── health.ts        # ヘルスチェックAPI
 ├── infrastructure/    # インフラ設定
 ├── docs/             # ドキュメント
+│   └── vercel-env-setup.md  # Vercel環境変数設定ガイド
 ├── vercel.json       # Vercel設定
 └── CLAUDE.md         # Claude Code用ガイド
 ```
