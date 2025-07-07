@@ -5,7 +5,6 @@
 
 import { apiClient } from './client';
 import type { 
-  EnhancedSuggestion, 
   EnhancedSuggestionsResponse,
   Situation,
   Duration
@@ -56,11 +55,11 @@ export async function getEnhancedSuggestions({
     );
 
     // レスポンスの検証
-    if (!response.data.suggestions || !Array.isArray(response.data.suggestions)) {
+    if (!response.suggestions || !Array.isArray(response.suggestions)) {
       throw new Error('Invalid response format from enhanced suggestions API');
     }
 
-    return response.data;
+    return response;
   } catch (error) {
     // エラーハンドリング
     console.error('Enhanced suggestions API error:', error);
@@ -88,14 +87,15 @@ export async function getVoiceSegmentAudio(
   segmentId: string
 ): Promise<Blob> {
   try {
-    const response = await apiClient.get(
+    const response = await apiClient.post<Blob>(
       `/enhanced-suggestions/${suggestionId}/voice/${segmentId}`,
+      {},
       {
         responseType: 'blob'
       }
     );
 
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Voice segment fetch error:', error);
     throw {
@@ -155,5 +155,7 @@ export function getVoiceSegmentUrl(
   suggestionId: string,
   segmentId: string
 ): string {
-  return `${apiClient.defaults.baseURL}/enhanced-suggestions/${suggestionId}/voice/${segmentId}`;
+  // TODO: apiClient.defaults.baseURLの代わりに、環境変数から取得
+  const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  return `${baseURL}/enhanced-suggestions/${suggestionId}/voice/${segmentId}`;
 }

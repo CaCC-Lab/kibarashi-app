@@ -87,7 +87,8 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
   
   // Refs
   const audioPlayerRef = useRef<AudioPlayer | null>(null);
-  const progressIntervalRef = useRef<number | null>(null);
+  // TODO: プログレスバーの実装時に使用
+  // const progressIntervalRef = useRef<number | null>(null);
   
   // プレイヤーID
   const playerId = `voice-guide-${suggestionId}`;
@@ -215,7 +216,7 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
   /**
    * セグメント終了時の処理
    */
-  const handleSegmentEnd = useCallback((segment: VoiceSegment) => {
+  const handleSegmentEnd = useCallback(() => {
     // 次のセグメントがある場合
     if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
       const pauseDuration = voiceGuideScript.settings.pauseBetweenSegments * 1000;

@@ -39,9 +39,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
   const { 
     testGroup, 
     isStudentOptimized, 
-    features,
-    trackMetric,
-    trackCompletion
+    trackMetric
   } = useStudentABTest({
     onExposure: (event) => {
       console.log('[A/B Test] Exposure:', event);

@@ -32,7 +32,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   
   // 学生向けA/Bテストフックの統合
-  const { isStudentOptimized, trackMetric, shouldRender } = useStudentABTest({
+  const { trackMetric, shouldRender } = useStudentABTest({
     onMetric: (event) => {
       console.log('[SuggestionCard] Student A/B Test Metric:', event);
     }
@@ -40,7 +40,6 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
 
   // 主婦・主夫向けA/Bテストフックの統合
   const { 
-    isHousewifeOptimized, 
     trackMetric: trackHousewifeMetric, 
     shouldRender: shouldRenderHousewife 
   } = useHousewifeABTest({

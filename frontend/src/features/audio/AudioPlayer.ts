@@ -351,11 +351,12 @@ export class AudioPlayer {
  * Web Audio APIを使用した高度な音声処理（将来の拡張用）
  */
 export class AdvancedAudioPlayer extends AudioPlayer {
-  private audioContext: AudioContext | null = null;
-  private sourceNode: AudioBufferSourceNode | null = null;
-  private gainNode: GainNode | null = null;
-  
   // TODO: Web Audio APIを使用した高度な機能の実装
+  // private audioContext: AudioContext | null = null;
+  // private sourceNode: AudioBufferSourceNode | null = null;
+  // private gainNode: GainNode | null = null;
+  
+  // TODO: 以下の機能を実装予定
   // - リアルタイムエフェクト
   // - 空間音響
   // - 高度な音声分析
