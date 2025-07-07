@@ -19,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 新ターゲット層の追加（Phase B/C の代替）
 - **就職活動中の人（20-24歳）**: 面接前の緊張緩和、不採用後の気持ち転換、ES作成疲れのリフレッシュに特化
-- **転職活動中の人（25-40歳）**: 現職との両立ストレス解消、キャリア不安の軽減、長期活動のモチベーション維持に対応
+- **転職活動中の人（25-49歳）**: 現職との両立ストレス解消、キャリア不安の軽減、長期活動のモチベーション維持に対応
 - 実装計画書: `/docs/target-jobhunting-implementation-plan.md`
 
 ### 重要な開発方針
