@@ -5,6 +5,17 @@ import ttsRouter from './tts';
 
 const router = Router();
 
+// ヘルスチェックエンドポイント
+router.get('/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    service: 'kibarashi-backend',
+    version: '1.1.0',
+    ttsEnabled: process.env.GCP_TTS_ENABLED === 'true'
+  });
+});
+
 // ルートエンドポイント
 router.get('/', (_req, res) => {
   res.json({
@@ -19,6 +30,7 @@ router.get('/', (_req, res) => {
       suggestions: '/api/v1/suggestions',
       enhancedSuggestions: '/api/v1/enhanced-suggestions',
       tts: '/api/v1/tts',
+      health: '/api/v1/health'
     },
   });
 });

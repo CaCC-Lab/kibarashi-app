@@ -1,6 +1,7 @@
 import { logger } from '../../utils/logger';
 import { getFallbackSuggestions } from './fallbackData';
 import { geminiClient } from '../gemini/geminiClient';
+import { JobHuntingPromptInput } from './jobHuntingPromptTemplates';
 
 // 気晴らし提案のデータ構造
 // なぜこの構造か：ユーザーが実践しやすいように、
@@ -39,10 +40,11 @@ export interface Suggestion {
  * @returns 3つの気晴らし提案の配列
  */
 export async function generateSuggestions(
-  situation: 'workplace' | 'home' | 'outside',
+  situation: 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting',
   duration: number,
   ageGroup?: string,
-  studentContext?: { concern?: string; subject?: string }
+  studentContext?: { concern?: string; subject?: string },
+  jobHuntingContext?: Partial<JobHuntingPromptInput>
 ): Promise<Suggestion[]> {
   try {
     // ステップ1: Gemini APIの有効性を確認
@@ -52,7 +54,7 @@ export async function generateSuggestions(
       logger.info('Generating suggestions with Gemini API', { situation, duration, ageGroup });
       
       // ステップ2: AIを使ってパーソナライズされた提案を生成
-      const suggestions = await geminiClient.generateSuggestions(situation, duration, ageGroup, studentContext);
+      const suggestions = await geminiClient.generateSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
       
       // ステップ3: 必ず3つの提案を返す
       // なぜ3つか：選択肢を提供しつつ、情報過多を避けるため

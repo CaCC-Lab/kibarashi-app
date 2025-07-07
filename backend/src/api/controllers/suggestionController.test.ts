@@ -126,6 +126,65 @@ describe('suggestionController', () => {
       expect(responseJson.metadata.situation).toBe('outside');
       expect(responseJson.metadata.duration).toBe(30);
     });
+
+    it('就職・転職活動中で5分の提案を取得できる', async () => {
+      mockRequest.query = {
+        situation: 'job_hunting',
+        duration: '5',
+        ageGroup: 'job_seeker'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(Array.isArray(responseJson.suggestions)).toBe(true);
+      expect(responseJson.suggestions.length).toBeGreaterThan(0);
+      expect(responseJson.metadata.situation).toBe('job_hunting');
+      expect(responseJson.metadata.duration).toBe(5);
+    });
+
+    it('就職・転職活動中で15分の提案を取得できる', async () => {
+      mockRequest.query = {
+        situation: 'job_hunting',
+        duration: '15',
+        ageGroup: 'job_seeker'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(responseJson.metadata.situation).toBe('job_hunting');
+      expect(responseJson.metadata.duration).toBe(15);
+    });
+
+    it('就職・転職活動中で30分の提案を取得できる', async () => {
+      mockRequest.query = {
+        situation: 'job_hunting',
+        duration: '30',
+        ageGroup: 'job_seeker'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(responseJson.metadata.situation).toBe('job_hunting');
+      expect(responseJson.metadata.duration).toBe(30);
+    });
   });
 
   describe('異常系テスト', () => {
@@ -259,6 +318,134 @@ describe('suggestionController', () => {
       expect(nextCallCount).toBe(0);
       expect(responseJson).toBeDefined();
       expect(responseJson.suggestions).toBeDefined();
+    });
+
+    it('就職活動者（job_seeker）向けパラメータが正しく処理される', async () => {
+      mockRequest.query = {
+        situation: 'job_hunting',
+        duration: '15',
+        ageGroup: 'job_seeker',
+        jobHuntingPhase: 'interviewing',
+        jobHuntingConcern: '面接前の緊張',
+        jobHuntingDuration: '3-6months'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(responseJson.metadata.ageGroup).toBe('job_seeker');
+      expect(responseJson.metadata.situation).toBe('job_hunting');
+      
+      // 就職活動者向けの最適化された提案が返されることを確認
+      const suggestion = responseJson.suggestions[0];
+      expect(suggestion.description).toBeDefined();
+      expect(suggestion.title).toBeDefined();
+    });
+
+    it('転職活動者（career_changer）向けパラメータが正しく処理される', async () => {
+      mockRequest.query = {
+        situation: 'job_hunting',
+        duration: '5',
+        ageGroup: 'career_changer',
+        jobHuntingPhase: 'applying',
+        jobHuntingConcern: '職務経歴書作成のストレス',
+        jobHuntingDuration: 'over_6months'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(responseJson.metadata.ageGroup).toBe('career_changer');
+      expect(responseJson.metadata.situation).toBe('job_hunting');
+      
+      // 転職活動者向けの最適化された提案が返されることを確認
+      const suggestion = responseJson.suggestions[0];
+      expect(suggestion.description).toBeDefined();
+      expect(suggestion.title).toBeDefined();
+    });
+
+    it('job_seekerが職場状況で提案を取得できる', async () => {
+      mockRequest.query = {
+        situation: 'workplace',
+        duration: '5',
+        ageGroup: 'job_seeker',
+        jobHuntingPhase: 'preparation',
+        jobHuntingConcern: '就活準備のストレス'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(responseJson.metadata.ageGroup).toBe('job_seeker');
+      expect(responseJson.metadata.situation).toBe('workplace');
+    });
+
+    it('career_changerが家で提案を取得できる', async () => {
+      mockRequest.query = {
+        situation: 'home',
+        duration: '30',
+        ageGroup: 'career_changer',
+        jobHuntingPhase: 'waiting',
+        jobHuntingConcern: '転職活動の長期化による不安'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(responseJson.metadata.ageGroup).toBe('career_changer');
+      expect(responseJson.metadata.situation).toBe('home');
+    });
+
+    it('就職活動向けパラメータの組み合わせテスト', async () => {
+      mockRequest.query = {
+        situation: 'job_hunting',
+        duration: '15',
+        ageGroup: 'job_seeker',
+        jobHuntingPhase: 'rejected',
+        jobHuntingConcern: '不採用通知への落ち込み',
+        jobHuntingDuration: '1-3months'
+      };
+      
+      await getSuggestions(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext
+      );
+      
+      expect(responseJson).toBeDefined();
+      expect(responseJson.suggestions).toBeDefined();
+      expect(Array.isArray(responseJson.suggestions)).toBe(true);
+      expect(responseJson.suggestions.length).toBeGreaterThan(0);
+      
+      // すべての提案が適切な構造を持つことを確認
+      responseJson.suggestions.forEach((suggestion: any) => {
+        expect(suggestion).toHaveProperty('id');
+        expect(suggestion).toHaveProperty('title');
+        expect(suggestion).toHaveProperty('description');
+        expect(suggestion).toHaveProperty('duration');
+        expect(suggestion).toHaveProperty('category');
+        expect(['認知的', '行動的']).toContain(suggestion.category);
+      });
     });
   });
 

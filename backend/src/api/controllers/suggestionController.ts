@@ -5,12 +5,16 @@ import { generateSuggestions } from '../../services/suggestion/generator';
 
 // リクエストパラメータのバリデーションスキーマ
 const suggestionsQuerySchema = z.object({
-  situation: z.enum(['workplace', 'home', 'outside', 'studying', 'school', 'commuting']),
+  situation: z.enum(['workplace', 'home', 'outside', 'studying', 'school', 'commuting', 'job_hunting']),
   duration: z.enum(['5', '15', '30']).transform(Number),
   // オプショナルパラメータ - AgeGroup型に対応した値のみ許可
-  ageGroup: z.enum(['student', 'office_worker', 'middle_school', 'housewife', 'elderly']).optional(),
+  ageGroup: z.enum(['student', 'office_worker', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']).optional(),
   studentConcern: z.string().optional(),
   studentSubject: z.string().optional(),
+  // 就活・転職活動者向けパラメータ
+  jobHuntingPhase: z.enum(['preparation', 'applying', 'interviewing', 'waiting', 'rejected']).optional(),
+  jobHuntingConcern: z.string().optional(),
+  jobHuntingDuration: z.enum(['just_started', '1-3months', '3-6months', 'over_6months']).optional(),
 });
 
 export const getSuggestions = async (
@@ -21,7 +25,16 @@ export const getSuggestions = async (
   try {
     // パラメータのバリデーション
     const validatedQuery = suggestionsQuerySchema.parse(req.query);
-    const { situation, duration, ageGroup, studentConcern, studentSubject } = validatedQuery;
+    const { 
+      situation, 
+      duration, 
+      ageGroup, 
+      studentConcern, 
+      studentSubject,
+      jobHuntingPhase,
+      jobHuntingConcern,
+      jobHuntingDuration 
+    } = validatedQuery;
 
     logger.info(`Generating suggestions for situation: ${situation}, duration: ${duration}, ageGroup: ${ageGroup || 'default'}`);
 
@@ -31,8 +44,16 @@ export const getSuggestions = async (
       subject: studentSubject,
     } : undefined;
 
+    // 就活・転職活動者向けコンテキストを構築
+    const jobHuntingContext = ((ageGroup === 'job_seeker' || ageGroup === 'career_changer') && 
+      (jobHuntingPhase || jobHuntingConcern || jobHuntingDuration)) ? {
+      currentPhase: jobHuntingPhase,
+      concern: jobHuntingConcern,
+      activityDuration: jobHuntingDuration,
+    } : undefined;
+
     // 提案の生成
-    const suggestions = await generateSuggestions(situation, duration, ageGroup, studentContext);
+    const suggestions = await generateSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
 
     // キャッシュを無効化するヘッダーを設定
     res.set({
@@ -63,12 +84,12 @@ export const getSuggestions = async (
           case 'ageGroup':
             what = `年齢層パラメータ '${err.message}' が無効です`;
             why = '指定された年齢層が対応していません';
-            how = '有効な値: student, office_worker, middle_school, housewife, elderly';
+            how = '有効な値: student, office_worker, middle_school, housewife, elderly, job_seeker, career_changer';
             break;
           case 'situation':
             what = `状況パラメータ '${err.message}' が無効です`;
             why = '指定された状況が対応していません';
-            how = '有効な値: workplace, home, outside, studying, school, commuting';
+            how = '有効な値: workplace, home, outside, studying, school, commuting, job_hunting';
             break;
           case 'duration':
             what = `時間パラメータ '${err.message}' が無効です`;

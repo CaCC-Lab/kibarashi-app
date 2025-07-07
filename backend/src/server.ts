@@ -69,6 +69,18 @@ app.get('/health', (_req, res) => {
   });
 });
 
+// 404ハンドラー（すべてのルートの後に配置）
+app.use('*', (_req, res) => {
+  res.status(404).json({
+    error: {
+      message: 'リソースが見つかりません',
+      reason: '要求された情報が存在しないか、削除された可能性があります。',
+      solution: 'URLが正しいか確認してください。',
+      statusCode: 404
+    }
+  });
+});
+
 // エラーハンドリング
 app.use(errorHandler);
 

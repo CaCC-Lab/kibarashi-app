@@ -69,6 +69,51 @@ describe('generateSuggestions', () => {
         expect(suggestion.description).toBeTruthy();
       });
     });
+
+    it('就職・転職活動で5分の提案を生成できる', async () => {
+      const suggestions = await generateSuggestions('job_hunting', 5, 'job_seeker');
+      
+      expect(suggestions).toBeDefined();
+      expect(Array.isArray(suggestions)).toBe(true);
+      expect(suggestions.length).toBeGreaterThan(0);
+      expect(suggestions.length).toBeLessThanOrEqual(3);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion).toHaveProperty('id');
+        expect(suggestion).toHaveProperty('title');
+        expect(suggestion).toHaveProperty('description');
+        expect(suggestion).toHaveProperty('duration');
+        expect(suggestion).toHaveProperty('category');
+        expect(['認知的', '行動的']).toContain(suggestion.category);
+        expect(suggestion.duration).toBeLessThanOrEqual(5);
+      });
+    });
+
+    it('就職・転職活動で15分の提案を生成できる', async () => {
+      const suggestions = await generateSuggestions('job_hunting', 15, 'job_seeker');
+      
+      expect(suggestions).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion.duration).toBeLessThanOrEqual(15);
+        expect(suggestion.title).toBeTruthy();
+        expect(suggestion.description).toBeTruthy();
+      });
+    });
+
+    it('就職・転職活動で30分の提案を生成できる', async () => {
+      const suggestions = await generateSuggestions('job_hunting', 30, 'career_changer');
+      
+      expect(suggestions).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion.duration).toBeLessThanOrEqual(30);
+        expect(suggestion.title).toBeTruthy();
+        expect(suggestion.description).toBeTruthy();
+      });
+    });
   });
 
   describe('提案内容の品質テスト', () => {
@@ -181,6 +226,176 @@ describe('generateSuggestions', () => {
     });
   });
 
+  describe('年齢層別テスト', () => {
+    it('学生向けの提案を生成できる', async () => {
+      const suggestions = await generateSuggestions(
+        'studying', 
+        15, 
+        'student',
+        { concern: '期末試験のストレス', subject: '数学' }
+      );
+      
+      expect(suggestions).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion).toHaveProperty('id');
+        expect(suggestion).toHaveProperty('title');
+        expect(suggestion).toHaveProperty('description');
+        expect(['認知的', '行動的']).toContain(suggestion.category);
+      });
+    });
+
+    it('就活生向けの提案を生成できる', async () => {
+      const suggestions = await generateSuggestions(
+        'job_hunting', 
+        15, 
+        'job_seeker',
+        undefined,
+        { 
+          currentPhase: 'interviewing',
+          concern: '面接前の緊張',
+          activityDuration: '3-6months'
+        }
+      );
+      
+      expect(suggestions).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion).toHaveProperty('id');
+        expect(suggestion).toHaveProperty('title');
+        expect(suggestion).toHaveProperty('description');
+        expect(['認知的', '行動的']).toContain(suggestion.category);
+      });
+    });
+
+    it('転職活動者向けの提案を生成できる', async () => {
+      const suggestions = await generateSuggestions(
+        'job_hunting', 
+        15, 
+        'career_changer',
+        undefined,
+        { 
+          currentPhase: 'waiting',
+          concern: '条件交渉のストレス',
+          activityDuration: 'over_6months'
+        }
+      );
+      
+      expect(suggestions).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion).toHaveProperty('id');
+        expect(suggestion).toHaveProperty('title');
+        expect(suggestion).toHaveProperty('description');
+        expect(['認知的', '行動的']).toContain(suggestion.category);
+      });
+    });
+
+    it('職場環境での就活生向け提案を生成できる', async () => {
+      const suggestions = await generateSuggestions(
+        'workplace', 
+        5, 
+        'job_seeker',
+        undefined,
+        { 
+          currentPhase: 'preparation',
+          concern: '自己分析の迷い'
+        }
+      );
+      
+      expect(suggestions).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion.duration).toBeLessThanOrEqual(5);
+        // 職場で実践可能な内容になっているか確認
+        expect(suggestion.title).toBeTruthy();
+        expect(suggestion.description).toBeTruthy();
+      });
+    });
+
+    it('年齢層なしでも正常に動作する', async () => {
+      const suggestions = await generateSuggestions('workplace', 15);
+      
+      expect(suggestions).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion).toHaveProperty('id');
+        expect(suggestion).toHaveProperty('title');
+        expect(suggestion).toHaveProperty('description');
+      });
+    });
+  });
+
+  describe('ジョブハンティングコンテキストのテスト', () => {
+    it('各フェーズでの就活提案を生成できる', async () => {
+      const phases = ['preparation', 'applying', 'interviewing', 'waiting', 'rejected'] as const;
+      
+      for (const phase of phases) {
+        const suggestions = await generateSuggestions(
+          'job_hunting', 
+          15, 
+          'job_seeker',
+          undefined,
+          { currentPhase: phase }
+        );
+        
+        expect(suggestions).toBeDefined();
+        expect(suggestions.length).toBeGreaterThan(0);
+        
+        suggestions.forEach(suggestion => {
+          expect(suggestion).toHaveProperty('id');
+          expect(suggestion).toHaveProperty('title');
+          expect(suggestion).toHaveProperty('description');
+        });
+      }
+    });
+
+    it('各活動期間での提案を生成できる', async () => {
+      const durations = ['just_started', '1-3months', '3-6months', 'over_6months'] as const;
+      
+      for (const duration of durations) {
+        const suggestions = await generateSuggestions(
+          'job_hunting', 
+          15, 
+          'career_changer',
+          undefined,
+          { activityDuration: duration }
+        );
+        
+        expect(suggestions).toBeDefined();
+        expect(suggestions.length).toBeGreaterThan(0);
+        
+        suggestions.forEach(suggestion => {
+          expect(suggestion).toHaveProperty('id');
+          expect(suggestion).toHaveProperty('title');
+          expect(suggestion).toHaveProperty('description');
+        });
+      }
+    });
+
+    it('コンテキスト情報なしでも就活提案を生成できる', async () => {
+      const suggestions = await generateSuggestions(
+        'job_hunting', 
+        15, 
+        'job_seeker'
+      );
+      
+      expect(suggestions).toBeDefined();
+      expect(suggestions.length).toBeGreaterThan(0);
+      
+      suggestions.forEach(suggestion => {
+        expect(suggestion).toHaveProperty('id');
+        expect(suggestion).toHaveProperty('title');
+        expect(suggestion).toHaveProperty('description');
+      });
+    });
+  });
+
   describe('パフォーマンステスト', () => {
     it('提案生成は3秒以内に完了する', async () => {
       const startTime = Date.now();
@@ -196,7 +411,7 @@ describe('generateSuggestions', () => {
       const results = await Promise.all([
         generateSuggestions('workplace', 5),
         generateSuggestions('home', 15),
-        generateSuggestions('outside', 30)
+        generateSuggestions('job_hunting', 30, 'job_seeker')
       ]);
       
       // すべての結果が正常であることを確認
@@ -204,6 +419,27 @@ describe('generateSuggestions', () => {
         expect(suggestions).toBeDefined();
         expect(suggestions.length).toBeGreaterThan(0);
       });
+    });
+
+    it('複雑なコンテキストでも適切な時間で完了する', async () => {
+      const startTime = Date.now();
+      
+      await generateSuggestions(
+        'job_hunting', 
+        15, 
+        'career_changer',
+        undefined,
+        { 
+          currentPhase: 'interviewing',
+          concern: '複数企業の面接スケジュール調整によるストレス',
+          stressFactor: '現職との両立の難しさ',
+          activityDuration: 'over_6months'
+        }
+      );
+      
+      const endTime = Date.now();
+      const executionTime = endTime - startTime;
+      expect(executionTime).toBeLessThan(5000); // 5秒以内
     });
   });
 });

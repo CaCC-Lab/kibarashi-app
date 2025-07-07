@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../../utils/logger';
 import { EnhancedSuggestionGenerator } from '../suggestion/enhancedSuggestionGenerator.js';
 import { createStudentPrompt, StudentPromptInput } from '../suggestion/studentPromptTemplates.js';
+import { createJobSeekerPrompt, createCareerChangerPrompt, JobHuntingPromptInput } from '../suggestion/jobHuntingPromptTemplates.js';
 
 class GeminiClient {
   private genAI: GoogleGenerativeAI;
@@ -23,11 +24,22 @@ class GeminiClient {
     situation: string,
     duration: number,
     ageGroup?: string,
-    studentContext?: Partial<StudentPromptInput>
+    studentContext?: Partial<StudentPromptInput>,
+    jobHuntingContext?: Partial<JobHuntingPromptInput>
   ): Promise<any[]> {
     try {
-      const prompt = this.createPrompt(situation, duration, ageGroup, studentContext);
-      const result = await this.model.generateContent(prompt);
+      const prompt = this.createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext);
+      
+      // タイムアウト付きでGemini APIを呼び出し
+      const timeoutMs = process.env.NODE_ENV === 'test' ? 3000 : 10000; // テスト環境では3秒、本番では10秒
+      const apiCall = this.model.generateContent(prompt);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`Gemini API timeout after ${timeoutMs}ms`));
+        }, timeoutMs);
+      });
+      
+      const result = await Promise.race([apiCall, timeoutPromise]);
       const response = await result.response;
       const text = response.text();
       
@@ -36,17 +48,23 @@ class GeminiClient {
       logger.info('Gemini API response received', { 
         situation, 
         duration, 
-        suggestionCount: suggestions.length 
+        suggestionCount: suggestions.length,
+        responseTime: `< ${timeoutMs}ms`
       });
       
       return suggestions;
     } catch (error) {
-      logger.error('Gemini API error', { error, situation, duration });
+      logger.error('Gemini API error', { 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        situation, 
+        duration,
+        stack: error instanceof Error ? error.stack : undefined
+      });
       throw error;
     }
   }
 
-  private createPrompt(situation: string, duration: number, ageGroup: string = 'office_worker', studentContext?: Partial<StudentPromptInput>): string {
+  private createPrompt(situation: string, duration: number, ageGroup: string = 'office_worker', studentContext?: Partial<StudentPromptInput>, jobHuntingContext?: Partial<JobHuntingPromptInput>): string {
     // 学生の場合、詳細なプロンプト生成を使用
     if (ageGroup === 'student' && studentContext) {
       const studentInput: StudentPromptInput = {
@@ -72,6 +90,36 @@ class GeminiClient {
       studentInput.situation = studentSituationMap[situation] || 'studying';
       
       return createStudentPrompt(studentInput);
+    }
+    
+    // 就活生の場合、専用のプロンプト生成を使用
+    if (ageGroup === 'job_seeker' && jobHuntingContext) {
+      const jobSeekerInput: JobHuntingPromptInput = {
+        activityType: 'job_seeking',
+        currentPhase: jobHuntingContext.currentPhase,
+        concern: jobHuntingContext.concern || '',
+        time: duration,
+        situation: situation as any,
+        stressFactor: jobHuntingContext.stressFactor,
+        activityDuration: jobHuntingContext.activityDuration
+      };
+      
+      return createJobSeekerPrompt(jobSeekerInput);
+    }
+    
+    // 転職活動者の場合、専用のプロンプト生成を使用
+    if (ageGroup === 'career_changer' && jobHuntingContext) {
+      const careerChangerInput: JobHuntingPromptInput = {
+        activityType: 'career_change',
+        currentPhase: jobHuntingContext.currentPhase,
+        concern: jobHuntingContext.concern || '',
+        time: duration,
+        situation: situation as any,
+        stressFactor: jobHuntingContext.stressFactor,
+        activityDuration: jobHuntingContext.activityDuration
+      };
+      
+      return createCareerChangerPrompt(careerChangerInput);
     }
     
     // 年齢層別のプロンプト設定を取得
@@ -153,6 +201,24 @@ ${this.getActivityGuidelines(ageGroup, situation)}
           scientificExplanation: '簡単な科学的根拠を分かりやすく説明',
           specialConsiderations: '思春期の悩み、学校生活のストレス、親との関係、安全性を最優先'
         };
+      case 'job_seeker':
+        return {
+          persona: 'あなたは就職活動中の若者（20-24歳）に寄り添うキャリアカウンセラーです。\n初めての就職活動の不安や緊張を理解し、前向きで実践的なアドバイスを提供してください。',
+          target: '20-24歳の就職活動中の方',
+          tone: '応援しながら寄り添う感じで、プレッシャーを与えない',
+          emojiUsage: 'moderate',
+          scientificExplanation: 'ストレス軽減効果を簡潔に説明',
+          specialConsiderations: '面接前の緊張、ES作成疲れ、不採用による自己肯定感低下、周囲との比較による焦り、自己分析の難しさに配慮'
+        };
+      case 'career_changer':
+        return {
+          persona: 'あなたは転職活動中の方（25-49歳）の状況を深く理解するキャリアアドバイザーです。\n現職との両立の大変さ、キャリアの悩み、年齢や経験に応じた不安を理解し、実践的で共感的なアドバイスを提供してください。',
+          target: '25-49歳の転職活動中の方',
+          tone: '共感的で落ち着いた感じで、専門的かつ実用的',
+          emojiUsage: 'minimal',
+          scientificExplanation: 'ビジネスパーソン向けに効果を端的に説明',
+          specialConsiderations: '現職との両立、給与・待遇交渉のストレス、家族の期待、不採用の連続による自信喪失、40代後半の方は管理職経験と求人ニーズのミスマッチ・給与ダウンへの葛藤に特に配慮'
+        };
       case 'housewife':
         return {
           persona: 'あなたは主婦・主夫の方の気持ちに共感する実用的なアドバイザーです。\n家事や育児の負担を理解し、温かく実践的なアドバイスを提供してください。',
@@ -190,7 +256,8 @@ ${this.getActivityGuidelines(ageGroup, situation)}
     const baseMaps = {
       workplace: '職場',
       home: '家・自宅',
-      outside: '外出先'
+      outside: '外出先',
+      job_hunting: '就職・転職活動中'
     };
 
     switch (ageGroup) {
@@ -242,6 +309,29 @@ ${this.getActivityGuidelines(ageGroup, situation)}
 - 危険な身体活動や外出を必要とする活動は避ける
 - 思春期の心理的変化に配慮した内容
 - 親や先生に相談しやすい方法も含める`;
+
+      case 'job_seeker':
+        return `${baseGuidelines}
+
+就活生向け特別配慮：
+- 面接前の緊張緩和に効果的な方法（深呼吸、アファメーション、軽いストレッチ）
+- 不採用通知後の気持ちの切り替え方法（感情受容、小さな達成感、気分転換）
+- ES・書類作成疲れのリフレッシュ方法（目の体操、音楽、瞑想）
+- 長期化する活動へのモチベーション維持方法（偉人の名言、進歩の確認、未来を想像）
+- 説明会・面接の移動中でも実践可能な内容
+- 自己肯定感を高める活動を重視`;
+
+      case 'career_changer':
+        return `${baseGuidelines}
+
+転職活動者向け特別配慮：
+- 現職の休憩時間や昼休みに実践可能な短時間の活動
+- 面接前の緊張緩和（プレゼン準備、自信を高める方法）
+- 不採用の連続による自信回復方法（経験の価値の再認識、感謝のワーク）
+- 40代後半向け：キャリアの棚卸し、未来からの逆算思考、経験を価値として捉え直す活動
+- 家族の期待によるプレッシャー軽減方法
+- 給与・条件交渉のストレス緩和方法
+- ワークライフバランスを意識した気晴らし`;
 
       case 'housewife':
         return `${baseGuidelines}
@@ -414,11 +504,11 @@ ${this.getActivityGuidelines(ageGroup, situation)}
 let instance: GeminiClient | null = null;
 
 export const geminiClient = {
-  generateSuggestions: async (situation: 'workplace' | 'home' | 'outside' | string, duration: number, ageGroup?: string, studentContext?: Partial<StudentPromptInput>) => {
+  generateSuggestions: async (situation: 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting', duration: number, ageGroup?: string, studentContext?: Partial<StudentPromptInput>, jobHuntingContext?: Partial<JobHuntingPromptInput>) => {
     if (!instance) {
       instance = new GeminiClient();
     }
-    return instance.generateSuggestions(situation, duration, ageGroup, studentContext);
+    return instance.generateSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
   },
   
   generateEnhancedSuggestions: async (situation: 'workplace' | 'home' | 'outside', duration: number, ageGroup?: string) => {
