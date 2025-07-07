@@ -263,7 +263,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
         )}
 
         {/* 学生向け最適化コンテンツ */}
-        {shouldRender('studentFeature') && (
+        {shouldRender('studentFeature') && (ageGroup === 'student' || ageGroup === 'middle_school') && (
           <div data-testid="student-optimized-content" className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/30 dark:to-green-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
             <div className="flex items-center space-x-2 mb-2">
               <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -350,11 +350,11 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
               d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>
-            {shouldRender('studentFeature') && '学習効率アップ開始'}
+            {shouldRender('studentFeature') && (ageGroup === 'student' || ageGroup === 'middle_school') && '学習効率アップ開始'}
             {shouldRenderHousewife('housewifeFeature') && ageGroup === 'housewife' && 'ストレス解消を始める'}
             {shouldRenderJobSeeker('jobSeekerFeature') && ageGroup === 'job_seeker' && '就活疲れをリフレッシュ'}
             {shouldRenderCareerChanger('careerChangerFeature') && ageGroup === 'career_changer' && '転職ストレスを解消'}
-            {!shouldRender('studentFeature') && 
+            {(!shouldRender('studentFeature') || (ageGroup !== 'student' && ageGroup !== 'middle_school')) && 
              (!shouldRenderHousewife('housewifeFeature') || ageGroup !== 'housewife') && 
              (!shouldRenderJobSeeker('jobSeekerFeature') || ageGroup !== 'job_seeker') &&
              (!shouldRenderCareerChanger('careerChangerFeature') || ageGroup !== 'career_changer') &&

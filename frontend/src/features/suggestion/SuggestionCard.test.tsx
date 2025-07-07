@@ -351,6 +351,7 @@ describe('SuggestionCard', () => {
           description="A/Bテスト統合確認"
           duration={5}
           category="認知的"
+          ageGroup="student"
           onStart={onStart}
         />
       );

@@ -16,22 +16,22 @@ interface DurationSelectorProps {
 const durations: DurationOption[] = [
   {
     id: 5,
-    label: '5分',
-    description: 'ちょっとした気分転換に',
+    label: 'ちょっとした気分転換に',
+    description: '短時間でさっとリフレッシュ',
     color: 'from-accent-400 to-accent-600',
     examples: '深呼吸、軽いストレッチ',
   },
   {
     id: 15,
-    label: '15分',
-    description: 'しっかりリフレッシュ',
+    label: 'しっかりリフレッシュ',
+    description: '適度な時間でリラックス',
     color: 'from-primary-400 to-primary-600',
     examples: '瞑想、散歩、読書',
   },
   {
     id: 30,
-    label: '30分',
-    description: 'じっくり気晴らし',
+    label: 'じっくり気晴らし',
+    description: '時間をかけて気分転換',
     color: 'from-secondary-400 to-secondary-600',
     examples: '運動、料理、創作活動',
   },
@@ -95,9 +95,9 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className={`text-xl font-bold transition-colors duration-200 ${
+                    <span className={`text-lg font-bold transition-colors duration-200 ${
                       selected === option.id ? 'text-primary-600' : 'text-text-primary'
-                    }`}>{option.id}</span>
+                    }`}>{option.id}分</span>
                   </div>
                 </div>
                 
