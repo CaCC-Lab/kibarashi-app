@@ -2,7 +2,7 @@ import { VercelRequest, VercelResponse } from "@vercel/node";
 import { z } from "zod";
 
 // Import core logic from shared package
-import { generateEnhancedSuggestions, logger } from "../../packages/core-logic/dist/index.js";
+import { generateEnhancedSuggestions, logger } from "core-logic";
 
 // Standard API response types
 type ApiResponseSuccess<T> = {
