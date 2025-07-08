@@ -1,5 +1,14 @@
 {
   "installCommand": "npm install && npm run build:logic && cd api && npm install",
+  "functions": {
+    "api/*.ts": {
+      "runtime": "@vercel/node@3"
+    },
+    "api/v1/*.ts": {
+      "runtime": "@vercel/node@3"
+    }
+  },
+  "framework": null,
   "rewrites": [
     {
       "source": "/api/(.*)",
