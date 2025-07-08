@@ -48,6 +48,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   console.log('[HANDLER] Function invoked at:', new Date().toISOString());
   console.log('[HANDLER] Method:', req.method);
   console.log('[HANDLER] Query params:', req.query);
+  console.log('[HANDLER] Environment NODE_ENV:', process.env.NODE_ENV);
+  console.log('[HANDLER] Environment VERCEL:', process.env.VERCEL);
+  console.log('[HANDLER] Environment keys count:', Object.keys(process.env).length);
   
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -100,10 +103,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
       } catch (importError) {
         console.error('[HANDLER] Import test failed:', importError);
+        console.error('[HANDLER] Error stack:', (importError as any)?.stack);
         return res.status(500).json({
           status: 'error',
           message: 'Import test failed',
           error: (importError as any).message,
+          stack: (importError as any)?.stack,
           timestamp: new Date().toISOString()
         });
       }
