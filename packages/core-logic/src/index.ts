@@ -25,6 +25,3 @@ export { seasonalClient } from './services/external/seasonalClient.js';
 
 // Utils
 export { logger } from './utils/logger.js';
-
-// Data
-export { default as suggestionsData } from './data/suggestions.json';

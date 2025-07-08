@@ -1,4 +1,4 @@
-import winston from 'winston';
+import * as winston from 'winston';
 
 // 循環参照を安全に処理するためのJSON.stringify代替関数
 const safeStringify = (obj: any): string => {
