@@ -35,12 +35,26 @@ export class APIKeyManager {
     rateLimitHits: 0
   };
 
+  private isInitialized = false;
+
   constructor() {
     this.config = {
       rotationEnabled: process.env.GEMINI_KEY_ROTATION_ENABLED === 'true',
       retryAttempts: parseInt(process.env.GEMINI_RETRY_ATTEMPTS || '3'),
       cooldownMinutes: parseInt(process.env.GEMINI_COOLDOWN_MINUTES || '60')
     };
+
+    // 遅延初期化（初回のAPI使用時に実行）
+    logger.info('API Key Manager created - initialization deferred until first use');
+  }
+
+  /**
+   * 遅延初期化を実行
+   */
+  private ensureInitialized(): void {
+    if (this.isInitialized) {
+      return;
+    }
 
     this.initializeApiKeys();
     
@@ -67,6 +81,8 @@ export class APIKeyManager {
       retryAttempts: this.config.retryAttempts,
       cooldownMinutes: this.config.cooldownMinutes
     });
+    
+    this.isInitialized = true;
   }
 
   /**
@@ -114,6 +130,7 @@ export class APIKeyManager {
    * 現在使用可能なAPIキーを取得
    */
   getCurrentApiKey(): string {
+    this.ensureInitialized();
     this.updateCooldownStatus();
     
     const availableKeys = this.apiKeys.filter(key => !key.isOnCooldown);
@@ -179,6 +196,7 @@ export class APIKeyManager {
    * APIキーの失敗を記録し、必要に応じてクールダウンを設定
    */
   markKeyAsFailure(apiKey: string, isRateLimit: boolean = false): void {
+    this.ensureInitialized();
     const keyInfo = this.apiKeys.find(k => k.key === apiKey);
     if (!keyInfo) {
       logger.warn('Unknown API key reported as failed', { apiKey: apiKey.substring(0, 10) + '...' });
@@ -208,6 +226,7 @@ export class APIKeyManager {
    * APIキーの成功を記録
    */
   markKeyAsSuccess(apiKey: string): void {
+    this.ensureInitialized();
     const keyInfo = this.apiKeys.find(k => k.key === apiKey);
     if (keyInfo) {
       keyInfo.failureCount = Math.max(0, keyInfo.failureCount - 1); // 成功時は失敗カウントを減らす
@@ -251,6 +270,7 @@ export class APIKeyManager {
    * 利用可能なキーの数を取得
    */
   getAvailableKeyCount(): number {
+    this.ensureInitialized();
     this.updateCooldownStatus();
     return this.apiKeys.filter(key => !key.isOnCooldown).length;
   }
@@ -259,6 +279,7 @@ export class APIKeyManager {
    * 統計情報を取得
    */
   getStats() {
+    this.ensureInitialized();
     return {
       ...this.stats,
       totalKeys: this.apiKeys.length,
@@ -277,6 +298,7 @@ export class APIKeyManager {
    * 全てのキーのクールダウンをリセット（緊急時用）
    */
   resetAllCooldowns(): void {
+    this.ensureInitialized();
     for (const keyInfo of this.apiKeys) {
       keyInfo.isOnCooldown = false;
       keyInfo.cooldownUntil = null;
@@ -290,6 +312,7 @@ export class APIKeyManager {
    * 手動でキーローテーション
    */
   forceRotation(): string {
+    this.ensureInitialized();
     if (!this.config.rotationEnabled) {
       logger.warn('Key rotation is disabled, ignoring force rotation request');
       return this.getCurrentApiKey();
