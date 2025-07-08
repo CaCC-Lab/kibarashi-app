@@ -34,6 +34,9 @@
     "check:env": "node scripts/check-env.js",
     "validate:openapi": "node scripts/validate-openapi.js"
   },
+  "dependencies": {
+    "@vercel/node": "^3.0.0"
+  },
   "devDependencies": {
     "@playwright/test": "^1.53.2",
     "concurrently": "^8.2.2",
