@@ -1,25 +1,17 @@
 {
-  "name": "kibarashi-api",
+  "name": "kibarashi-app-api",
   "version": "1.0.0",
-  "description": "Serverless API functions for Kibarashi App",
+  "description": "Vercel serverless functions for kibarashi-app",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "vercel dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vercel dev"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
-    "@google-cloud/text-to-speech": "^5.8.1",
-    "zod": "^3.22.4"
+    "@vercel/node": "^3.0.0"
   },
   "devDependencies": {
-    "@vercel/node": "^3.0.0",
-    "@types/node": "^20.10.0",
-    "typescript": "^5.3.3"
-  },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "license": "UNLICENSED"
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
 }
