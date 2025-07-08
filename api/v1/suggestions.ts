@@ -78,10 +78,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
     console.log('[HANDLER] Starting main logic...');
     
+    // Quick debug mode for testing
+    if (req.query.debug === 'quick') {
+      console.log('[HANDLER] Quick debug mode');
+      return res.status(200).json({
+        status: 'success',
+        message: 'Quick debug mode working',
+        timestamp: new Date().toISOString(),
+        query: req.query
+      });
+    }
+    
     // Test module import before processing
     console.log('[HANDLER] Testing module imports...');
     console.log('[HANDLER] generateEnhancedSuggestions type:', typeof generateEnhancedSuggestions);
     console.log('[HANDLER] logger type:', typeof logger);
+    
+    // Import test mode
+    if (req.query.debug === 'import') {
+      console.log('[HANDLER] Import test mode');
+      try {
+        logger.info('Import test - logger working');
+        return res.status(200).json({
+          status: 'success',
+          message: 'Import test successful',
+          generateEnhancedSuggestions: typeof generateEnhancedSuggestions,
+          logger: typeof logger,
+          timestamp: new Date().toISOString()
+        });
+      } catch (importError) {
+        console.error('[HANDLER] Import test failed:', importError);
+        return res.status(500).json({
+          status: 'error',
+          message: 'Import test failed',
+          error: (importError as any).message,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
     
     // Validate request parameters
     console.log('[HANDLER] Validating request parameters...');
