@@ -22,7 +22,7 @@ class ContextAPI {
       }
 
       // バックエンドAPIからデータを取得
-      const response = await fetch('/api/v1/context/current', {
+      const response = await fetch('/api/v1/context', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
