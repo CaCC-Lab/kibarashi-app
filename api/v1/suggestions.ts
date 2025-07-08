@@ -1,8 +1,8 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { z } from "zod";
 
-// Import core logic from shared package
-import { generateEnhancedSuggestions, logger } from "core-logic";
+// Import core logic from shared package - using dynamic import to avoid startup errors
+// import { generateEnhancedSuggestions, logger } from "core-logic";
 
 // Standard API response types
 type ApiResponseSuccess<T> = {
@@ -32,17 +32,24 @@ const suggestionsQuerySchema = z.object({
   jobHuntingDuration: z.enum(['just_started', '1-3months', '3-6months', 'over_6months']).optional(),
 });
 
-function handleError(res: VercelResponse, error: unknown): VercelResponse {
-  if (error instanceof z.ZodError) {
-    logger.warn('Validation error in suggestions API:', error.issues);
-    return res.status(400).json({
-      status: 'error',
-      message: '入力データが無効です。パラメータを確認してください。',
-      code: 'INVALID_INPUT',
-    } as ApiResponseError);
-  }
+async function handleError(res: VercelResponse, error: unknown): Promise<VercelResponse> {
+  try {
+    const { logger } = await import("core-logic");
+    
+    if (error instanceof z.ZodError) {
+      logger.warn('Validation error in suggestions API:', error.issues);
+      return res.status(400).json({
+        status: 'error',
+        message: '入力データが無効です。パラメータを確認してください。',
+        code: 'INVALID_INPUT',
+      } as ApiResponseError);
+    }
 
-  logger.error('Unhandled error in suggestions API:', error);
+    logger.error('Unhandled error in suggestions API:', error);
+  } catch (importError) {
+    console.error('Failed to import logger for error handling:', importError);
+  }
+  
   return res.status(500).json({
     status: 'error',
     message: 'サーバー内部でエラーが発生しました。時間をおいて再試行してください。',
@@ -89,15 +96,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
     
-    // Test module import before processing
-    console.log('[HANDLER] Testing module imports...');
-    console.log('[HANDLER] generateEnhancedSuggestions type:', typeof generateEnhancedSuggestions);
-    console.log('[HANDLER] logger type:', typeof logger);
-    
     // Import test mode
     if (req.query.debug === 'import') {
       console.log('[HANDLER] Import test mode');
       try {
+        console.log('[HANDLER] Testing dynamic import...');
+        const { generateEnhancedSuggestions, logger } = await import("core-logic");
+        console.log('[HANDLER] Dynamic import successful');
         logger.info('Import test - logger working');
         return res.status(200).json({
           status: 'success',
@@ -135,6 +140,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } = validatedQuery;
 
     console.log('[HANDLER] Validated params:', { situation, duration, location, ageGroup });
+    
+    // Dynamic import of core logic functions to avoid startup errors
+    console.log('[HANDLER] Importing core logic functions...');
+    const { generateEnhancedSuggestions, logger } = await import("core-logic");
+    console.log('[HANDLER] Core logic functions imported successfully');
+    
     logger.info(`Generating suggestions for situation: ${situation}, duration: ${duration}, location: ${location}, ageGroup: ${ageGroup || 'default'}`);
 
     // Build context for enhanced suggestions
