@@ -1,7 +1,10 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "frontend/dist",
   "installCommand": "npm install && cd packages/core-logic && npm install && npm run build && cd ../../api && npm install && cd ..",
+  "functions": {
+    "api/**/*.ts": {
+      "runtime": "@vercel/node@3"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
