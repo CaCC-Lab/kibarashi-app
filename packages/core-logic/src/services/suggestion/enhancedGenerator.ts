@@ -164,7 +164,7 @@ export async function generateEnhancedSuggestions(
       includeVoiceGuide
     });
     
-    return await generateEnhancedFallback(situation, duration, detailLevel);
+    return await generateEnhancedFallback(situation, duration, detailLevel, ageGroup);
     
   } catch (error) {
     // エラーハンドリング：AI生成が失敗してもサービスを継続
@@ -179,7 +179,7 @@ export async function generateEnhancedSuggestions(
     });
     
     // 拡張フォールバックデータを使用
-    return await generateEnhancedFallback(situation, duration, detailLevel);
+    return await generateEnhancedFallback(situation, duration, detailLevel, ageGroup);
   }
 }
 
@@ -190,7 +190,8 @@ export async function generateEnhancedSuggestions(
 async function generateEnhancedFallback(
   situation: string,
   duration: number,
-  detailLevel: 'simple' | 'standard' | 'detailed'
+  detailLevel: 'simple' | 'standard' | 'detailed',
+  ageGroup?: string
 ): Promise<EnhancedSuggestion[]> {
   // situationをフォールバックで対応可能な型に変換
   type FallbackSituation = 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting';
@@ -206,8 +207,8 @@ async function generateEnhancedFallback(
     fallbackSituation = 'home';
   }
   
-  // 従来のフォールバックデータを取得
-  const fallbackSuggestions = getFallbackSuggestions(fallbackSituation, duration);
+  // 従来のフォールバックデータを取得（ageGroupパラメータを追加）
+  const fallbackSuggestions = getFallbackSuggestions(fallbackSituation, duration, ageGroup);
   
   // 拡張提案ジェネレーターを使用して音声ガイドを生成
   const enhancedGenerator = new EnhancedSuggestionGenerator();
