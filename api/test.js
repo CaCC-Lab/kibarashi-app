@@ -1,4 +1,4 @@
-module.exports = (req, res) => {
+export default (req, res) => {
   console.log('[TEST] Function invoked at:', new Date().toISOString());
   console.log('[TEST] Method:', req.method);
   console.log('[TEST] Query:', req.query);
