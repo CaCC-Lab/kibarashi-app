@@ -10,6 +10,16 @@ async function testEndpoint(path) {
     const data = await response.json();
     console.log(`Status: ${response.status}`);
     console.log('Response:', JSON.stringify(data, null, 2));
+    
+    // 検証: suggestionsエンドポイントの場合
+    if (path.includes('/suggestions')) {
+      if (!data.suggestions || !Array.isArray(data.suggestions)) {
+        console.error('❌ Error: suggestions array not found at root level');
+        return false;
+      }
+      console.log(`✅ Found ${data.suggestions.length} suggestions`);
+    }
+    
     return response.status === 200;
   } catch (error) {
     console.error(`Error: ${error.message}`);

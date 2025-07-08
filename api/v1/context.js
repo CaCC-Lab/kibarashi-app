@@ -15,9 +15,10 @@ export default (req, res) => {
   if (req.method !== "GET") {
     console.log('[JS CONTEXT] Invalid method:', req.method);
     return res.status(405).json({
-      status: 'error',
-      message: 'Method not allowed',
-      code: 'METHOD_NOT_ALLOWED'
+      error: {
+        message: 'Method not allowed',
+        code: 'METHOD_NOT_ALLOWED'
+      }
     });
   }
 
@@ -132,9 +133,10 @@ export default (req, res) => {
   } catch (error) {
     console.error('[JS CONTEXT] Error:', error);
     return res.status(500).json({
-      status: 'error',
-      message: 'サーバー内部でエラーが発生しました。時間をおいて再試行してください。',
-      code: 'INTERNAL_SERVER_ERROR'
+      error: {
+        message: 'サーバー内部でエラーが発生しました。時間をおいて再試行してください。',
+        code: 'INTERNAL_SERVER_ERROR'
+      }
     });
   }
 };
