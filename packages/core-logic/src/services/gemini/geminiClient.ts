@@ -580,10 +580,17 @@ export const geminiClient = {
     return instance.generateSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext, useContextualEnhancement);
   },
   
-  generateEnhancedSuggestions: async (situation: 'workplace' | 'home' | 'outside', duration: number, ageGroup?: string) => {
+  generateEnhancedSuggestions: async (
+    situation: string,
+    duration: number,
+    ageGroup?: string,
+    studentContext?: Partial<StudentPromptInput>,
+    jobHuntingContext?: Partial<JobHuntingPromptInput>,
+    location?: string
+  ) => {
     if (!instance) {
       instance = new GeminiClient();
     }
-    return instance.generateEnhancedSuggestions(situation, duration, ageGroup);
+    return instance.generateEnhancedSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext, location);
   }
 };

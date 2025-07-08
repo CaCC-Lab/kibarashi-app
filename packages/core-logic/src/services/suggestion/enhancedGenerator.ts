@@ -188,12 +188,26 @@ export async function generateEnhancedSuggestions(
  * 従来のフォールバックデータを拡張形式に変換
  */
 async function generateEnhancedFallback(
-  situation: 'workplace' | 'home' | 'outside',
+  situation: string,
   duration: number,
   detailLevel: 'simple' | 'standard' | 'detailed'
 ): Promise<EnhancedSuggestion[]> {
+  // situationをフォールバックで対応可能な型に変換
+  type FallbackSituation = 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting';
+  const validSituations: FallbackSituation[] = ['workplace', 'home', 'outside', 'studying', 'school', 'commuting', 'job_hunting'];
+  
+  // 有効なsituationかチェックし、無効な場合はデフォルトを使用
+  let fallbackSituation: FallbackSituation;
+  if (validSituations.includes(situation as FallbackSituation)) {
+    fallbackSituation = situation as FallbackSituation;
+  } else {
+    // 未知のsituationの場合は'home'をデフォルトとする
+    logger.warn(`Unknown situation '${situation}' for fallback, using 'home' as default`);
+    fallbackSituation = 'home';
+  }
+  
   // 従来のフォールバックデータを取得
-  const fallbackSuggestions = getFallbackSuggestions(situation, duration);
+  const fallbackSuggestions = getFallbackSuggestions(fallbackSituation, duration);
   
   // 拡張提案ジェネレーターを使用して音声ガイドを生成
   const enhancedGenerator = new EnhancedSuggestionGenerator();
