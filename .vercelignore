@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+packages/
+
+# Build outputs (except frontend/dist)
+backend/dist/
+**/dist/
+!frontend/dist/
+
+# Development files
+*.log
+.env.local
+.env.development
+.env.test
+
+# Cache
+.cache/
+**/cache/
+.parcel-cache/
+
+# Testing
+test-results/
+**/coverage/
+playwright-report/
+
+# Development tools
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Package manager files
+pnpm-lock.yaml
+pnpm-workspace.yaml
+yarn.lock
+
+# Docker
+docker-compose.yml
+Dockerfile*
+
+# Documentation (not needed for deployment)
+docs/
+*.md
+!README.md
+
+# Scripts
+scripts/
+
+# Temporary files
+temp/
+tmp/
+screenshots/
+
+# Python files
+*.py
+__pycache__/
+
+# Other
+gemini_*.md
+*_analysis.md
+*_plan.md
+*.backup

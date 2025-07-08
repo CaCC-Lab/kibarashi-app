@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "5分気晴らし - 音声ガイド付きストレス解消アプリ",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "scripts": {
     "setup": "npm install && npm run setup:frontend && npm run setup:backend",
     "setup:frontend": "cd frontend && npm install",
