@@ -684,22 +684,42 @@ Phase A（年齢層別展開）の成功を受けて実施する長期戦略
 - API構造変更（Serverless Functions化): ✅ 100% 完了
 - Vercel設定: ✅ 100% 完了
 - フロントエンド対応: ✅ 100% 完了
-- 本番デプロイ: ⏳ 0% 未開始
+- **デプロイ準備完了**: ✅ **95% 完了**
+- 本番デプロイ実行: ⏳ 5% 未開始（手動設定待ち）
 
-### 実装完了機能（2025/06/25）
+### 実装完了機能（2025/01/08）
 - ✅ **Vercel Functions対応** - 完全実装済み
   - ✅ Express.js → Serverless Functions 移行
-  - ✅ API エンドポイントの個別関数化
+  - ✅ API エンドポイントの個別関数化（health、suggestions、tts）
   - ✅ 環境変数とクライアント管理の最適化
   - ✅ フロントエンドの自動URL切り替え実装
   - ✅ Vercel設定ファイルの作成
+  - ✅ **ローカルテスト完了** - 全API正常動作確認
+  - ✅ **ESModules対応** - core-logic共有パッケージ完成
+  - ✅ **デプロイ手順書作成** - 詳細チェックリスト完備
+  - ✅ **検証スクリプト作成** - 自動動作確認ツール
 
-### 次のステップ
-- [ ] Vercel Web UIでのプロジェクト作成
-- [ ] GitHub連携設定
-- [ ] 環境変数の設定
-- [ ] 本番デプロイの実行
-- [ ] 動作確認とテスト
+### 🎯 手動設定が必要な項目（推定12分）
+- [ ] **Vercel Web UIでのプロジェクト作成**（5分）
+  - プロジェクト名: kibarashi-app
+  - GitHub連携: CaCC-Lab/kibarashi-app
+  - Framework: Other
+- [ ] **GitHub Secrets設定**（3分）
+  - VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+  - GEMINI_API_KEY_1, GEMINI_API_KEY_2, GEMINI_API_KEY_3
+  - GOOGLE_CLOUD_TTS_KEY
+- [ ] **Vercel環境変数設定**（3分）
+  - Production環境用API キー設定
+  - NODE_ENV=production等の設定
+- [ ] **本番デプロイ実行**（1分）
+  - `git push origin main` で自動デプロイ
+  - または GitHub Actions手動実行
+
+### 📋 完備済み自動化機能
+- ✅ **GitHub Actions CI/CD** - 完全自動化済み
+- ✅ **自動品質チェック** - テスト・lint・ビルド
+- ✅ **自動健全性確認** - API動作・レスポンス検証
+- ✅ **自動通知機能** - デプロイ結果の自動報告
 
 ## 🐛 バグ修正（2025/06/26-28）
 
