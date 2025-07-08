@@ -1,11 +1,13 @@
 {
-  "installCommand": "cd api && npm install",
   "functions": {
-    "api/**/*.ts": {
-      "runtime": "@vercel/node@3"
-    },
-    "api/**/*.js": {
+    "api/**/*.[jt]s": {
       "runtime": "@vercel/node@3"
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/v1/suggestions",
+      "destination": "/api/v1/suggestions"
+    }
+  ]
 }
