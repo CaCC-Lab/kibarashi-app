@@ -1,13 +1,1 @@
-{
-  "functions": {
-    "api/**/*.[jt]s": {
-      "runtime": "@vercel/node@3"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/v1/suggestions",
-      "destination": "/api/v1/suggestions"
-    }
-  ]
-}
+{}
