@@ -87,9 +87,9 @@ async function testSuggestionsAPI() {
     const suggestionsHandler = suggestionsModule.default;
     
     const req = new MockVercelRequest('GET', '/api/v1/suggestions', {}, {
-      situation: '職場',
+      situation: 'workplace',
       duration: '5',
-      ageGroup: 'adult'
+      ageGroup: 'office_worker'
     });
     const res = new MockVercelResponse();
     

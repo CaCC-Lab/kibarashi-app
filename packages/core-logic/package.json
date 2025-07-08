@@ -2,8 +2,15 @@
   "name": "core-logic",
   "version": "1.0.0",
   "description": "Shared core logic for kibarashi-app backend and Vercel functions",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
