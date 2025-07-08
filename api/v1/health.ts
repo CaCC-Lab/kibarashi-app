@@ -10,7 +10,7 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  if (req.method \!== 'GET') {
+  if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
@@ -25,4 +25,3 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
 
   res.status(200).json(health);
 }
-EOF < /dev/null

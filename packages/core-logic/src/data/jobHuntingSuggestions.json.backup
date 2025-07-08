@@ -1,0 +1,182 @@
+{
+  "suggestions": [
+    {
+      "id": "jh001",
+      "category": "cognitive",
+      "subcategory": "relaxation",
+      "title": "1分間の深呼吸リセット",
+      "description": "面接前の緊張を和らげる効果的な呼吸法。心拍数を落ち着かせ、集中力を高めます",
+      "situations": ["workplace", "home", "outside", "job_hunting"],
+      "durations": [5, 15, 30],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["interviewing", "waiting"],
+      "guide": {
+        "5": "背筋を伸ばして座り、4秒かけて鼻から息を吸い、4秒止めて、4秒かけて口から吐きます。これを5回繰り返しましょう。「私は準備ができている」と心の中で唱えてください。",
+        "15": "快適な姿勢で座り、目を閉じます。4-7-8呼吸法を実践しましょう。4秒で吸い、7秒止め、8秒で吐きます。これを4サイクル行い、その後普通の呼吸に戻して5分間、呼吸に意識を向けます。緊張が和らぐのを感じてください。",
+        "30": "リラックスした環境で、本格的な瞑想セッションを行います。まず5分間4-7-8呼吸法で深くリラックスし、続いて20分間ボディスキャン瞑想を実践します。足の先から頭まで、各部位の感覚に意識を向けながら緊張を手放していきます。最後の5分で深呼吸に戻り、「私は落ち着いている」「私は準備ができている」と心の中で唱えて終了します。"
+      }
+    },
+    {
+      "id": "jh002",
+      "category": "cognitive",
+      "subcategory": "affirmation",
+      "title": "自信を高めるアファメーション",
+      "description": "自己肯定感を高め、前向きな気持ちで活動に臨むための言葉かけ",
+      "situations": ["workplace", "home", "outside", "job_hunting"],
+      "durations": [5, 15, 30],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["applying", "interviewing", "rejected"],
+      "guide": {
+        "5": "鏡を見て、または心の中で次の言葉を3回唱えましょう。「私には価値がある」「私の経験は貴重だ」「最適な場所が私を待っている」。そして、自分の長所を3つ思い浮かべてください。",
+        "15": "静かな場所で座り、深呼吸を数回行います。目を閉じて、これまでの成功体験を5つ思い出します。それぞれについて「私はその時〇〇を成し遂げた」と心の中で確認し、その時の達成感を味わいます。最後に「私は必ず道を見つける」と力強く唱えます。",
+        "30": "自分史を振り返るセッションを行います。紙に人生の重要な節目と成長を時系列で書き出し、それぞれでどんな力を発揮したかを記録します。困難を乗り越えた経験に特に注目し、その時の自分を褒めてあげましょう。最後に、その経験が今の活動にどう活かせるかを考えて記録します。"
+      }
+    },
+    {
+      "id": "jh003",
+      "category": "behavioral",
+      "subcategory": "exercise",
+      "title": "肩の力を抜くクイックストレッチ",
+      "description": "PC作業や緊張で固まった肩と首をほぐし、リフレッシュ",
+      "situations": ["workplace", "home"],
+      "durations": [5],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["applying", "preparation"],
+      "guide": {
+        "5": "両肩を耳に向けて持ち上げ、3秒キープしてからストンと落とします。これを3回。次に首を右に傾けて10秒、左に10秒。最後に両手を組んで頭上に伸ばし、深呼吸を3回しましょう。"
+      }
+    },
+    {
+      "id": "jh004",
+      "category": "cognitive",
+      "subcategory": "perspective",
+      "title": "感情を受け入れるナレーション",
+      "description": "不採用通知後の複雑な感情を整理し、次へ進む力を得る",
+      "situations": ["home", "outside"],
+      "durations": [5, 15],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["rejected"],
+      "guide": {
+        "5": "「今、私は〇〇と感じている」と、今の感情に名前をつけてみましょう。悔しさ、悲しさ、焦り...それらはすべて自然な感情です。深呼吸をして、「この経験も私の成長の一部」と優しく自分に語りかけましょう。",
+        "15": "紙とペンを用意し、今の気持ちを5分間自由に書き出します。次に、この経験から学んだことを3つ書きます。最後に、「次はもっと良い結果が待っている」というメッセージを自分に送りましょう。"
+      }
+    },
+    {
+      "id": "jh005",
+      "category": "behavioral",
+      "subcategory": "achievement",
+      "title": "小さな達成感タスク",
+      "description": "すぐに完了できる簡単なタスクで、達成感と前向きな気持ちを取り戻す",
+      "situations": ["home", "workplace"],
+      "durations": [5, 15],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["rejected", "waiting"],
+      "guide": {
+        "5": "机の上の書類を整理する、メールを1通返信する、ToDoリストを更新するなど、5分で完了できるタスクを1つ選んで実行しましょう。完了したら「よくやった！」と自分を褒めてください。",
+        "15": "部屋の一角を片付ける、履歴書のフォーマットを整える、LinkedInプロフィールを更新するなど、少し時間のかかるタスクに取り組みましょう。完了後は達成感を味わってください。"
+      }
+    },
+    {
+      "id": "jh006",
+      "category": "cognitive",
+      "subcategory": "mindfulness",
+      "title": "PC疲れを癒す目の体操",
+      "description": "ES作成や企業研究で疲れた目をリフレッシュ",
+      "situations": ["workplace", "home"],
+      "durations": [5],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["applying", "preparation"],
+      "guide": {
+        "5": "画面から目を離し、20フィート（約6m）先を20秒見つめます。次に目を閉じて、眼球を時計回りに5回、反時計回りに5回ゆっくり回します。最後に手のひらで目を覆い、30秒間暗闇でリラックスしましょう。"
+      }
+    },
+    {
+      "id": "jh007",
+      "category": "cognitive",
+      "subcategory": "motivation",
+      "title": "偉人の名言でモチベーションアップ",
+      "description": "困難を乗り越えた人々の言葉から勇気をもらう",
+      "situations": ["workplace", "home", "outside"],
+      "durations": [5],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["rejected", "waiting", "applying"],
+      "guide": {
+        "5": "「失敗は成功のもと」「継続は力なり」など、心に響く名言を1つ選んで、3回声に出して読みましょう。その言葉が自分の状況にどう当てはまるか考え、前向きなエネルギーを感じてください。"
+      }
+    },
+    {
+      "id": "jh008",
+      "category": "behavioral",
+      "subcategory": "refreshment",
+      "title": "コーヒーブレイク瞑想",
+      "description": "飲み物を楽しみながら、今この瞬間に集中する",
+      "situations": ["workplace", "home"],
+      "durations": [5, 15],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["applying", "preparation"],
+      "guide": {
+        "5": "お気に入りの飲み物を用意し、最初の一口を取る前に香りを楽しみます。ゆっくりと一口飲み、味と温度を感じます。「今、この瞬間を大切に」と心で唱えながら、残りも味わいましょう。",
+        "15": "飲み物を準備する過程から瞑想を始めます。お湯を沸かす音、カップの感触、立ち上る湯気...すべてに意識を向けます。飲みながら、今日の良かったことを3つ思い出してください。"
+      }
+    },
+    {
+      "id": "jh009",
+      "category": "cognitive",
+      "subcategory": "planning",
+      "title": "未来の自分への手紙",
+      "description": "活動が実を結んだ未来の自分を想像し、希望を持つ",
+      "situations": ["home"],
+      "durations": [15, 30],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["applying", "waiting"],
+      "guide": {
+        "15": "1年後の自分に向けて短い手紙を書きます。「希望の仕事に就いた自分」を想像し、今の努力がどう実を結んだか、どんな毎日を送っているかを書きましょう。最後に今の自分へのエールも添えて。",
+        "30": "詳細な未来日記を書きます。理想の職場での1日の流れ、仕事内容、同僚との関係、達成感などを具体的に描写します。その後、そこに至るまでの道のりを逆算して考えてみましょう。"
+      }
+    },
+    {
+      "id": "jh010",
+      "category": "cognitive",
+      "subcategory": "career",
+      "title": "キャリアの棚卸し5分スプリント",
+      "description": "これまでの経験と成果を素早く整理し、自信を取り戻す（転職者向け）",
+      "situations": ["workplace", "home"],
+      "durations": [5, 15],
+      "ageGroups": ["career_changer"],
+      "phases": ["preparation", "rejected"],
+      "guide": {
+        "5": "タイマーをセットし、これまでの仕事で達成したこと、褒められたこと、感謝されたことを思いつくまま書き出します。小さなことでもOK。5分後、リストを見返して「私には価値がある」と確認しましょう。",
+        "15": "職歴を3つの期間に分け、それぞれで得たスキル、達成した成果、乗り越えた困難を整理します。最後に、これらの経験が次の職場でどう活きるかを考えてみましょう。"
+      }
+    },
+    {
+      "id": "jh011",
+      "category": "cognitive",
+      "subcategory": "gratitude",
+      "title": "感謝を伝える5分間ミッション",
+      "description": "支えてくれる人への感謝を思い出し、心を温かくする",
+      "situations": ["workplace", "home", "outside"],
+      "durations": [5],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["all"],
+      "guide": {
+        "5": "活動を支えてくれている人（家族、友人、エージェントなど）を1人思い浮かべ、心の中で感謝を伝えます。可能なら、簡単なメッセージを送ってみましょう。感謝の気持ちが自分も温かくしてくれます。"
+      }
+    },
+    {
+      "id": "jh012",
+      "category": "behavioral",
+      "subcategory": "mindfulness",
+      "title": "マインドフル・ウォーキング",
+      "description": "移動時間を瞑想の時間に変える",
+      "situations": ["outside"],
+      "durations": [5, 15],
+      "ageGroups": ["job_seeker", "career_changer"],
+      "phases": ["interviewing", "applying"],
+      "guide": {
+        "5": "次の目的地まで、または5分間、歩くことに完全に集中します。足が地面に触れる感覚、呼吸のリズム、周りの音に意識を向けます。考えが浮かんでも、また歩くことに注意を戻しましょう。",
+        "15": "ゆっくりとしたペースで歩き始めます。最初の5分は呼吸に、次の5分は体の感覚に、最後の5分は周囲の景色に注意を向けます。面接への不安も、この時間だけは手放しましょう。"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "core-logic",
+  "version": "1.0.0",
+  "description": "Shared core logic for kibarashi-app backend and Vercel functions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@google-ai/generativelanguage": "1.1.0",
+    "@google-cloud/text-to-speech": "5.0.1",
+    "axios": "^1.6.2",
+    "zod": "^3.22.4",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.4",
+    "typescript": "5.3.3"
+  },
+  "keywords": ["kibarashi", "backend", "shared"],
+  "author": "",
+  "license": "MIT"
+}
