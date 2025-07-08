@@ -51,17 +51,23 @@ function handleError(res: VercelResponse, error: unknown): VercelResponse {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  console.log('[HANDLER] Function invoked at:', new Date().toISOString());
+  console.log('[HANDLER] Method:', req.method);
+  console.log('[HANDLER] Query params:', req.query);
+  
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
+    console.log('[HANDLER] OPTIONS request, returning 200');
     res.status(200).end();
     return;
   }
 
   if (req.method !== "GET") {
+    console.log('[HANDLER] Invalid method:', req.method);
     return res.status(405).json({
       status: 'error',
       message: 'Method not allowed',
@@ -70,8 +76,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    console.log('[HANDLER] Starting main logic...');
+    
+    // Test module import before processing
+    console.log('[HANDLER] Testing module imports...');
+    console.log('[HANDLER] generateEnhancedSuggestions type:', typeof generateEnhancedSuggestions);
+    console.log('[HANDLER] logger type:', typeof logger);
+    
     // Validate request parameters
+    console.log('[HANDLER] Validating request parameters...');
     const validatedQuery = suggestionsQuerySchema.parse(req.query);
+    console.log('[HANDLER] Validation successful');
+    
     const { 
       situation, 
       duration, 
@@ -84,9 +100,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       jobHuntingDuration 
     } = validatedQuery;
 
+    console.log('[HANDLER] Validated params:', { situation, duration, location, ageGroup });
     logger.info(`Generating suggestions for situation: ${situation}, duration: ${duration}, location: ${location}, ageGroup: ${ageGroup || 'default'}`);
 
     // Build context for enhanced suggestions
+    console.log('[HANDLER] Building context...');
     const studentContext = (ageGroup === 'student' && (studentConcern || studentSubject)) ? {
       concern: studentConcern,
       subject: studentSubject,
@@ -99,8 +117,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       activityDuration: jobHuntingDuration,
     } : undefined;
 
+    console.log('[HANDLER] Context built, calling generateEnhancedSuggestions...');
+    
     // Generate suggestions using core logic with location parameter
     const suggestions = await generateEnhancedSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext, location);
+    console.log('[HANDLER] Suggestions generated successfully, count:', suggestions.length);
 
     // Cache control headers
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -123,6 +144,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     return res.status(200).json(response);
   } catch (error) {
+    console.error('[HANDLER] Error caught:', error);
+    console.error('[HANDLER] Error type:', typeof error);
+    console.error('[HANDLER] Error name:', (error as any)?.name);
+    console.error('[HANDLER] Error message:', (error as any)?.message);
+    console.error('[HANDLER] Error stack:', (error as any)?.stack);
     return handleError(res, error);
   }
 }
