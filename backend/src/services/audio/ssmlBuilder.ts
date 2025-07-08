@@ -139,6 +139,11 @@ export class SSMLBuilder {
    * SSML文字のエスケープ
    */
   private escapeSSML(text: string): string {
+    // 安全のため文字列以外は文字列に変換
+    if (typeof text !== 'string') {
+      text = String(text);
+    }
+    
     return text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')

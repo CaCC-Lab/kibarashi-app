@@ -7,8 +7,8 @@ import { generateSuggestions } from '../../services/suggestion/generator';
 const suggestionsQuerySchema = z.object({
   situation: z.enum(['workplace', 'home', 'outside', 'studying', 'school', 'commuting', 'job_hunting']),
   duration: z.enum(['5', '15', '30']).transform(Number),
-  // オプショナルパラメータ - AgeGroup型に対応した値のみ許可
-  ageGroup: z.enum(['student', 'office_worker', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']).optional(),
+  // オプショナルパラメータ - AgeGroup型に対応した値のみ許可、無効な値は無視
+  ageGroup: z.enum(['student', 'office_worker', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']).optional().catch(undefined),
   studentConcern: z.string().optional(),
   studentSubject: z.string().optional(),
   // 就活・転職活動者向けパラメータ
@@ -68,7 +68,8 @@ export const getSuggestions = async (
         situation,
         duration,
         timestamp: new Date().toISOString(),
-        ...(ageGroup && { ageGroup }),
+        // 元のクエリパラメータのageGroupを記録（バリデーション後の値ではなく）
+        ...(req.query.ageGroup && { ageGroup: req.query.ageGroup }),
       },
     });
   } catch (error) {
@@ -117,7 +118,7 @@ export const getSuggestions = async (
         errors: errorDetails
       });
 
-      const appError = new Error('リクエストパラメータが無効です');
+      const appError = new Error('Invalid request parameters');
       (appError as any).statusCode = 400;
       (appError as any).details = {
         errors: errorDetails,

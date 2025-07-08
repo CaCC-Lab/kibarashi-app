@@ -129,11 +129,18 @@ ${ageGroup === 'student' ? '高校生・大学生' : '社会人'}向けの${situ
     const stepDuration = Math.floor(mainDuration / data.detailedSteps.length);
 
     data.detailedSteps.forEach((step, index) => {
-      const mainSSML = this.ssmlBuilder.createMainGuide([step]);
+      // stepがオブジェクトの場合はinstructionプロパティを使用、文字列の場合はそのまま使用
+      const stepText = typeof step === 'object' && step !== null && 'instruction' in step 
+        ? step.instruction 
+        : typeof step === 'string' 
+        ? step 
+        : String(step);
+      
+      const mainSSML = this.ssmlBuilder.createMainGuide([stepText]);
       segments.push({
         id: `${data.id}_main_${index}`,
         type: 'main',
-        text: step,
+        text: stepText,
         ssml: mainSSML,
         duration: stepDuration,
         startTime: currentTime,
