@@ -12,8 +12,7 @@
     "@google-ai/generativelanguage": "1.1.0",
     "@google-cloud/text-to-speech": "5.0.1",
     "axios": "^1.6.2",
-    "zod": "^3.22.4",
-    "core-logic": "file:../packages/core-logic"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.10.4",
