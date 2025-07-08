@@ -45,7 +45,20 @@ export class APIKeyManager {
     this.initializeApiKeys();
     
     if (this.apiKeys.length === 0) {
-      throw new Error('No valid Gemini API keys found in environment variables');
+      if (process.env.NODE_ENV === 'test') {
+        // テスト環境では警告のみ出して、ダミーキーを設定
+        logger.warn('No Gemini API keys found in test environment, using dummy key for testing');
+        this.apiKeys.push({
+          key: 'test-dummy-key-for-testing',
+          index: 0,
+          lastUsed: null,
+          failureCount: 0,
+          isOnCooldown: false,
+          cooldownUntil: null
+        });
+      } else {
+        throw new Error('No valid Gemini API keys found in environment variables');
+      }
     }
 
     logger.info('API Key Manager initialized', {

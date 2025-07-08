@@ -8,7 +8,7 @@ const router = express.Router();
  * GET /api/admin/api-keys/status
  * APIキーの状態を取得
  */
-router.get('/api-keys/status', async (req, res) => {
+router.get('/api-keys/status', async (_req, res) => {
   try {
     const stats = apiKeyManager.getStats();
     
@@ -57,12 +57,12 @@ router.get('/api-keys/status', async (req, res) => {
  * POST /api/admin/api-keys/rotate
  * 手動でAPIキーをローテーション
  */
-router.post('/api-keys/rotate', async (req, res) => {
+router.post('/api-keys/rotate', async (_req, res) => {
   try {
     logger.info('Manual API key rotation requested');
 
     const beforeStats = apiKeyManager.getStats();
-    const newKey = apiKeyManager.forceRotation();
+    apiKeyManager.forceRotation();
     const afterStats = apiKeyManager.getStats();
 
     res.json({
@@ -92,7 +92,7 @@ router.post('/api-keys/rotate', async (req, res) => {
  * POST /api/admin/api-keys/reset-cooldowns
  * 全てのAPIキーのクールダウンをリセット（緊急時用）
  */
-router.post('/api-keys/reset-cooldowns', async (req, res) => {
+router.post('/api-keys/reset-cooldowns', async (_req, res) => {
   try {
     logger.warn('Emergency API key cooldown reset requested');
 
@@ -132,7 +132,7 @@ router.post('/api-keys/reset-cooldowns', async (req, res) => {
  * GET /api/admin/health
  * 管理者向けヘルスチェック
  */
-router.get('/health', async (req, res) => {
+router.get('/health', async (_req, res) => {
   try {
     const stats = apiKeyManager.getStats();
     const hasAvailableKeys = stats.availableKeys > 0;

@@ -69,7 +69,7 @@ class WeatherClient {
         throw new Error(`Weather API error: ${response.status}`);
       }
 
-      const data: WeatherApiResponse = await response.json();
+      const data = await response.json() as WeatherApiResponse;
       const weatherData = this.parseWeatherResponse(data);
 
       // キャッシュに保存

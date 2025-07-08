@@ -8,7 +8,7 @@ const router = express.Router();
  * GET /api/context/current
  * 現在のコンテキストデータを取得
  */
-router.get('/current', async (req, res) => {
+router.get('/current', async (_req, res) => {
   try {
     logger.info('Context data requested');
 
@@ -63,6 +63,7 @@ router.get('/weather', async (req, res) => {
       success: true,
       data: context.weather
     });
+    return;
 
   } catch (error) {
     logger.error('Failed to get weather data', { error });
@@ -72,6 +73,7 @@ router.get('/weather', async (req, res) => {
       error: 'Failed to retrieve weather data',
       message: '天候データの取得に失敗しました'
     });
+    return;
   }
 });
 
@@ -79,7 +81,7 @@ router.get('/weather', async (req, res) => {
  * GET /api/context/seasonal
  * 季節データのみを取得
  */
-router.get('/seasonal', async (req, res) => {
+router.get('/seasonal', async (_req, res) => {
   try {
     logger.info('Seasonal data requested');
 
@@ -126,6 +128,7 @@ router.post('/validate', async (req, res) => {
         context
       }
     });
+    return;
 
   } catch (error) {
     logger.error('Failed to validate context data', { error });
@@ -135,6 +138,7 @@ router.post('/validate', async (req, res) => {
       error: 'Failed to validate context data',
       message: 'コンテキストデータの検証に失敗しました'
     });
+    return;
   }
 });
 

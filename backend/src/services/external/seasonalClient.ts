@@ -61,7 +61,7 @@ class SeasonalClient {
   /**
    * 日本の祝日・記念日を取得
    */
-  private getHolidays(month: number, date: number, year: number): string[] {
+  private getHolidays(month: number, date: number, _year: number): string[] {
     const holidays: Array<{ month: number; date: number; name: string; flexible?: boolean }> = [
       { month: 1, date: 1, name: '元日' },
       { month: 1, date: 15, name: '成人の日', flexible: true }, // 実際は第2月曜日
@@ -153,7 +153,7 @@ class SeasonalClient {
   /**
    * 季節に応じた気晴らしのヒントを生成
    */
-  private generateSeasonalTips(season: SeasonalData['season'], month: number, date: number): string[] {
+  private generateSeasonalTips(season: SeasonalData['season'], month: number, _date: number): string[] {
     const tips: string[] = [];
 
     switch (season) {
