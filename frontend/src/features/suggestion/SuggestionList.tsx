@@ -20,6 +20,7 @@ import { contextAPI, ContextualData } from '../../services/contextAPI';
 interface SuggestionListProps {
   situation: SituationId; // 場所：年齢層に応じた状況
   duration: 5 | 15 | 30; // 所要時間：5分、15分、30分
+  location?: string; // 地理的位置（地域別の提案生成用）
 }
 
 /**
@@ -35,7 +36,7 @@ interface SuggestionListProps {
  * - 選択肢を一覧で表示し、興味を持ったものの詳細を確認できる
  * - ネットワークエラー等で失敗しても、ユーザーがあきらめずに済む
  */
-const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) => {
+const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
   
@@ -140,8 +141,8 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
     // コンテキストを統合
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
-    fetchSuggestions(situation, duration, currentAgeGroup, context);
-  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized]);
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location);
+  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location]);
 
   // 再取得関数
   const refetch = () => {
@@ -162,7 +163,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration }) 
     
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
-    fetchSuggestions(situation, duration, currentAgeGroup, context);
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location);
   };
 
   if (loading) {

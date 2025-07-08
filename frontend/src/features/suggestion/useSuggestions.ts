@@ -23,7 +23,8 @@ export const useSuggestions = () => {
     situation: SituationId,
     duration: 5 | 15 | 30,
     ageGroup?: AgeGroup,
-    studentContext?: { concern?: string; subject?: string }
+    studentContext?: { concern?: string; subject?: string },
+    location?: string
   ) => {
     // 前回のリクエストをキャンセル
     if (abortControllerRef.current) {
@@ -38,7 +39,7 @@ export const useSuggestions = () => {
     setError(null);
     
     try {
-      const data = await fetchSuggestions(situation, duration, ageGroup, studentContext);
+      const data = await fetchSuggestions(situation, duration, ageGroup, studentContext, location);
       console.log('API Response:', data); // デバッグログ追加
       
       // リクエストがキャンセルされていない場合のみ状態を更新

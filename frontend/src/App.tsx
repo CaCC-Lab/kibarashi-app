@@ -22,6 +22,7 @@ function App() {
   const [currentStep, setCurrentStep] = useState<Step>('situation');
   const [situation, setSituation] = useState<SituationId | null>(null);
   const [duration, setDuration] = useState<Duration>(null);
+  const [currentLocation, setCurrentLocation] = useState<string>('Tokyo');
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   // 初回ユーザーの場合、オンボーディングモーダルを表示
@@ -68,6 +69,10 @@ function App() {
     setCurrentStep('situation');
   };
 
+  const handleLocationChange = (location: string) => {
+    setCurrentLocation(location);
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'situation':
@@ -76,7 +81,7 @@ function App() {
         return <DurationSelector selected={duration} onSelect={handleDurationSelect} />;
       case 'suggestions':
         if (situation && duration) {
-          return <SuggestionList situation={situation} duration={duration} />;
+          return <SuggestionList situation={situation} duration={duration} location={currentLocation} />;
         }
         return null;
       case 'favorites':
@@ -147,7 +152,14 @@ function App() {
   // 年齢層のローディング中は全体をローディング表示
   if (ageGroupLoading) {
     return (
-      <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick} onSettingsClick={handleSettingsClick} onCustomClick={handleCustomClick}>
+      <MainLayout 
+        onFavoritesClick={handleFavoritesClick} 
+        onHistoryClick={handleHistoryClick} 
+        onSettingsClick={handleSettingsClick} 
+        onCustomClick={handleCustomClick}
+        currentLocation={currentLocation}
+        onLocationChange={handleLocationChange}
+      >
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <Loading />
@@ -159,7 +171,14 @@ function App() {
 
   return (
     <>
-      <MainLayout onFavoritesClick={handleFavoritesClick} onHistoryClick={handleHistoryClick} onSettingsClick={handleSettingsClick} onCustomClick={handleCustomClick}>
+      <MainLayout 
+        onFavoritesClick={handleFavoritesClick} 
+        onHistoryClick={handleHistoryClick} 
+        onSettingsClick={handleSettingsClick} 
+        onCustomClick={handleCustomClick}
+        currentLocation={currentLocation}
+        onLocationChange={handleLocationChange}
+      >
         <div className="max-w-4xl mx-auto">
           {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && currentStep !== 'custom' && renderBreadcrumb()}
           

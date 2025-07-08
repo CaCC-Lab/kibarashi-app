@@ -20,6 +20,8 @@ type ApiResponseError = {
 const suggestionsQuerySchema = z.object({
   situation: z.enum(['workplace', 'home', 'outside', 'studying', 'school', 'commuting', 'job_hunting']),
   duration: z.enum(['5', '15', '30']).transform(Number),
+  // Location parameter for contextual suggestions
+  location: z.string().optional().default('Tokyo'),
   // Optional parameters for enhanced targeting
   ageGroup: z.enum(['student', 'office_worker', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']).optional().catch(undefined),
   studentConcern: z.string().optional(),
@@ -73,6 +75,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { 
       situation, 
       duration, 
+      location,
       ageGroup, 
       studentConcern, 
       studentSubject,
@@ -81,7 +84,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       jobHuntingDuration 
     } = validatedQuery;
 
-    logger.info(`Generating suggestions for situation: ${situation}, duration: ${duration}, ageGroup: ${ageGroup || 'default'}`);
+    logger.info(`Generating suggestions for situation: ${situation}, duration: ${duration}, location: ${location}, ageGroup: ${ageGroup || 'default'}`);
 
     // Build context for enhanced suggestions
     const studentContext = (ageGroup === 'student' && (studentConcern || studentSubject)) ? {
@@ -96,8 +99,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       activityDuration: jobHuntingDuration,
     } : undefined;
 
-    // Generate suggestions using core logic
-    const suggestions = await generateEnhancedSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
+    // Generate suggestions using core logic with location parameter
+    const suggestions = await generateEnhancedSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext, location);
 
     // Cache control headers
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -111,6 +114,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         metadata: {
           situation,
           duration,
+          location,
           timestamp: new Date().toISOString(),
           ...(ageGroup && { ageGroup }),
         },

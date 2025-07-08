@@ -11,6 +11,8 @@ interface MainLayoutProps {
   showFavoritesButton?: boolean;
   showHistoryButton?: boolean;
   showCustomButton?: boolean;
+  currentLocation?: string;
+  onLocationChange?: (location: string) => void;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ 
@@ -21,7 +23,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   onCustomClick,
   showFavoritesButton = true,
   showHistoryButton = true,
-  showCustomButton = true
+  showCustomButton = true,
+  currentLocation,
+  onLocationChange
 }) => {
   return (
     <div className="min-h-screen flex flex-col">
@@ -36,6 +40,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         showFavoritesButton={showFavoritesButton}
         showHistoryButton={showHistoryButton}
         showCustomButton={showCustomButton}
+        currentLocation={currentLocation}
+        onLocationChange={onLocationChange}
       />
       <main id="main-content" className="flex-1 container mx-auto px-4 py-8 animate-fadeIn">
         {children}

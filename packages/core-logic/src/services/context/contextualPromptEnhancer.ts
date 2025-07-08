@@ -19,13 +19,13 @@ class ContextualPromptEnhancer {
   /**
    * 現在のコンテキストデータを取得
    */
-  async getCurrentContext(): Promise<ContextualData> {
+  async getCurrentContext(location: string = 'Tokyo'): Promise<ContextualData> {
     try {
       logger.info('Gathering contextual data for enhanced suggestions');
 
       // 並列でデータを取得
       const [weather, seasonal] = await Promise.all([
-        weatherClient.getCurrentWeather('Tokyo').catch(error => {
+        weatherClient.getCurrentWeather(location).catch(error => {
           logger.warn('Weather data unavailable', { error: error.message });
           return null;
         }),
@@ -319,11 +319,11 @@ ${userHistory.slice(-5).map((item, index) => `${index + 1}. ${item}`).join('\n')
 let instance: ContextualPromptEnhancer | null = null;
 
 export const contextualPromptEnhancer = {
-  getCurrentContext: async () => {
+  getCurrentContext: async (location?: string) => {
     if (!instance) {
       instance = new ContextualPromptEnhancer();
     }
-    return instance.getCurrentContext();
+    return instance.getCurrentContext(location);
   },
 
   generateEnhancedPrompt: (params: EnhancedPromptParams) => {

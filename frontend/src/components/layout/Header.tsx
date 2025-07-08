@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import DarkModeToggle from '../common/DarkModeToggle';
+import LocationSelector from '../location/LocationSelector';
+import HelpModal from '../help/HelpModal';
 
 interface HeaderProps {
   onFavoritesClick?: () => void;
@@ -9,6 +11,8 @@ interface HeaderProps {
   showFavoritesButton?: boolean;
   showHistoryButton?: boolean;
   showCustomButton?: boolean;
+  currentLocation?: string;
+  onLocationChange?: (location: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -18,9 +22,13 @@ const Header: React.FC<HeaderProps> = ({
   onCustomClick,
   showFavoritesButton = true,
   showHistoryButton = true,
-  showCustomButton = true
+  showCustomButton = true,
+  currentLocation = 'Tokyo',
+  onLocationChange
 }) => {
   const [showMessage, setShowMessage] = useState(false);
+  const [showLocationSelector, setShowLocationSelector] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const handleSettingsClick = () => {
     if (onSettingsClick) {
@@ -31,6 +39,29 @@ const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const handleLocationChange = (location: string) => {
+    if (onLocationChange) {
+      onLocationChange(location);
+    }
+  };
+
+  // 場所の表示名を取得
+  const getLocationDisplayName = (location: string) => {
+    const locationMap: Record<string, string> = {
+      'Tokyo': '東京',
+      'Osaka': '大阪',
+      'Kyoto': '京都',
+      'Yokohama': '横浜',
+      'Nagoya': '名古屋',
+      'Sapporo': '札幌',
+      'Fukuoka': '福岡',
+      'Sendai': '仙台',
+      'Hiroshima': '広島',
+      'Kobe': '神戸'
+    };
+    return locationMap[location] || location;
+  };
+
   return (
     <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-primary-100 dark:border-gray-700 transition-colors backdrop-blur-sm">
       <div className="container mx-auto px-4 py-4">
@@ -38,15 +69,43 @@ const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center space-x-3">
             {/* ブランドロゴ - 新しいプライマリカラーでブランド認知度向上 */}
             <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105">
-              <span className="text-text-inverse font-bold text-lg">5</span>
+              <span className="text-text-inverse font-bold text-lg">気</span>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-text-primary dark:text-text-inverse">5分気晴らし</h1>
-              <p className="text-sm text-text-secondary dark:text-gray-300">音声ガイド付きストレス解消</p>
+              <h1 className="text-xl font-bold text-text-primary dark:text-text-inverse">気晴らしアプリ</h1>
+              <p className="text-sm text-text-secondary dark:text-gray-300">5分〜30分・音声ガイド付き</p>
             </div>
           </div>
           
           <div className="flex items-center space-x-3">
+            {/* 場所表示と変更ボタン */}
+            <button
+              onClick={() => setShowLocationSelector(true)}
+              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+              aria-label="場所を変更"
+              title="場所を変更"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="text-sm font-medium hidden sm:inline">
+                {getLocationDisplayName(currentLocation)}
+              </span>
+            </button>
+            
+            {/* ヘルプボタン */}
+            <button
+              onClick={() => setShowHelpModal(true)}
+              className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+              aria-label="使い方・ヘルプ"
+              title="使い方・ヘルプ"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+            
             <DarkModeToggle />
             
             {showFavoritesButton && onFavoritesClick && (
@@ -158,6 +217,20 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       </div>
+      
+      {/* 場所選択モーダル */}
+      <LocationSelector
+        currentLocation={currentLocation}
+        onLocationChange={handleLocationChange}
+        isOpen={showLocationSelector}
+        onClose={() => setShowLocationSelector(false)}
+      />
+      
+      {/* ヘルプモーダル */}
+      <HelpModal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+      />
     </header>
   );
 };

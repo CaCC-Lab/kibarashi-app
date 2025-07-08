@@ -204,6 +204,33 @@
 
 ### 🎉 完了した主要な機能・修正
 
+- [x] **場所変更機能の実装（2025/07/08）**
+  - [x] LocationSelectorコンポーネントの統合
+  - [x] App.tsx - location状態管理とMainLayoutへの受け渡し
+  - [x] MainLayout.tsx - location propsの受け入れとHeaderへの受け渡し
+  - [x] SuggestionList.tsx - location parameterサポート追加
+  - [x] useSuggestions.ts - location parameterの追加
+  - [x] APIエンドポイント - location queryパラメータのサポート
+  - [x] enhancedGenerator.ts - function overloadingによる後方互換性
+  - [x] geminiClient.ts - contextualPromptEnhancerとの統合
+  - [x] contextualPromptEnhancer.ts - 動的location対応（Tokyo固定を解除）
+  - [x] 地域別天候・季節データに基づく提案生成
+  - [x] Playwright E2Eテストによる動作確認
+  - [x] TypeScriptビルド成功（エラーなし）
+
+- [x] **HelpModal（機能説明画面）の実装（2025/07/08）**
+  - [x] 機能説明画面の設計・実装完了
+  - [x] ストレス状態のユーザーに配慮したシンプルなUI
+  - [x] 段階的な説明（基本→詳細→高度）
+  - [x] アクセシビリティ対応（キーボードナビゲーション、スクリーンリーダー）
+  - [x] ダークモード対応
+  - [x] Headerコンポーネントとの統合
+
+- [x] **アプリタイトル修正（2025/07/08）**
+  - [x] 「5分気晴らし」→「気晴らしアプリ」に変更
+  - [x] 15分・30分オプションがあることを適切に反映
+  - [x] index.html、manifest.webmanifest、関連コンポーネントを更新
+
 - [x] **APIエラー修正（CSP問題）**
   - [x] Content Security Policyの適切な設定
   - [x] connect-srcとmedia-srcの追加

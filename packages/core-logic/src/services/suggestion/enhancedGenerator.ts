@@ -67,8 +67,23 @@ export interface EnhancedSuggestion {
  * 
  * @param situation - ユーザーの現在の場所
  * @param duration - 希望する気晴らし時間
- * @param options - 拡張オプション（音声設定など）
+ * @param ageGroup - 年齢層グループ
+ * @param studentContext - 学生向け追加情報
+ * @param jobHuntingContext - 就活向け追加情報
+ * @param location - 地理的位置（天候・地域情報用）
  * @returns 3つの拡張気晴らし提案の配列
+ */
+export async function generateEnhancedSuggestions(
+  situation: string,
+  duration: number,
+  ageGroup?: string,
+  studentContext?: any,
+  jobHuntingContext?: any,
+  location?: string
+): Promise<EnhancedSuggestion[]>;
+
+/**
+ * レガシー用オーバーロード（後方互換性）
  */
 export async function generateEnhancedSuggestions(
   situation: 'workplace' | 'home' | 'outside',
@@ -77,9 +92,40 @@ export async function generateEnhancedSuggestions(
     ageGroup?: string;
     detailLevel?: 'simple' | 'standard' | 'detailed';
     includeVoiceGuide?: boolean;
-  } = {}
+  }
+): Promise<EnhancedSuggestion[]>;
+
+export async function generateEnhancedSuggestions(
+  situation: string,
+  duration: number,
+  ageGroupOrOptions?: string | {
+    ageGroup?: string;
+    detailLevel?: 'simple' | 'standard' | 'detailed';
+    includeVoiceGuide?: boolean;
+  },
+  studentContext?: any,
+  jobHuntingContext?: any,
+  location?: string
 ): Promise<EnhancedSuggestion[]> {
-  const { ageGroup = 'office_worker', detailLevel = 'standard', includeVoiceGuide = true } = options;
+  // レガシー形式の判定
+  const isLegacyCall = typeof ageGroupOrOptions === 'object';
+  
+  let ageGroup: string;
+  let detailLevel: 'simple' | 'standard' | 'detailed';
+  let includeVoiceGuide: boolean;
+  
+  if (isLegacyCall) {
+    // レガシー呼び出し形式
+    const options = ageGroupOrOptions || {};
+    ageGroup = options.ageGroup || 'office_worker';
+    detailLevel = options.detailLevel || 'standard';
+    includeVoiceGuide = options.includeVoiceGuide !== false;
+  } else {
+    // 新しい呼び出し形式
+    ageGroup = ageGroupOrOptions || 'office_worker';
+    detailLevel = 'standard';
+    includeVoiceGuide = true;
+  }
   
   try {
     // ステップ1: Gemini APIの有効性を確認
@@ -88,14 +134,18 @@ export async function generateEnhancedSuggestions(
         situation, 
         duration, 
         ageGroup,
-        detailLevel 
+        detailLevel,
+        location 
       });
       
-      // ステップ2: AIを使って拡張提案を生成
+      // ステップ2: AIを使って拡張提案を生成（location対応）
       const enhancedSuggestions = await geminiClient.generateEnhancedSuggestions(
         situation, 
         duration, 
-        ageGroup
+        ageGroup,
+        studentContext,
+        jobHuntingContext,
+        location
       );
       
       // ステップ3: 必ず3つの提案を返す
@@ -109,6 +159,7 @@ export async function generateEnhancedSuggestions(
     logger.info('Using enhanced fallback suggestions', {
       situation,
       duration,
+      location,
       reason: !process.env.GEMINI_API_KEY ? 'GEMINI_API_KEY not configured' : 'Voice guide disabled',
       includeVoiceGuide
     });
@@ -123,7 +174,8 @@ export async function generateEnhancedSuggestions(
       situation,
       duration,
       ageGroup,
-      detailLevel
+      detailLevel,
+      location
     });
     
     // 拡張フォールバックデータを使用

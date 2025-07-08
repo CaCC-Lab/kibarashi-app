@@ -371,7 +371,10 @@ class GeminiClient {
   async generateEnhancedSuggestions(
     situation: string,
     duration: number,
-    ageGroup?: string
+    ageGroup?: string,
+    studentContext?: Partial<StudentPromptInput>,
+    jobHuntingContext?: Partial<JobHuntingPromptInput>,
+    location?: string
   ): Promise<any[]> {
     // パラメータバリデーション（テスト環境でも実行）
     this.validateSuggestionParameters(situation, duration);
@@ -415,7 +418,22 @@ class GeminiClient {
         return [enhancedSuggestion];
       }
       
-      const prompt = this.enhancedGenerator.generateEnhancedPrompt(situation, duration, ageGroup);
+      // コンテキスト強化版のプロンプトを生成
+      let prompt: string;
+      if (location) {
+        // location指定がある場合はcontextualPromptEnhancerを使用
+        const context = await contextualPromptEnhancer.getCurrentContext(location);
+        prompt = contextualPromptEnhancer.generateEnhancedPrompt({
+          situation,
+          duration,
+          context,
+          userHistory: []
+        });
+      } else {
+        // 従来の拡張プロンプト生成
+        prompt = this.enhancedGenerator.generateEnhancedPrompt(situation, duration, ageGroup);
+      }
+      
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
       const text = response.text();
@@ -427,6 +445,7 @@ class GeminiClient {
         situation, 
         duration,
         ageGroup,
+        location,
         suggestionCount: enhancedSuggestions.length 
       });
       

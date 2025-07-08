@@ -12,7 +12,8 @@ export async function fetchSuggestions(
   situation: SituationId,
   duration: 5 | 15 | 30,
   ageGroup?: AgeGroup,
-  studentContext?: { concern?: string; subject?: string }
+  studentContext?: { concern?: string; subject?: string },
+  location?: string
 ): Promise<SuggestionsResponse> {
   // キャッシュバスターとしてタイムスタンプを追加
   const timestamp = Date.now();
@@ -27,6 +28,11 @@ export async function fetchSuggestions(
   // 年齢層が指定されている場合は追加
   if (ageGroup) {
     params.set('ageGroup', ageGroup);
+  }
+  
+  // 場所が指定されている場合は追加
+  if (location) {
+    params.set('location', location);
   }
   
   // 学生向けコンテキストが指定されている場合は追加
