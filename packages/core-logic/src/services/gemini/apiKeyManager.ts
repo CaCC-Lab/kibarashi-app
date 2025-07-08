@@ -299,5 +299,23 @@ export class APIKeyManager {
   }
 }
 
-// シングルトンインスタンス
-export const apiKeyManager = new APIKeyManager();
+// 遅延初期化のためのシングルトンインスタンス
+let _apiKeyManagerInstance: APIKeyManager | null = null;
+
+export function getApiKeyManager(): APIKeyManager {
+  if (!_apiKeyManagerInstance) {
+    _apiKeyManagerInstance = new APIKeyManager();
+  }
+  return _apiKeyManagerInstance;
+}
+
+// 後方互換性のためのプロパティ
+export const apiKeyManager = {
+  get getCurrentApiKey() { return getApiKeyManager().getCurrentApiKey.bind(getApiKeyManager()); },
+  get getAvailableKeyCount() { return getApiKeyManager().getAvailableKeyCount.bind(getApiKeyManager()); },
+  get markKeyAsFailure() { return getApiKeyManager().markKeyAsFailure.bind(getApiKeyManager()); },
+  get markKeyAsSuccess() { return getApiKeyManager().markKeyAsSuccess.bind(getApiKeyManager()); },
+  get getStats() { return getApiKeyManager().getStats.bind(getApiKeyManager()); },
+  get resetAllCooldowns() { return getApiKeyManager().resetAllCooldowns.bind(getApiKeyManager()); },
+  get forceRotation() { return getApiKeyManager().forceRotation.bind(getApiKeyManager()); }
+};

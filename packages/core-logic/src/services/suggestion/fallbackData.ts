@@ -1,11 +1,8 @@
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join } from 'path';
 import { Suggestion } from './generator';
 
-// Get current directory in ESM
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// __dirname is available in CommonJS automatically
 
 // Load suggestions data
 const suggestionsData = JSON.parse(

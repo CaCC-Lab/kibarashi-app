@@ -13,20 +13,26 @@ class GeminiClient {
   private enhancedGenerator: EnhancedSuggestionGenerator;
   private previousSuggestions: Map<string, string[]> = new Map();
   private currentApiKey: string | null = null;
+  private isInitialized: boolean = false;
 
   constructor() {
     this.enhancedGenerator = new EnhancedSuggestionGenerator();
-    this.initializeClient();
+    // 遅延初期化：実際に使用される時まで初期化を遅らせる
   }
 
   /**
    * APIクライアントを初期化
    */
   private initializeClient(): void {
+    if (this.isInitialized) {
+      return; // 既に初期化済みの場合はスキップ
+    }
+
     try {
       this.currentApiKey = apiKeyManager.getCurrentApiKey();
       this.genAI = new GoogleGenerativeAI(this.currentApiKey);
       this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      this.isInitialized = true;
       
       logger.info('Gemini client initialized with API key manager');
     } catch (error) {
@@ -48,6 +54,7 @@ class GeminiClient {
       this.currentApiKey = newApiKey;
       this.genAI = new GoogleGenerativeAI(newApiKey);
       this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      this.isInitialized = true;
       
       logger.info('API key rotated and client reinitialized');
     } catch (error) {
@@ -90,6 +97,9 @@ class GeminiClient {
   ): Promise<any[]> {
     // パラメータバリデーション（テスト環境でも実行）
     this.validateSuggestionParameters(situation, duration);
+    
+    // 遅延初期化：実際に使用される時まで初期化を遅らせる
+    this.initializeClient();
     
     const maxRetries = 3;
     let lastError: Error | null = null;
@@ -227,6 +237,9 @@ class GeminiClient {
     }
     
     // 本番環境・開発環境では実際のAPIを呼び出し
+    // 初期化を確認（既に実行済みでも安全）
+    this.initializeClient();
+    
     const timeoutMs = 10000;
     const apiCall = this.model.generateContent(prompt);
     const timeoutPromise = new Promise((_, reject) => {
@@ -379,6 +392,9 @@ class GeminiClient {
     // パラメータバリデーション（テスト環境でも実行）
     this.validateSuggestionParameters(situation, duration);
     
+    // 遅延初期化：実際に使用される時まで初期化を遅らせる
+    this.initializeClient();
+    
     try {
       // テスト環境では実際のAPIを呼ばずにモックレスポンスを返す
       if (process.env.NODE_ENV === 'test') {
@@ -433,6 +449,9 @@ class GeminiClient {
         // 従来の拡張プロンプト生成
         prompt = this.enhancedGenerator.generateEnhancedPrompt(situation, duration, ageGroup);
       }
+      
+      // 実際のAPI呼び出し前に初期化を確認
+      this.initializeClient();
       
       const result = await this.model.generateContent(prompt);
       const response = await result.response;
