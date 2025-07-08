@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
-import { z } from "zod";
 
-// Import core logic from shared package - using dynamic import to avoid startup errors
+// All dependencies now loaded dynamically to avoid startup errors
+// import { z } from "zod";
 // import { generateEnhancedSuggestions, logger } from "core-logic";
 
 // Standard API response types
@@ -16,28 +16,15 @@ type ApiResponseError = {
   code?: string;
 };
 
-// Request validation schema matching backend logic
-const suggestionsQuerySchema = z.object({
-  situation: z.enum(['workplace', 'home', 'outside', 'studying', 'school', 'commuting', 'job_hunting']),
-  duration: z.enum(['5', '15', '30']).transform(Number),
-  // Location parameter for contextual suggestions
-  location: z.string().optional().default('Tokyo'),
-  // Optional parameters for enhanced targeting
-  ageGroup: z.enum(['student', 'office_worker', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']).optional().catch(undefined),
-  studentConcern: z.string().optional(),
-  studentSubject: z.string().optional(),
-  // Job hunting parameters
-  jobHuntingPhase: z.enum(['preparation', 'applying', 'interviewing', 'waiting', 'rejected']).optional(),
-  jobHuntingConcern: z.string().optional(),
-  jobHuntingDuration: z.enum(['just_started', '1-3months', '3-6months', 'over_6months']).optional(),
-});
+// Request validation schema - will be created dynamically
 
 async function handleError(res: VercelResponse, error: unknown): Promise<VercelResponse> {
   try {
     const { logger } = await import("core-logic");
     
-    if (error instanceof z.ZodError) {
-      logger.warn('Validation error in suggestions API:', error.issues);
+    // Check for validation error dynamically
+    if (error && typeof error === 'object' && 'issues' in error) {
+      logger.warn('Validation error in suggestions API:', (error as any).issues);
       return res.status(400).json({
         status: 'error',
         message: '入力データが無効です。パラメータを確認してください。',
@@ -122,8 +109,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
     
-    // Validate request parameters
+    // Validate request parameters with dynamic import
     console.log('[HANDLER] Validating request parameters...');
+    const { z } = await import("zod");
+    
+    const suggestionsQuerySchema = z.object({
+      situation: z.enum(['workplace', 'home', 'outside', 'studying', 'school', 'commuting', 'job_hunting']),
+      duration: z.enum(['5', '15', '30']).transform(Number),
+      // Location parameter for contextual suggestions
+      location: z.string().optional().default('Tokyo'),
+      // Optional parameters for enhanced targeting
+      ageGroup: z.enum(['student', 'office_worker', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer']).optional().catch(undefined),
+      studentConcern: z.string().optional(),
+      studentSubject: z.string().optional(),
+      // Job hunting parameters
+      jobHuntingPhase: z.enum(['preparation', 'applying', 'interviewing', 'waiting', 'rejected']).optional(),
+      jobHuntingConcern: z.string().optional(),
+      jobHuntingDuration: z.enum(['just_started', '1-3months', '3-6months', 'over_6months']).optional(),
+    });
+    
     const validatedQuery = suggestionsQuerySchema.parse(req.query);
     console.log('[HANDLER] Validation successful');
     
