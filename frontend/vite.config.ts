@@ -36,6 +36,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'prompt', // autoUpdateからpromptに変更
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      // 開発時にService Workerを完全に無効化
+      disable: process.env.NODE_ENV === 'development',
       manifest: {
         name: '5分気晴らし',
         short_name: '気晴らし',
@@ -76,16 +78,17 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true, // Service Workerを即座に更新
-        runtimeCaching: [], // 一時的にランタイムキャッシュを無効化
+        runtimeCaching: [], // ランタイムキャッシュを無効化
+        // APIリクエストをキャッシュ対象から除外
+        navigateFallbackDenylist: [/^\/api\//],
       },
       devOptions: {
-        enabled: false, // 一時的にPWAを無効化
+        enabled: false, // 開発時はPWAを無効化
         suppressWarnings: true,
         navigateFallback: 'index.html',
         type: 'module',
       },
       selfDestroying: true, // 既存のService Workerを削除
-      disable: false, // PWA機能自体は有効（Service Workerのみ無効）
     })
   ],
   resolve: {

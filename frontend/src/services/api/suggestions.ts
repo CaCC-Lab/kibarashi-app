@@ -15,14 +15,27 @@ export async function fetchSuggestions(
   studentContext?: { concern?: string; subject?: string },
   location?: string
 ): Promise<SuggestionsResponse> {
-  // キャッシュバスターとしてタイムスタンプを追加
+  // 強力なキャッシュバスターを実装
   const timestamp = Date.now();
+  const randomId = Math.random().toString(36).substring(2, 15);
+  const performanceNow = performance.now();
+  
+  console.log('🔄 Fetching suggestions with cache-busting:', {
+    situation,
+    duration,
+    ageGroup,
+    timestamp,
+    randomId,
+    performanceNow
+  });
   
   // URLパラメータを構築
   const params = new URLSearchParams({
     situation,
     duration: duration.toString(),
-    _t: timestamp.toString()
+    _t: timestamp.toString(),
+    _r: randomId,
+    _p: performanceNow.toString()
   });
   
   // 年齢層が指定されている場合は追加
@@ -45,9 +58,18 @@ export async function fetchSuggestions(
     }
   }
   
-  const response = await apiClient.get<SuggestionsResponse>(
-    `/api/v1/suggestions?${params.toString()}`
-  );
+  const url = `/api/v1/suggestions?${params.toString()}`;
+  console.log('📡 API Request URL:', url);
+  
+  const response = await apiClient.get<SuggestionsResponse>(url, {
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    }
+  });
+  
+  console.log('📨 API Response:', response);
   
   return response;
 }
