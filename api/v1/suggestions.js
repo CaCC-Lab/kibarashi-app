@@ -4,10 +4,12 @@
 const { GeminiClient } = require('./_lib/gemini.js');
 const { SimpleAPIKeyManager } = require('./_lib/apiKeyManager.js');
 const { getFallbackSuggestions } = require('./_lib/fallback.js');
+const { getCache } = require('./_lib/cache.js');
 
 let geminiClient = null;
 let keyManager = null;
 let lastKeyRotation = 0;
+const cache = getCache();
 
 // 遅延初期化（コールドスタート対策）
 function getGeminiClient() {
@@ -81,38 +83,55 @@ module.exports = async (req, res) => {
     let source = 'fallback';
     let debugInfo = {};
     
-    // Gemini APIを試行
-    const client = getGeminiClient();
-    if (client) {
-      try {
-        console.log('[SUGGESTIONS] Attempting Gemini API generation...');
-        console.log('[SUGGESTIONS] Request parameters:', {
-          situation: normalizedSituation,
-          duration: normalizedDuration,
-          ageGroup: ageGroup
-        });
-        
-        suggestions = await client.generateSuggestions(
-          normalizedSituation, 
-          normalizedDuration, 
-          ageGroup
-        );
-        source = 'gemini_api';
-        debugInfo.gemini_success = true;
-        console.log('[SUGGESTIONS] Gemini API generation successful');
-        console.log('[SUGGESTIONS] Generated suggestions count:', suggestions?.length || 0);
-      } catch (geminiError) {
-        console.error('[SUGGESTIONS] Gemini API error details:', {
-          message: geminiError.message,
-          stack: geminiError.stack?.substring(0, 500),
-          name: geminiError.name
-        });
-        debugInfo.gemini_error = geminiError.message;
-        // Gemini API失敗時はフォールバックへ
-      }
+    // キャッシュキーを生成
+    const cacheKey = cache.generateKey(normalizedSituation, normalizedDuration, ageGroup);
+    
+    // まずキャッシュをチェック
+    const cachedSuggestions = cache.get(cacheKey);
+    if (cachedSuggestions) {
+      console.log('[SUGGESTIONS] Cache hit for key:', cacheKey);
+      suggestions = cachedSuggestions;
+      source = 'cache';
+      debugInfo.cache_hit = true;
     } else {
-      console.log('[SUGGESTIONS] Gemini client not available, using fallback');
-      debugInfo.gemini_client_available = false;
+      // キャッシュミスの場合、Gemini APIを試行
+      const client = getGeminiClient();
+      if (client) {
+        try {
+          console.log('[SUGGESTIONS] Cache miss, attempting Gemini API generation...');
+          console.log('[SUGGESTIONS] Request parameters:', {
+            situation: normalizedSituation,
+            duration: normalizedDuration,
+            ageGroup: ageGroup
+          });
+          
+          suggestions = await client.generateSuggestions(
+            normalizedSituation, 
+            normalizedDuration, 
+            ageGroup
+          );
+          source = 'gemini_api';
+          debugInfo.gemini_success = true;
+          
+          // 成功したらキャッシュに保存
+          cache.set(cacheKey, suggestions);
+          console.log('[SUGGESTIONS] Cached Gemini response for key:', cacheKey);
+          
+          console.log('[SUGGESTIONS] Gemini API generation successful');
+          console.log('[SUGGESTIONS] Generated suggestions count:', suggestions?.length || 0);
+        } catch (geminiError) {
+          console.error('[SUGGESTIONS] Gemini API error details:', {
+            message: geminiError.message,
+            stack: geminiError.stack?.substring(0, 500),
+            name: geminiError.name
+          });
+          debugInfo.gemini_error = geminiError.message;
+          // Gemini API失敗時はフォールバックへ
+        }
+      } else {
+        console.log('[SUGGESTIONS] Gemini client not available, using fallback');
+        debugInfo.gemini_client_available = false;
+      }
     }
     
     // フォールバックデータを使用
@@ -142,6 +161,7 @@ module.exports = async (req, res) => {
         location: req.query.location || 'Tokyo',
         timestamp: new Date().toISOString(),
         source: source,
+        cache: cache.getStats(),
         debug: debugInfo
       }
     };

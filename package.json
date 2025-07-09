@@ -17,6 +17,8 @@
     "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "cd frontend && npm test",
     "test:backend": "cd backend && npm test",
+    "test:api": "cd api/v1/_lib && node ../../../node_modules/.bin/mocha *.test.js",
+    "test:e2e": "npx playwright test",
     "lint": "npm run lint:frontend && npm run lint:backend",
     "lint:frontend": "cd frontend && npm run lint",
     "lint:backend": "cd backend && npm run lint",
@@ -44,6 +46,7 @@
   "devDependencies": {
     "@playwright/test": "^1.53.2",
     "concurrently": "^8.2.2",
+    "mocha": "^11.7.1",
     "playwright": "^1.53.2"
   },
   "engines": {
