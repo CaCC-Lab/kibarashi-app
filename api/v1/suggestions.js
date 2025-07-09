@@ -6,14 +6,21 @@ const { SimpleAPIKeyManager } = require('./_lib/apiKeyManager.js');
 const { getFallbackSuggestions } = require('./_lib/fallback.js');
 
 let geminiClient = null;
+let keyManager = null;
+let lastKeyRotation = 0;
 
 // 遅延初期化（コールドスタート対策）
 function getGeminiClient() {
-  if (!geminiClient) {
+  if (!geminiClient || Date.now() - lastKeyRotation > 60000) { // 1分ごとに再評価
     try {
-      const keyManager = new SimpleAPIKeyManager();
+      if (!keyManager) {
+        keyManager = new SimpleAPIKeyManager();
+      }
+      
+      // クライアントを再作成（キーの状態が変わっている可能性があるため）
       geminiClient = new GeminiClient(keyManager);
-      console.log('[SUGGESTIONS] Gemini client initialized');
+      lastKeyRotation = Date.now();
+      console.log('[SUGGESTIONS] Gemini client initialized/refreshed');
     } catch (error) {
       console.error('[SUGGESTIONS] Failed to initialize Gemini client:', error.message);
       // クライアント初期化失敗時はnullのまま
