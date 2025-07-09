@@ -71,5 +71,18 @@ export async function fetchSuggestions(
   
   console.log('📨 API Response:', response);
   
+  // 304 Not Modifiedの場合、nullが返される可能性があるため、デフォルトレスポンスを返す
+  if (response === null) {
+    console.log('📦 304 Not Modified - returning empty suggestions');
+    return {
+      suggestions: [],
+      metadata: {
+        situation,
+        duration,
+        timestamp: new Date().toISOString()
+      }
+    };
+  }
+  
   return response;
 }

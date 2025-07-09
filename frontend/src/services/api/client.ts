@@ -124,10 +124,15 @@ class ApiClient {
           'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
           'Pragma': 'no-cache',
           'Expires': '0',
-          'If-None-Match': '*',
+          // If-None-Match: '*' はGETリクエストには不適切なため削除
           ...options?.headers,
         },
       });
+
+      // 304 Not Modifiedは成功とみなし、nullを返すことでキャッシュ使用を示す
+      if (response.status === 304) {
+        return null as any; // キャッシュが有効であることを示す
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -168,11 +173,16 @@ class ApiClient {
           'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
           'Pragma': 'no-cache',
           'Expires': '0',
-          'If-None-Match': '*',
+          // If-None-Match: '*' はPOSTリクエストでも通常使用しないため削除
           ...options?.headers,
         },
         body: JSON.stringify(data),
       });
+
+      // 304 Not Modifiedは成功とみなし、nullを返すことでキャッシュ使用を示す
+      if (response.status === 304) {
+        return null as any; // キャッシュが有効であることを示す
+      }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
