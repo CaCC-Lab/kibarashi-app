@@ -245,12 +245,22 @@ export function generateImprovedPrompt(
   // 年齢層別のペルソナとターゲット設定
   const ageGroupSettings = getAgeGroupSettings(ageGroup);
   
+  // ランダム要素を生成して、毎回異なる提案を促す
+  const randomSeed = Math.random();
+  const randomFocus = getRandomFocus(randomSeed);
+  const randomCategories = getRandomCategories(randomSeed);
+  
   return `${ageGroupSettings.persona}
+
+【ランダムシード】: ${randomSeed}
 
 【条件】
 - 場所: ${getSituationLabel(situation, ageGroup)}
 - 時間: ${duration}分（${timeGuideline.description}）
 - 対象: ${ageGroupSettings.target}
+
+【今回の特別な焦点】
+${randomFocus}
 
 【重要な指針】
 1. **具体性と細分化**
@@ -271,6 +281,9 @@ export function generateImprovedPrompt(
 4. **${duration}分の時間枠に最適化**
    ${timeGuideline.characteristics.map(c => `- ${c}`).join('\n   ')}
 
+【今回優先して提案するカテゴリ】
+${randomCategories}
+
 【避けるべき重複提案】
 ${previousSuggestions.length > 0 ? previousSuggestions.join(', ') : 'なし'}
 
@@ -288,7 +301,55 @@ ${previousSuggestions.length > 0 ? previousSuggestions.join(', ') : 'なし'}
 - 3-5個の具体的なステップ
 - 励ましの言葉を含むガイド文（150-200文字）
 
+**重要**: 前回と異なる新しい提案を必ず3つ生成してください。同じ提案を繰り返さないでください。
+
 JSON形式で回答してください。`;
+}
+
+/**
+ * ランダムな焦点を生成
+ */
+function getRandomFocus(seed: number): string {
+  const focuses = [
+    '今回は特に「五感を使った気晴らし」を重視してください',
+    '今回は特に「想像力を活用した気晴らし」を重視してください',
+    '今回は特に「身体の微細な動きを使った気晴らし」を重視してください',
+    '今回は特に「デジタルツールを活用した気晴らし」を重視してください',
+    '今回は特に「自然や環境を活用した気晴らし」を重視してください',
+    '今回は特に「人とのつながりを感じる気晴らし」を重視してください',
+    '今回は特に「創造性を発揮する気晴らし」を重視してください',
+    '今回は特に「マインドフルネスを取り入れた気晴らし」を重視してください'
+  ];
+  
+  const index = Math.floor(seed * focuses.length);
+  return focuses[index];
+}
+
+/**
+ * ランダムなカテゴリ優先順位を生成
+ */
+function getRandomCategories(seed: number): string {
+  const allCategories = [
+    '想像・妄想系',
+    '自己対話・肯定系',
+    '感覚集中系',
+    '思考整理系',
+    '飲食系',
+    '軽運動系',
+    '創作・作業系',
+    'コミュニケーション系',
+    '趣味・興味系'
+  ];
+  
+  // シードに基づいてカテゴリをシャッフル
+  const shuffled = [...allCategories].sort(() => seed - 0.5);
+  
+  // 上位3つを選択
+  const selected = shuffled.slice(0, 3);
+  
+  return `1. ${selected[0]}
+2. ${selected[1]}
+3. ${selected[2]}`;
 }
 
 /**

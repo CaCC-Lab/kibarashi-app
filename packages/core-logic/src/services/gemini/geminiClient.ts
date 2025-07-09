@@ -366,7 +366,7 @@ class GeminiClient {
     const key = `${situation}-${duration}-${ageGroup}`;
     const previousSuggestions = this.previousSuggestions.get(key) || [];
     
-    // 改善されたプロンプト生成機能を使用
+    // 改善されたプロンプト生成機能を使用（ランダム要素付き）
     const improvedPrompt = generateImprovedPrompt(
       situation,
       duration,
@@ -374,7 +374,15 @@ class GeminiClient {
       previousSuggestions
     );
     
-    return improvedPrompt;
+    // 追加のランダム要素をプロンプトに注入
+    const randomInstructions = `
+【追加指示】
+- 生成ID: ${Date.now()}-${Math.random().toString(36).substring(2, 9)}
+- 必ず前回とは異なる新しい提案を3つ生成してください
+- 同じパターンや似た内容を避けて、創造的な提案をしてください
+`;
+    
+    return improvedPrompt + randomInstructions;
   }
 
 
