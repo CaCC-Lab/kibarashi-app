@@ -892,3 +892,23 @@ Phase A（年齢層別展開）の成功を受けて実施する長期戦略
     - [x] フロントエンド統合テスト
   - [x] **Vercel Functions構造修正**: ディレクトリ構造をVercel仕様に適合
   - [x] **本番環境デプロイ準備**: GitHubプッシュによる自動デプロイ実行予定
+
+- [x] **天気情報の地域別表示を修正（2025/07/09）**
+  - [x] **問題特定**: ユーザー報告「まだ東京の天気が出るよ？」（場所変更しても天気データが東京のまま）
+  - [x] **Playwrightテスト用data-testid属性追加**
+    - [x] SituationSelector: `data-testid="situation-${option.id}"`
+    - [x] DurationSelector: `data-testid="duration-${option.id}"`
+    - [x] LocationSelector: `data-testid="location-${location.id.toLowerCase()}"`
+    - [x] SuggestionCard: `data-testid="suggestion-card"`
+    - [x] ContextDisplay: `data-testid="weather-info"`
+  - [x] **contextAPI.tsのキャッシュ管理改善**
+    - [x] 場所変更時のキャッシュクリアロジック実装
+    - [x] より詳細なデバッグログ追加
+  - [x] **SuggestionList.tsxのコンテキストデータ取得強化**
+    - [x] 場所変更時に明示的にキャッシュをクリア
+    - [x] location依存のuseEffect更新
+  - [x] **Playwrightテスト実行で完全動作確認**
+    - [x] 東京の天気: `☀️35°C 晴れ東京☀️夏 (7月)...`
+    - [x] 大阪の天気: `☀️37°C 晴れ大阪☀️夏 (7月)...`
+    - [x] ヘッダー位置表示: 正常変更
+    - [x] 全3テスト成功
