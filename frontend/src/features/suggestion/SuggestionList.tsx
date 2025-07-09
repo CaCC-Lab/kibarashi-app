@@ -96,8 +96,13 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     const loadContextData = async () => {
       setContextLoading(true);
       try {
-        const context = await contextAPI.getCurrentContext();
+        // 場所が変わった場合はキャッシュをクリア
+        if (location) {
+          contextAPI.clearCache();
+        }
+        const context = await contextAPI.getCurrentContext(location);
         setContextData(context);
+        console.log('Context data loaded for location:', location, context);
       } catch (error) {
         console.error('Failed to load context data:', error);
         // エラーが発生してもコンテキストなしで提案を表示
@@ -107,7 +112,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     };
 
     loadContextData();
-  }, []); // 初回のみ実行
+  }, [location]); // location が変わるたびに実行
 
   // コンポーネントマウント時と条件変更時に提案を取得
   useEffect(() => {

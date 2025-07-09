@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const suggestionsHandler = require('./api/v1/suggestions');
+const contextHandler = require('./api/v1/context');
 
 const app = express();
 const PORT = 3004;
@@ -21,6 +22,14 @@ app.get('/api/v1/suggestions', (req, res) => {
   
   // Express.js の Request/Response オブジェクトを使用
   suggestionsHandler(req, res);
+});
+
+app.get('/api/v1/context', (req, res) => {
+  console.log('Context API Request received:', req.method, req.url);
+  console.log('Query params:', req.query);
+  
+  // Express.js の Request/Response オブジェクトを使用
+  contextHandler(req, res);
 });
 
 // 健康チェック用エンドポイント

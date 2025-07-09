@@ -153,7 +153,10 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   const style = categoryStyles[category] || categoryStyles['認知的']; // フォールバック
 
   return (
-    <div className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col">
+    <div 
+      data-testid="suggestion-card"
+      className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col"
+    >
       <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">

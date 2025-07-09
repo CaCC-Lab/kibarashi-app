@@ -71,7 +71,10 @@ const ContextDisplay: React.FC<ContextDisplayProps> = ({
   };
 
   return (
-    <div className={`bg-gradient-to-r ${getSeasonTheme(seasonal.season)} border rounded-lg p-4 mb-6 ${className}`}>
+    <div 
+      data-testid="weather-info"
+      className={`bg-gradient-to-r ${getSeasonTheme(seasonal.season)} border rounded-lg p-4 mb-6 ${className}`}
+    >
       <div className="flex flex-wrap items-center gap-4">
         {/* 天候情報 */}
         {weather && (

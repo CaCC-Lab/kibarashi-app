@@ -119,6 +119,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
             return (
               <button
                 key={location.id}
+                data-testid={`location-${location.id.toLowerCase()}`}
                 onClick={() => handleLocationSelect(location)}
                 className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
                   isSelected

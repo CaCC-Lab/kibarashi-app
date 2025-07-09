@@ -1,4 +1,4 @@
-export default (req, res) => {
+module.exports = (req, res) => {
   console.log('[JS CONTEXT] Function invoked at:', new Date().toISOString());
   console.log('[JS CONTEXT] Method:', req.method);
   
@@ -25,6 +25,127 @@ export default (req, res) => {
   try {
     console.log('[JS CONTEXT] Processing request...');
     
+    // クエリパラメータから位置情報を取得
+    const location = req.query.location || 'Tokyo';
+    console.log('[JS CONTEXT] Location:', location);
+    
+    // 地域別の天気データ設定
+    const locationWeatherData = {
+      'Tokyo': {
+        baseName: '東京',
+        temperatureRange: { min: 8, max: 32 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -5,
+          'spring': 0,
+          'summer': 8,
+          'autumn': -2
+        }
+      },
+      'Osaka': {
+        baseName: '大阪',
+        temperatureRange: { min: 10, max: 35 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -3,
+          'spring': 2,
+          'summer': 10,
+          'autumn': 0
+        }
+      },
+      'Kyoto': {
+        baseName: '京都',
+        temperatureRange: { min: 5, max: 38 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -7,
+          'spring': 1,
+          'summer': 12,
+          'autumn': -1
+        }
+      },
+      'Yokohama': {
+        baseName: '横浜',
+        temperatureRange: { min: 9, max: 30 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -4,
+          'spring': 1,
+          'summer': 6,
+          'autumn': -1
+        }
+      },
+      'Nagoya': {
+        baseName: '名古屋',
+        temperatureRange: { min: 6, max: 36 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -6,
+          'spring': 1,
+          'summer': 11,
+          'autumn': -2
+        }
+      },
+      'Sapporo': {
+        baseName: '札幌',
+        temperatureRange: { min: -8, max: 28 },
+        commonConditions: ['sunny', 'cloudy', 'snowy'],
+        seasonalAdjustment: {
+          'winter': -15,
+          'spring': -5,
+          'summer': 3,
+          'autumn': -8
+        }
+      },
+      'Fukuoka': {
+        baseName: '福岡',
+        temperatureRange: { min: 12, max: 34 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -1,
+          'spring': 3,
+          'summer': 9,
+          'autumn': 1
+        }
+      },
+      'Sendai': {
+        baseName: '仙台',
+        temperatureRange: { min: 3, max: 30 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -8,
+          'spring': -2,
+          'summer': 5,
+          'autumn': -4
+        }
+      },
+      'Hiroshima': {
+        baseName: '広島',
+        temperatureRange: { min: 8, max: 33 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -2,
+          'spring': 2,
+          'summer': 8,
+          'autumn': 0
+        }
+      },
+      'Kobe': {
+        baseName: '神戸',
+        temperatureRange: { min: 9, max: 32 },
+        commonConditions: ['sunny', 'cloudy', 'rainy'],
+        seasonalAdjustment: {
+          'winter': -3,
+          'spring': 1,
+          'summer': 7,
+          'autumn': -1
+        }
+      }
+    };
+    
+    // 地域データを取得（デフォルトは東京）
+    const locationData = locationWeatherData[location] || locationWeatherData['Tokyo'];
+    
     const now = new Date();
     const month = now.getMonth() + 1;
     const hour = now.getHours();
@@ -41,18 +162,29 @@ export default (req, res) => {
       season = 'winter';
     }
     
-    // 時間帯に基づく天候パターン
-    const weatherConditions = ['sunny', 'cloudy', 'rainy'];
-    const currentCondition = weatherConditions[hour % weatherConditions.length];
+    // 地域別の天候パターン
+    const weatherConditions = locationData.commonConditions;
+    let currentCondition = weatherConditions[hour % weatherConditions.length];
     
-    // 季節の温度
+    // 札幌の冬は雪の確率を高く
+    if (location === 'Sapporo' && season === 'winter') {
+      const snowChance = Math.random();
+      if (snowChance < 0.4) {
+        currentCondition = 'snowy';
+      }
+    }
+    
+    // 地域と季節を考慮した温度計算
     const baseTemperatures = {
       spring: 18,
       summer: 28,
       autumn: 15,
       winter: 8
     };
-    const temperature = baseTemperatures[season] + Math.floor(Math.random() * 6) - 3;
+    const baseTemp = baseTemperatures[season];
+    const locationAdjustment = locationData.seasonalAdjustment[season];
+    const randomVariation = Math.floor(Math.random() * 6) - 3; // ±3度のランダム変動
+    const temperature = baseTemp + locationAdjustment + randomVariation;
     
     // 天候の説明
     const weatherDescriptions = {
@@ -110,10 +242,11 @@ export default (req, res) => {
           condition: currentCondition,
           description: weatherDescriptions[currentCondition] || '不明',
           humidity: Math.floor(Math.random() * 30) + 50, // 50-80%
-          location: '東京',
+          location: locationData.baseName,
           icon: currentCondition === 'sunny' ? '01d' : 
                 currentCondition === 'cloudy' ? '03d' : 
-                currentCondition === 'rainy' ? '10d' : '01d'
+                currentCondition === 'rainy' ? '10d' : 
+                currentCondition === 'snowy' ? '13d' : '01d'
         },
         seasonal: {
           season: season,

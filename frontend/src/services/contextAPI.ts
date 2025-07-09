@@ -13,16 +13,25 @@ class ContextAPI {
   /**
    * 現在のコンテキストデータを取得
    */
-  async getCurrentContext(): Promise<ContextualData | null> {
+  async getCurrentContext(location?: string): Promise<ContextualData | null> {
     try {
-      // キャッシュチェック
+      // キャッシュチェック - 場所が変わった場合はキャッシュを無効化
       if (this.cache && Date.now() - this.cache.timestamp < this.cacheTimeout) {
-        console.log('Context data returned from cache');
-        return this.cache.data;
+        // 場所が変わった場合はキャッシュをクリア
+        if (location && this.cache.data.weather?.location !== this.getLocationDisplayName(location)) {
+          console.log('Location changed, clearing cache');
+          this.cache = null;
+        } else {
+          console.log('Context data returned from cache');
+          return this.cache.data;
+        }
       }
 
       // バックエンドAPIからデータを取得
-      const response = await fetch('/api/v1/context', {
+      const url = location ? `/api/v1/context?location=${encodeURIComponent(location)}` : '/api/v1/context';
+      console.log('Fetching context data from:', url);
+      
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -32,12 +41,15 @@ class ContextAPI {
       });
 
       if (!response.ok) {
+        console.error('Context API error:', response.status, response.statusText);
         throw new Error(`Context API error: ${response.status}`);
       }
 
       const result = await response.json();
+      console.log('Context API response:', result);
       
       if (!result.success || !result.data) {
+        console.error('Invalid context API response:', result);
         throw new Error('Invalid context API response');
       }
 
@@ -58,15 +70,16 @@ class ContextAPI {
 
     } catch (error) {
       console.error('Failed to fetch context data from API, falling back to mock:', error);
+      console.log('Using mock data for location:', location);
       // エラー時はモックデータを返す
-      return this.getMockContextData();
+      return this.getMockContextData(location);
     }
   }
 
   /**
    * モックデータ（開発・テスト用）
    */
-  private async getMockContextData(): Promise<ContextualData> {
+  private async getMockContextData(location?: string): Promise<ContextualData> {
     const now = new Date();
     const month = now.getMonth() + 1;
     const hour = now.getHours();
@@ -98,7 +111,7 @@ class ContextAPI {
         condition: currentCondition,
         description: this.getWeatherDescription(currentCondition),
         humidity: Math.floor(Math.random() * 30) + 50, // 50-80%
-        location: '東京',
+        location: this.getLocationDisplayName(location || 'Tokyo'),
         icon: this.getWeatherIcon(currentCondition)
       },
       seasonal: {
@@ -223,6 +236,25 @@ class ContextAPI {
     };
 
     return icons[condition];
+  }
+
+  /**
+   * 場所の表示名を取得
+   */
+  private getLocationDisplayName(location: string): string {
+    const locationMap: Record<string, string> = {
+      'Tokyo': '東京',
+      'Osaka': '大阪',
+      'Kyoto': '京都',
+      'Yokohama': '横浜',
+      'Nagoya': '名古屋',
+      'Sapporo': '札幌',
+      'Fukuoka': '福岡',
+      'Sendai': '仙台',
+      'Hiroshima': '広島',
+      'Kobe': '神戸'
+    };
+    return locationMap[location] || location;
   }
 
   /**

@@ -65,6 +65,7 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
         {situations.map((option, index) => (
           <button
             key={option.id}
+            data-testid={`situation-${option.id}`}
             onClick={() => {
               if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
                 navigator.vibrate(30);
