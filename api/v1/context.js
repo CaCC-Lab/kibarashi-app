@@ -1,5 +1,5 @@
-// OpenWeatherMap API を使用した実際の天気データ取得
-const axios = require('axios');
+// Fixed context.js without axios dependency
+const https = require('https');
 
 // 47都道府県の県庁所在地座標データ
 const JAPAN_CITIES = {
@@ -58,17 +58,47 @@ const JAPAN_CITIES = {
   'Kobe': { lat: 34.6913, lon: 135.1830, name: '神戸' }
 };
 
+// HTTPS request helper
+function httpsRequest(options) {
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      res.on('end', () => {
+        try {
+          const jsonData = JSON.parse(data);
+          resolve({ status: res.statusCode, data: jsonData });
+        } catch (error) {
+          reject(new Error(`JSON parse error: ${error.message}`));
+        }
+      });
+    });
+    
+    req.on('error', (error) => {
+      reject(error);
+    });
+    
+    req.setTimeout(8000, () => {
+      req.abort();
+      reject(new Error('Request timeout'));
+    });
+    
+    req.end();
+  });
+}
+
 // OpenWeatherMap API の weather ID を内部のcondition形式に変換
 function mapWeatherCondition(weatherId, weatherMain) {
-  if (weatherId >= 200 && weatherId < 300) return 'rainy'; // 雷雨
-  if (weatherId >= 300 && weatherId < 400) return 'rainy'; // 霧雨
-  if (weatherId >= 500 && weatherId < 600) return 'rainy'; // 雨
-  if (weatherId >= 600 && weatherId < 700) return 'snowy'; // 雪
-  if (weatherId >= 700 && weatherId < 800) return 'cloudy'; // 大気現象（霧など）
-  if (weatherId === 800) return 'sunny'; // 晴れ
-  if (weatherId > 800) return 'cloudy'; // 曇り
+  if (weatherId >= 200 && weatherId < 300) return 'rainy';
+  if (weatherId >= 300 && weatherId < 400) return 'rainy';
+  if (weatherId >= 500 && weatherId < 600) return 'rainy';
+  if (weatherId >= 600 && weatherId < 700) return 'snowy';
+  if (weatherId >= 700 && weatherId < 800) return 'cloudy';
+  if (weatherId === 800) return 'sunny';
+  if (weatherId > 800) return 'cloudy';
 
-  // フォールバック
   const main = weatherMain.toLowerCase();
   if (main.includes('rain')) return 'rainy';
   if (main.includes('snow')) return 'snowy';
@@ -94,17 +124,24 @@ async function getActualWeatherData(location) {
   }
 
   try {
-    const url = 'https://api.openweathermap.org/data/2.5/weather';
-    const response = await axios.get(url, {
-      params: {
-        lat: cityData.lat,
-        lon: cityData.lon,
-        appid: apiKey,
-        units: 'metric',
-        lang: 'ja'
-      },
-      timeout: 8000
-    });
+    const url = `https://api.openweathermap.org/data/2.5/weather?lat=${cityData.lat}&lon=${cityData.lon}&appid=${apiKey}&units=metric&lang=ja`;
+    const urlObj = new URL(url);
+    
+    const options = {
+      hostname: urlObj.hostname,
+      port: 443,
+      path: urlObj.pathname + urlObj.search,
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Kibarashi-App/1.0)'
+      }
+    };
+
+    const response = await httpsRequest(options);
+    
+    if (response.status !== 200) {
+      throw new Error(`HTTP ${response.status}: ${response.data.message || 'Unknown error'}`);
+    }
 
     const weather = response.data.weather[0];
     const condition = mapWeatherCondition(weather.id, weather.main);
@@ -118,7 +155,7 @@ async function getActualWeatherData(location) {
       icon: weather.icon
     };
   } catch (error) {
-    console.error('OpenWeatherMap API error:', error.response?.data || error.message);
+    console.error('OpenWeatherMap API error:', error.message);
     return null;
   }
 }
@@ -169,8 +206,13 @@ function getMockWeatherData(location) {
 }
 
 module.exports = async (req, res) => {
-  console.log('[JS CONTEXT] Function invoked at:', new Date().toISOString());
-  console.log('[JS CONTEXT] Method:', req.method);
+  console.log('[CONTEXT] Function invoked at:', new Date().toISOString());
+  console.log('[CONTEXT] Method:', req.method);
+  console.log('[CONTEXT] Environment:', {
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL_ENV: process.env.VERCEL_ENV,
+    hasWeatherKey: !!process.env.OPENWEATHER_API_KEY
+  });
   
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -178,12 +220,12 @@ module.exports = async (req, res) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
-    console.log('[JS CONTEXT] OPTIONS request, returning 200');
+    console.log('[CONTEXT] OPTIONS request, returning 200');
     return res.status(200).end();
   }
 
   if (req.method !== "GET") {
-    console.log('[JS CONTEXT] Invalid method:', req.method);
+    console.log('[CONTEXT] Invalid method:', req.method);
     return res.status(405).json({
       error: {
         message: 'Method not allowed',
@@ -193,33 +235,24 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('[JS CONTEXT] Processing request...');
+    console.log('[CONTEXT] Processing request...');
     
     // クエリパラメータから位置情報を取得
     const location = req.query.location || 'Tokyo';
-    console.log('[JS CONTEXT] Location:', location);
+    console.log('[CONTEXT] Location:', location);
     
     // 実際の天気データを取得
     let weatherData = await getActualWeatherData(location);
     
     if (!weatherData) {
-      console.log('[JS CONTEXT] Using mock weather data');
+      console.log('[CONTEXT] Using mock weather data');
       weatherData = getMockWeatherData(location);
     } else {
-      console.log('[JS CONTEXT] Using actual weather data from OpenWeatherMap');
+      console.log('[CONTEXT] Using actual weather data from OpenWeatherMap');
     }
     
     const now = new Date();
     const month = now.getMonth() + 1;
-    
-    // 天候の説明
-    const weatherDescriptions = {
-      sunny: '晴れ',
-      cloudy: '曇り',
-      rainy: '雨',
-      snowy: '雪',
-      unknown: '不明'
-    };
     
     // 季節のイベント
     const seasonalEvents = {
@@ -287,7 +320,7 @@ module.exports = async (req, res) => {
           season: season,
           month: month,
           seasonalEvents: seasonalEvents[month] || [],
-          holidays: [], // 簡易実装のため空配列
+          holidays: [],
           specialPeriods: specialPeriods,
           seasonalTips: seasonalTips[season] || []
         },
@@ -295,11 +328,11 @@ module.exports = async (req, res) => {
       }
     };
     
-    console.log('[JS CONTEXT] Sending response...');
+    console.log('[CONTEXT] Sending response...');
     return res.status(200).json(response);
     
   } catch (error) {
-    console.error('[JS CONTEXT] Error:', error);
+    console.error('[CONTEXT] Error:', error);
     return res.status(500).json({
       error: {
         message: 'サーバー内部でエラーが発生しました。時間をおいて再試行してください。',
