@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-
-interface Location {
-  id: string;
-  name: string;
-  displayName: string;
-  region: string;
-}
+import { PREFECTURES, REGIONS_ORDER, Prefecture } from '../../data/prefectures';
 
 interface LocationSelectorProps {
   currentLocation: string;
@@ -14,19 +8,6 @@ interface LocationSelectorProps {
   onClose: () => void;
 }
 
-const LOCATIONS: Location[] = [
-  { id: 'Tokyo', name: 'Tokyo', displayName: '東京', region: '関東' },
-  { id: 'Osaka', name: 'Osaka', displayName: '大阪', region: '関西' },
-  { id: 'Kyoto', name: 'Kyoto', displayName: '京都', region: '関西' },
-  { id: 'Yokohama', name: 'Yokohama', displayName: '横浜', region: '関東' },
-  { id: 'Nagoya', name: 'Nagoya', displayName: '名古屋', region: '中部' },
-  { id: 'Sapporo', name: 'Sapporo', displayName: '札幌', region: '北海道' },
-  { id: 'Fukuoka', name: 'Fukuoka', displayName: '福岡', region: '九州' },
-  { id: 'Sendai', name: 'Sendai', displayName: '仙台', region: '東北' },
-  { id: 'Hiroshima', name: 'Hiroshima', displayName: '広島', region: '中国' },
-  { id: 'Kobe', name: 'Kobe', displayName: '神戸', region: '関西' },
-];
-
 const LocationSelector: React.FC<LocationSelectorProps> = ({
   currentLocation,
   onLocationChange,
@@ -34,17 +15,29 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
   onClose
 }) => {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
-  const currentLocationData = LOCATIONS.find(loc => loc.name === currentLocation);
-  const regions = [...new Set(LOCATIONS.map(loc => loc.region))];
+  const currentLocationData = PREFECTURES.find(loc => loc.name === currentLocation || loc.displayName === currentLocation);
   
-  const filteredLocations = selectedRegion 
-    ? LOCATIONS.filter(loc => loc.region === selectedRegion)
-    : LOCATIONS;
+  // 検索フィルター
+  const searchFilteredPrefectures = searchTerm 
+    ? PREFECTURES.filter(pref => 
+        pref.displayName.includes(searchTerm) || 
+        pref.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (pref.capital && pref.capital.includes(searchTerm))
+      )
+    : PREFECTURES;
+  
+  // 地域フィルター
+  const filteredPrefectures = selectedRegion 
+    ? searchFilteredPrefectures.filter(pref => pref.region === selectedRegion)
+    : searchFilteredPrefectures;
 
-  const handleLocationSelect = (location: Location) => {
-    onLocationChange(location.name);
+  const handleLocationSelect = (prefecture: Prefecture) => {
+    onLocationChange(prefecture.name);
     onClose();
+    setSearchTerm('');
+    setSelectedRegion(null);
   };
 
   if (!isOpen) return null;
@@ -55,7 +48,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
         {/* ヘッダー */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-text-primary dark:text-text-inverse">
-            📍 場所を選択
+            📍 都道府県を選択
           </h2>
           <button
             onClick={onClose}
@@ -74,9 +67,25 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           <p className="text-text-primary dark:text-text-inverse font-medium">
             📍 {currentLocationData?.displayName || currentLocation}
             {currentLocationData?.region && (
-              <span className="text-sm text-text-secondary ml-2">({currentLocationData.region})</span>
+              <span className="text-sm text-text-secondary ml-2">({currentLocationData.region}地方)</span>
             )}
           </p>
+        </div>
+
+        {/* 検索ボックス */}
+        <div className="mb-4">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="都道府県名で検索..."
+              className="w-full px-4 py-2 pl-10 bg-surface-secondary dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-text-primary dark:text-text-inverse"
+            />
+            <svg className="absolute left-3 top-2.5 w-5 h-5 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
         </div>
 
         {/* 地域フィルター */}
@@ -93,7 +102,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
             >
               すべて
             </button>
-            {regions.map(region => (
+            {REGIONS_ORDER.map(region => (
               <button
                 key={region}
                 onClick={() => setSelectedRegion(region)}
@@ -109,44 +118,51 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           </div>
         </div>
 
-        {/* 都市一覧 */}
+        {/* 都道府県一覧 */}
         <div className="space-y-2">
           <p className="text-sm text-text-secondary dark:text-gray-300 mb-2">
-            都市を選択（{filteredLocations.length}件）
+            都道府県を選択（{filteredPrefectures.length}件）
           </p>
-          {filteredLocations.map(location => {
-            const isSelected = location.name === currentLocation;
-            return (
-              <button
-                key={location.id}
-                data-testid={`location-${location.id.toLowerCase()}`}
-                onClick={() => handleLocationSelect(location)}
-                className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500'
-                    : 'bg-surface-secondary dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-primary-900/10 border-2 border-transparent'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-text-primary dark:text-text-inverse">
-                      {location.displayName}
-                    </p>
-                    <p className="text-sm text-text-secondary dark:text-gray-300">
-                      {location.region}地方
-                    </p>
-                  </div>
-                  {isSelected && (
-                    <div className="text-primary-500">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+          {filteredPrefectures.length === 0 ? (
+            <div className="text-center py-8 text-text-secondary">
+              <p>該当する都道府県が見つかりません</p>
+            </div>
+          ) : (
+            filteredPrefectures.map(prefecture => {
+              const isSelected = prefecture.name === currentLocation || prefecture.displayName === currentLocation;
+              return (
+                <button
+                  key={prefecture.id}
+                  data-testid={`location-${prefecture.id}`}
+                  onClick={() => handleLocationSelect(prefecture)}
+                  className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
+                    isSelected
+                      ? 'bg-primary-100 dark:bg-primary-900/30 border-2 border-primary-500'
+                      : 'bg-surface-secondary dark:bg-gray-700 hover:bg-primary-50 dark:hover:bg-primary-900/10 border-2 border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-text-primary dark:text-text-inverse">
+                        {prefecture.displayName}
+                      </p>
+                      <p className="text-sm text-text-secondary dark:text-gray-300">
+                        {prefecture.region}地方
+                        {prefecture.capital && ` • ${prefecture.capital}`}
+                      </p>
                     </div>
-                  )}
-                </div>
-              </button>
-            );
-          })}
+                    {isSelected && (
+                      <div className="text-primary-500">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              );
+            })
+          )}
         </div>
 
         {/* フッター説明 */}

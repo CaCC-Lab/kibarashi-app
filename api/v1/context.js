@@ -1,3 +1,6 @@
+// 47都道府県の天気データをインポート
+const prefectureWeatherData = require('./prefectureWeatherData');
+
 module.exports = (req, res) => {
   console.log('[JS CONTEXT] Function invoked at:', new Date().toISOString());
   console.log('[JS CONTEXT] Method:', req.method);
@@ -29,119 +32,8 @@ module.exports = (req, res) => {
     const location = req.query.location || 'Tokyo';
     console.log('[JS CONTEXT] Location:', location);
     
-    // 地域別の天気データ設定
-    const locationWeatherData = {
-      'Tokyo': {
-        baseName: '東京',
-        temperatureRange: { min: 8, max: 32 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -5,
-          'spring': 0,
-          'summer': 8,
-          'autumn': -2
-        }
-      },
-      'Osaka': {
-        baseName: '大阪',
-        temperatureRange: { min: 10, max: 35 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -3,
-          'spring': 2,
-          'summer': 10,
-          'autumn': 0
-        }
-      },
-      'Kyoto': {
-        baseName: '京都',
-        temperatureRange: { min: 5, max: 38 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -7,
-          'spring': 1,
-          'summer': 12,
-          'autumn': -1
-        }
-      },
-      'Yokohama': {
-        baseName: '横浜',
-        temperatureRange: { min: 9, max: 30 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -4,
-          'spring': 1,
-          'summer': 6,
-          'autumn': -1
-        }
-      },
-      'Nagoya': {
-        baseName: '名古屋',
-        temperatureRange: { min: 6, max: 36 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -6,
-          'spring': 1,
-          'summer': 11,
-          'autumn': -2
-        }
-      },
-      'Sapporo': {
-        baseName: '札幌',
-        temperatureRange: { min: -8, max: 28 },
-        commonConditions: ['sunny', 'cloudy', 'snowy'],
-        seasonalAdjustment: {
-          'winter': -15,
-          'spring': -5,
-          'summer': 3,
-          'autumn': -8
-        }
-      },
-      'Fukuoka': {
-        baseName: '福岡',
-        temperatureRange: { min: 12, max: 34 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -1,
-          'spring': 3,
-          'summer': 9,
-          'autumn': 1
-        }
-      },
-      'Sendai': {
-        baseName: '仙台',
-        temperatureRange: { min: 3, max: 30 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -8,
-          'spring': -2,
-          'summer': 5,
-          'autumn': -4
-        }
-      },
-      'Hiroshima': {
-        baseName: '広島',
-        temperatureRange: { min: 8, max: 33 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -2,
-          'spring': 2,
-          'summer': 8,
-          'autumn': 0
-        }
-      },
-      'Kobe': {
-        baseName: '神戸',
-        temperatureRange: { min: 9, max: 32 },
-        commonConditions: ['sunny', 'cloudy', 'rainy'],
-        seasonalAdjustment: {
-          'winter': -3,
-          'spring': 1,
-          'summer': 7,
-          'autumn': -1
-        }
-      }
-    };
+    // 47都道府県の天気データを使用
+    const locationWeatherData = prefectureWeatherData;
     
     // 地域データを取得（デフォルトは東京）
     const locationData = locationWeatherData[location] || locationWeatherData['Tokyo'];
@@ -166,8 +58,10 @@ module.exports = (req, res) => {
     const weatherConditions = locationData.commonConditions;
     let currentCondition = weatherConditions[hour % weatherConditions.length];
     
-    // 札幌の冬は雪の確率を高く
-    if (location === 'Sapporo' && season === 'winter') {
+    // 北海道・東北地方の冬は雪の確率を高く
+    if ((location === 'Hokkaido' || location === 'Sapporo' || 
+         location === 'Aomori' || location === 'Akita' || 
+         location === 'Iwate' || location === 'Yamagata') && season === 'winter') {
       const snowChance = Math.random();
       if (snowChance < 0.4) {
         currentCondition = 'snowy';
