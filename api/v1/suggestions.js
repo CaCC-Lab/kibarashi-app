@@ -1,7 +1,31 @@
-export default (req, res) => {
-  console.log('[JS SUGGESTIONS] Function invoked at:', new Date().toISOString());
-  console.log('[JS SUGGESTIONS] Method:', req.method);
-  console.log('[JS SUGGESTIONS] Query params:', req.query);
+// CLAUDE-GENERATED: Gemini API統合版
+// AI-PAIRED: Geminiと協調して動的な提案生成を実現
+
+const { GeminiClient } = require('./_lib/gemini.js');
+const { SimpleAPIKeyManager } = require('./_lib/apiKeyManager.js');
+const { getFallbackSuggestions } = require('./_lib/fallback.js');
+
+let geminiClient = null;
+
+// 遅延初期化（コールドスタート対策）
+function getGeminiClient() {
+  if (!geminiClient) {
+    try {
+      const keyManager = new SimpleAPIKeyManager();
+      geminiClient = new GeminiClient(keyManager);
+      console.log('[SUGGESTIONS] Gemini client initialized');
+    } catch (error) {
+      console.error('[SUGGESTIONS] Failed to initialize Gemini client:', error.message);
+      // クライアント初期化失敗時はnullのまま
+    }
+  }
+  return geminiClient;
+}
+
+module.exports = async (req, res) => {
+  console.log('[SUGGESTIONS] Function invoked at:', new Date().toISOString());
+  console.log('[SUGGESTIONS] Method:', req.method);
+  console.log('[SUGGESTIONS] Query params:', req.query);
   
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -9,12 +33,12 @@ export default (req, res) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
   if (req.method === "OPTIONS") {
-    console.log('[JS SUGGESTIONS] OPTIONS request, returning 200');
+    console.log('[SUGGESTIONS] OPTIONS request, returning 200');
     return res.status(200).end();
   }
 
   if (req.method !== "GET") {
-    console.log('[JS SUGGESTIONS] Invalid method:', req.method);
+    console.log('[SUGGESTIONS] Invalid method:', req.method);
     return res.status(405).json({
       error: {
         message: 'Method not allowed',
@@ -24,72 +48,98 @@ export default (req, res) => {
   }
 
   try {
-    console.log('[JS SUGGESTIONS] Processing request...');
+    console.log('[SUGGESTIONS] Processing request...');
     
+    // パラメータの取得と検証
+    const { 
+      situation = 'workplace', 
+      duration = '5', 
+      ageGroup = 'office_worker' 
+    } = req.query;
+    
+    const durationNum = parseInt(duration);
+    
+    // 有効な値の検証
+    const validSituations = ['workplace', 'home', 'outside', 'job_hunting'];
+    const validDurations = [5, 15, 30];
+    
+    const normalizedSituation = validSituations.includes(situation) ? situation : 'workplace';
+    const normalizedDuration = validDurations.includes(durationNum) ? durationNum : 5;
+    
+    let suggestions = null;
+    let source = 'fallback';
+    
+    // Gemini APIを試行
+    const client = getGeminiClient();
+    if (client) {
+      try {
+        console.log('[SUGGESTIONS] Attempting Gemini API generation...');
+        suggestions = await client.generateSuggestions(
+          normalizedSituation, 
+          normalizedDuration, 
+          ageGroup
+        );
+        source = 'gemini_api';
+        console.log('[SUGGESTIONS] Gemini API generation successful');
+      } catch (geminiError) {
+        console.error('[SUGGESTIONS] Gemini API error:', geminiError.message);
+        // Gemini API失敗時はフォールバックへ
+      }
+    } else {
+      console.log('[SUGGESTIONS] Gemini client not available, using fallback');
+    }
+    
+    // フォールバックデータを使用
+    if (!suggestions) {
+      console.log('[SUGGESTIONS] Using fallback suggestions');
+      suggestions = getFallbackSuggestions(
+        normalizedSituation, 
+        normalizedDuration, 
+        ageGroup
+      );
+    }
+    
+    // レスポンスの構築
     const response = {
-      suggestions: [
-        {
-          id: 'js_1',
-          title: '深呼吸で気持ちをリセット',
-          description: '5分間の深呼吸で心を落ち着かせます',
-          duration: 5,
-          category: '認知的',
-          steps: [
-            '椅子に座り、背筋を伸ばす',
-            '鼻から4秒かけて息を吸う',
-            '4秒間息を止める',
-            '口から8秒かけて息を吐く',
-            'これを5回繰り返す'
-          ]
-        },
-        {
-          id: 'js_2',
-          title: '軽い散歩',
-          description: '新鮮な空気を吸いながら気分転換',
-          duration: 5,
-          category: '行動的',
-          steps: [
-            '外に出る',
-            'ゆっくりと歩く',
-            '周りの景色を観察する',
-            '深呼吸を心がける',
-            '気持ちをリフレッシュ'
-          ]
-        },
-        {
-          id: 'js_3',
-          title: '感謝の気持ちを思い出す',
-          description: '今日の良かったことを3つ思い出す',
-          duration: 5,
-          category: '認知的',
-          steps: [
-            '今日起きた良いことを思い出す',
-            '感謝したい人を思い浮かべる',
-            'その人に心の中でお礼を言う',
-            '自分の頑張りを認める',
-            '前向きな気持ちを感じる'
-          ]
-        }
-      ],
+      suggestions: suggestions,
       metadata: {
-        situation: req.query.situation || 'workplace',
-        duration: parseInt(req.query.duration) || 5,
-        ageGroup: req.query.ageGroup || 'office_worker',
+        situation: normalizedSituation,
+        duration: normalizedDuration,
+        ageGroup: ageGroup,
         location: req.query.location || 'Tokyo',
         timestamp: new Date().toISOString(),
-        source: 'javascript_version'
+        source: source
       }
     };
 
-    console.log('[JS SUGGESTIONS] Sending response...');
+    console.log(`[SUGGESTIONS] Sending response (source: ${source})`);
     return res.status(200).json(response);
+    
   } catch (error) {
-    console.error('[JS SUGGESTIONS] Error:', error);
-    return res.status(500).json({
-      error: {
-        message: 'サーバー内部でエラーが発生しました。時間をおいて再試行してください。',
-        code: 'INTERNAL_SERVER_ERROR'
-      }
-    });
+    console.error('[SUGGESTIONS] Unexpected error:', error);
+    
+    // エラー時も最低限のフォールバック提案を返す
+    try {
+      const fallbackSuggestions = getFallbackSuggestions('workplace', 5, 'office_worker');
+      return res.status(200).json({
+        suggestions: fallbackSuggestions,
+        metadata: {
+          situation: 'workplace',
+          duration: 5,
+          ageGroup: 'office_worker',
+          timestamp: new Date().toISOString(),
+          source: 'error_fallback',
+          error: true
+        }
+      });
+    } catch (fallbackError) {
+      // 完全に失敗した場合のエラーレスポンス
+      return res.status(500).json({
+        error: {
+          message: 'サーバー内部でエラーが発生しました。時間をおいて再試行してください。',
+          code: 'INTERNAL_SERVER_ERROR'
+        }
+      });
+    }
   }
 };
