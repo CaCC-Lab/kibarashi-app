@@ -27,6 +27,10 @@ module.exports = async (req, res) => {
   console.log('[SUGGESTIONS] Method:', req.method);
   console.log('[SUGGESTIONS] Query params:', req.query);
   
+  // 環境変数の確認（デバッグ用）
+  const hasGeminiKey = !!process.env.GEMINI_API_KEY_1;
+  console.log('[SUGGESTIONS] Environment check - GEMINI_API_KEY_1:', hasGeminiKey ? 'SET' : 'NOT SET');
+  
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -68,25 +72,40 @@ module.exports = async (req, res) => {
     
     let suggestions = null;
     let source = 'fallback';
+    let debugInfo = {};
     
     // Gemini APIを試行
     const client = getGeminiClient();
     if (client) {
       try {
         console.log('[SUGGESTIONS] Attempting Gemini API generation...');
+        console.log('[SUGGESTIONS] Request parameters:', {
+          situation: normalizedSituation,
+          duration: normalizedDuration,
+          ageGroup: ageGroup
+        });
+        
         suggestions = await client.generateSuggestions(
           normalizedSituation, 
           normalizedDuration, 
           ageGroup
         );
         source = 'gemini_api';
+        debugInfo.gemini_success = true;
         console.log('[SUGGESTIONS] Gemini API generation successful');
+        console.log('[SUGGESTIONS] Generated suggestions count:', suggestions?.length || 0);
       } catch (geminiError) {
-        console.error('[SUGGESTIONS] Gemini API error:', geminiError.message);
+        console.error('[SUGGESTIONS] Gemini API error details:', {
+          message: geminiError.message,
+          stack: geminiError.stack?.substring(0, 500),
+          name: geminiError.name
+        });
+        debugInfo.gemini_error = geminiError.message;
         // Gemini API失敗時はフォールバックへ
       }
     } else {
       console.log('[SUGGESTIONS] Gemini client not available, using fallback');
+      debugInfo.gemini_client_available = false;
     }
     
     // フォールバックデータを使用
@@ -97,6 +116,13 @@ module.exports = async (req, res) => {
         normalizedDuration, 
         ageGroup
       );
+      console.log('[SUGGESTIONS] Fallback suggestions generated:', suggestions?.length || 0);
+      
+      // 追加のランダム化（確実にシャッフルされるように）
+      if (suggestions && suggestions.length > 0) {
+        suggestions = shuffleArray(suggestions);
+        console.log('[SUGGESTIONS] Fallback suggestions shuffled');
+      }
     }
     
     // レスポンスの構築
@@ -108,19 +134,24 @@ module.exports = async (req, res) => {
         ageGroup: ageGroup,
         location: req.query.location || 'Tokyo',
         timestamp: new Date().toISOString(),
-        source: source
+        source: source,
+        debug: debugInfo
       }
     };
 
-    console.log(`[SUGGESTIONS] Sending response (source: ${source})`);
+    console.log(`[SUGGESTIONS] Sending response (source: ${source}, count: ${suggestions?.length || 0})`);
     return res.status(200).json(response);
     
   } catch (error) {
-    console.error('[SUGGESTIONS] Unexpected error:', error);
+    console.error('[SUGGESTIONS] Unexpected error:', {
+      message: error.message,
+      stack: error.stack?.substring(0, 500),
+      name: error.name
+    });
     
     // エラー時も最低限のフォールバック提案を返す
     try {
-      const fallbackSuggestions = getFallbackSuggestions('workplace', 5, 'office_worker');
+      const fallbackSuggestions = shuffleArray(getFallbackSuggestions('workplace', 5, 'office_worker'));
       return res.status(200).json({
         suggestions: fallbackSuggestions,
         metadata: {
@@ -129,7 +160,8 @@ module.exports = async (req, res) => {
           ageGroup: 'office_worker',
           timestamp: new Date().toISOString(),
           source: 'error_fallback',
-          error: true
+          error: true,
+          debug: { error_message: error.message }
         }
       });
     } catch (fallbackError) {
@@ -143,3 +175,18 @@ module.exports = async (req, res) => {
     }
   }
 };
+
+// 配列をシャッフルする関数（確実にランダムになるよう改良）
+function shuffleArray(array) {
+  if (!array || array.length === 0) return array;
+  
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  // 追加のランダム性を保証するため、現在時刻を使用
+  const timeBasedSeed = new Date().getTime();
+  return shuffled.sort(() => (Math.sin(timeBasedSeed + Math.random()) * 10000) % 1 - 0.5);
+}

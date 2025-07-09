@@ -295,19 +295,27 @@ const jobHuntingFallback = {
 };
 
 function getFallbackSuggestions(situation, duration, ageGroup) {
+  console.log('[FALLBACK] Generating suggestions for:', { situation, duration, ageGroup });
+  
   // 就活・転職活動者向けの特別対応
   if (ageGroup === 'job_hunting' || situation === 'job_hunting') {
     const suggestions = jobHuntingFallback.job_hunting[duration] || 
                       jobHuntingFallback.job_hunting[5];
-    return shuffleArray(suggestions).slice(0, 3);
+    console.log('[FALLBACK] Job hunting suggestions available:', suggestions.length);
+    return shuffleArrayWithTimestamp(suggestions).slice(0, 3);
   }
   
   // 通常の提案
   const situationData = fallbackSuggestions[situation] || fallbackSuggestions.workplace;
   const durationData = situationData[duration] || situationData[5];
   
+  console.log('[FALLBACK] Available suggestions:', durationData.length);
+  
   // 毎回異なる3つをランダムに返す
-  return shuffleArray(durationData).slice(0, 3);
+  const shuffled = shuffleArrayWithTimestamp(durationData);
+  console.log('[FALLBACK] Shuffled suggestions, returning 3 of', shuffled.length);
+  
+  return shuffled.slice(0, 3);
 }
 
 // 配列をシャッフルする関数
@@ -318,6 +326,28 @@ function shuffleArray(array) {
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
+}
+
+// タイムスタンプベースの強化されたシャッフル関数
+function shuffleArrayWithTimestamp(array) {
+  if (!array || array.length === 0) return array;
+  
+  const shuffled = [...array];
+  const timestamp = new Date().getTime();
+  const microseconds = performance.now(); // より高精度なタイムスタンプ
+  
+  // フィッシャー・イェーツシャッフル
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  // 追加のランダム性を保証するため、タイムスタンプを使用
+  const seed = timestamp + microseconds;
+  return shuffled.sort(() => {
+    const random = Math.sin(seed + Math.random() * 1000) * 10000;
+    return (random % 1) - 0.5;
+  });
 }
 
 module.exports = { getFallbackSuggestions };
