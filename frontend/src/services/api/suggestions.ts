@@ -13,7 +13,8 @@ export async function fetchSuggestions(
   duration: 5 | 15 | 30,
   ageGroup?: AgeGroup,
   studentContext?: { concern?: string; subject?: string },
-  location?: string
+  location?: string,
+  skipCache?: boolean
 ): Promise<SuggestionsResponse> {
   // 強力なキャッシュバスターを実装
   const timestamp = Date.now();
@@ -56,6 +57,11 @@ export async function fetchSuggestions(
     if (studentContext.subject) {
       params.set('studentSubject', studentContext.subject);
     }
+  }
+  
+  // キャッシュスキップフラグ
+  if (skipCache) {
+    params.set('skipCache', 'true');
   }
   
   const url = `/api/v1/suggestions?${params.toString()}`;

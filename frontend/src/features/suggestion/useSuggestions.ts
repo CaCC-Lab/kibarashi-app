@@ -24,7 +24,8 @@ export const useSuggestions = () => {
     duration: 5 | 15 | 30,
     ageGroup?: AgeGroup,
     studentContext?: { concern?: string; subject?: string },
-    location?: string
+    location?: string,
+    skipCache?: boolean
   ) => {
     // 前回のリクエストをキャンセル
     if (abortControllerRef.current) {
@@ -40,7 +41,8 @@ export const useSuggestions = () => {
       duration,
       ageGroup,
       studentContext,
-      location
+      location,
+      skipCache
     });
     
     // 強制的に前の状態をクリア
@@ -49,7 +51,7 @@ export const useSuggestions = () => {
     setError(null);
     
     try {
-      const data = await fetchSuggestions(situation, duration, ageGroup, studentContext, location);
+      const data = await fetchSuggestions(situation, duration, ageGroup, studentContext, location, skipCache);
       console.log('✅ API Response received:', data);
       
       // リクエストがキャンセルされていない場合のみ状態を更新

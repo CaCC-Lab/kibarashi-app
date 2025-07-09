@@ -67,7 +67,8 @@ module.exports = async (req, res) => {
     const { 
       situation = 'workplace', 
       duration = '5', 
-      ageGroup = 'office_worker' 
+      ageGroup = 'office_worker',
+      skipCache = 'false'
     } = req.query;
     
     const durationNum = parseInt(duration);
@@ -86,14 +87,25 @@ module.exports = async (req, res) => {
     // キャッシュキーを生成
     const cacheKey = cache.generateKey(normalizedSituation, normalizedDuration, ageGroup);
     
-    // まずキャッシュをチェック
-    const cachedSuggestions = cache.get(cacheKey);
-    if (cachedSuggestions) {
-      console.log('[SUGGESTIONS] Cache hit for key:', cacheKey);
-      suggestions = cachedSuggestions;
-      source = 'cache';
-      debugInfo.cache_hit = true;
+    // skipCacheフラグをチェック
+    const shouldSkipCache = skipCache === 'true' || skipCache === true;
+    
+    // まずキャッシュをチェック（skipCacheがfalseの場合のみ）
+    if (!shouldSkipCache) {
+      const cachedSuggestions = cache.get(cacheKey);
+      if (cachedSuggestions) {
+        console.log('[SUGGESTIONS] Cache hit for key:', cacheKey);
+        suggestions = cachedSuggestions;
+        source = 'cache';
+        debugInfo.cache_hit = true;
+      }
     } else {
+      console.log('[SUGGESTIONS] Cache skipped by request parameter');
+      debugInfo.cache_skipped = true;
+    }
+    
+    // キャッシュが使えない、またはキャッシュミスの場合
+    if (!suggestions) {
       // キャッシュミスの場合、Gemini APIを試行
       const client = getGeminiClient();
       if (client) {

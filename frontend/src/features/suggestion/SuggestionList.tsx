@@ -149,7 +149,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     fetchSuggestions(situation, duration, currentAgeGroup, context, location);
   }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location]);
 
-  // 再取得関数
+  // 再取得関数（キャッシュをスキップ）
   const refetch = () => {
     const studentContext = isStudentOptimized && currentAgeGroup === 'student' ? {
       concern: '勉強の合間のリフレッシュ',
@@ -168,7 +168,8 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
-    fetchSuggestions(situation, duration, currentAgeGroup, context, location);
+    // 「他の提案を見る」ボタンクリック時は必ずキャッシュをスキップ
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location, true);
   };
 
   if (loading) {
