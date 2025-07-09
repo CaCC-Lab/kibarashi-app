@@ -113,6 +113,9 @@
 - ✅ **ヘルプモーダル**（アプリ機能の使い方説明画面）
 - ✅ **UI改善**（アプリタイトルの時間表記最適化、テキスト改行の改善）
 - ✅ **天気情報の地域別表示修正**（キャッシュ機構の位置情報対応）
+- ✅ **フォールバック提案の大幅拡充**（18個→65個、就活・転職者向け追加）
+- ✅ **Gemini APIレスポンスキャッシュ**（API使用量削減、レスポンス高速化）
+- ✅ **システム監視ダッシュボード**（/api/v1/dashboard でAPIキー状態・キャッシュ効率を可視化）
 
 ---
 
@@ -268,6 +271,17 @@
 - 不要なJSONラッピングとBase64デコード処理を削除
 - バックエンドの音声レスポンスとフロントエンドの期待形式を統一
 
+### 18. フォールバック提案の大幅拡充とキャッシュシステム実装
+
+**課題**: Gemini APIのクォータ制限によるフォールバック依存時の提案バリエーション不足
+**解決策**:
+
+- フォールバック提案を18個から65個に大幅拡充（AさんとBくんの気晴らしリストを参考）
+- Fisher-Yatesアルゴリズムによる真のランダムシャッフル実装
+- SuggestionCacheクラスによるGemini APIレスポンスのキャッシュ機構（TTL: 1時間）
+- キャッシュヒット率の統計とダッシュボード表示
+- 就活・転職活動者向けの特別カテゴリ追加
+
 ### 9. Vercelデプロイ環境での提案表示エラー
 
 **課題**: ローカルでは動作するがVercel環境で提案が表示されない
@@ -414,6 +428,9 @@ vercel dev
 # デバッグエンドポイントで環境変数の状態を確認
 curl https://your-app.vercel.app/api/v1/debug?debug=true
 
+# システム監視ダッシュボードにアクセス
+open https://your-app.vercel.app/api/v1/dashboard
+
 # Vercel CLIでログを確認
 vercel logs --follow
 
@@ -437,6 +454,9 @@ npm run test:coverage
 
 # 特定のテストスイートを実行
 npm test -- --grep "TTS"
+
+# E2Eテスト（Playwright）を実行
+npm run test:e2e
 ```
 
 ---
@@ -451,7 +471,13 @@ kibarashi-app/
 │   └── v1/           # APIエンドポイント
 │       ├── suggestions.ts    # 気晴らし提案API
 │       ├── tts.ts           # 音声合成API
-│       └── health.ts        # ヘルスチェックAPI
+│       ├── health.ts        # ヘルスチェックAPI
+│       ├── dashboard.js     # システム監視ダッシュボード
+│       ├── cache-status.js  # キャッシュ状態API
+│       └── _lib/            # 共通ライブラリ
+│           ├── cache.js     # キャッシュシステム
+│           ├── fallback.js  # フォールバック提案（65個）
+│           └── apiKeyManager.js # APIキー管理
 ├── infrastructure/    # インフラ設定
 ├── docs/             # ドキュメント
 │   └── vercel-env-setup.md  # Vercel環境変数設定ガイド
