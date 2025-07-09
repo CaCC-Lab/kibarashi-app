@@ -45,6 +45,48 @@ const fallbackSuggestions = {
           '3つ目を探してみる',
           'それぞれに感謝の気持ちを感じる'
         ]
+      },
+      {
+        id: 'fallback-wp-5-4',
+        title: '5分間の瞑想',
+        description: '心を静めてリラックス',
+        duration: 5,
+        category: '認知的',
+        steps: [
+          '姿勢を正して座る',
+          '目を閉じて呼吸に集中',
+          '雑念が浮かんでも気にしない',
+          '呼吸の音に意識を向ける',
+          'ゆっくりと目を開ける'
+        ]
+      },
+      {
+        id: 'fallback-wp-5-5',
+        title: '机の整理整頓',
+        description: 'デスクを片付けて気分すっきり',
+        duration: 5,
+        category: '行動的',
+        steps: [
+          '不要な書類を捨てる',
+          '文房具を整理する',
+          '画面を清拭する',
+          '引き出しを整理する',
+          '清潔なデスクを眺める'
+        ]
+      },
+      {
+        id: 'fallback-wp-5-6',
+        title: '好きな写真を見る',
+        description: '心温まる写真で気分転換',
+        duration: 5,
+        category: '認知的',
+        steps: [
+          'スマホの写真フォルダを開く',
+          '家族やペットの写真を見る',
+          '楽しい思い出を思い出す',
+          '写真の中の人に感謝する',
+          '笑顔になる'
+        ]
       }
     ],
     15: [
@@ -257,15 +299,25 @@ function getFallbackSuggestions(situation, duration, ageGroup) {
   if (ageGroup === 'job_hunting' || situation === 'job_hunting') {
     const suggestions = jobHuntingFallback.job_hunting[duration] || 
                       jobHuntingFallback.job_hunting[5];
-    return suggestions.slice(0, 3);
+    return shuffleArray(suggestions).slice(0, 3);
   }
   
   // 通常の提案
   const situationData = fallbackSuggestions[situation] || fallbackSuggestions.workplace;
   const durationData = situationData[duration] || situationData[5];
   
-  // 最大3つまで返す
-  return durationData.slice(0, 3);
+  // 毎回異なる3つをランダムに返す
+  return shuffleArray(durationData).slice(0, 3);
+}
+
+// 配列をシャッフルする関数
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 }
 
 module.exports = { getFallbackSuggestions };

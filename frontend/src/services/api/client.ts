@@ -8,8 +8,13 @@ const getApiBaseUrl = (): string => {
     return window.location.origin;
   }
   
-  // 開発環境での設定
-  return import.meta.env.VITE_API_URL || 'http://localhost:3000';
+  // 開発環境での設定 - Viteプロキシを使用するため、同じオリジンを使用
+  // ただし、実際のポートが3001になっている場合は、そのポートを使用
+  if (typeof window !== 'undefined' && window.location.port === '3001') {
+    return `${window.location.protocol}//${window.location.hostname}:3001`;
+  }
+  
+  return import.meta.env.VITE_API_URL || window.location.origin;
 };
 
 const API_BASE_URL = getApiBaseUrl();

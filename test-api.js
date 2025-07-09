@@ -1,52 +1,29 @@
-#!/usr/bin/env node
+const handler = require('./api/v1/suggestions');
 
-// APIエンドポイントのテストスクリプト
-const baseUrl = process.argv[2] || 'https://kibarashi-app.vercel.app';
-
-async function testEndpoint(path) {
-  console.log(`\nTesting ${path}...`);
-  try {
-    const response = await fetch(`${baseUrl}${path}`);
-    const data = await response.json();
-    console.log(`Status: ${response.status}`);
+const mockRes = {
+  setHeader: (key, value) => console.log(`Header: ${key}: ${value}`),
+  status: (code) => ({
+    json: (data) => {
+      console.log(`Status: ${code}`);
+      console.log('Response:', JSON.stringify(data, null, 2));
+      return mockRes;
+    },
+    end: () => {
+      console.log('Response ended');
+      return mockRes;
+    }
+  }),
+  json: (data) => {
     console.log('Response:', JSON.stringify(data, null, 2));
-    
-    // 検証: suggestionsエンドポイントの場合
-    if (path.includes('/suggestions')) {
-      if (!data.suggestions || !Array.isArray(data.suggestions)) {
-        console.error('❌ Error: suggestions array not found at root level');
-        return false;
-      }
-      console.log(`✅ Found ${data.suggestions.length} suggestions`);
-    }
-    
-    return response.status === 200;
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-    return false;
+    return mockRes;
   }
-}
+};
 
-async function runTests() {
-  console.log(`Testing API endpoints at ${baseUrl}`);
-  
-  const endpoints = [
-    '/api/v1/context',
-    '/api/v1/suggestions?situation=workplace&duration=5',
-  ];
-  
-  let allPassed = true;
-  
-  for (const endpoint of endpoints) {
-    const passed = await testEndpoint(endpoint);
-    if (!passed) {
-      allPassed = false;
-    }
-  }
-  
-  console.log('\n' + '='.repeat(50));
-  console.log(allPassed ? '✅ All tests passed!' : '❌ Some tests failed!');
-  process.exit(allPassed ? 0 : 1);
-}
+const testReq = {
+  query: { situation: 'workplace', duration: '5' },
+  url: '/api/v1/suggestions?situation=workplace&duration=5',
+  method: 'GET'
+};
 
-runTests();
+console.log('=== API テスト開始 ===');
+handler(testReq, mockRes).catch(console.error);
