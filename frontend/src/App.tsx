@@ -4,6 +4,7 @@ import Loading from './components/common/Loading';
 import { SituationId } from './types/situation';
 import { useAgeGroup } from './hooks/useAgeGroup';
 import { AgeGroupOnboardingModal } from './components/ageGroup/AgeGroupSelector';
+import { DebugModeToggle } from './components/debug/DebugModeToggle';
 
 // コンポーネントの遅延読み込み
 const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
@@ -24,6 +25,10 @@ function App() {
   const [duration, setDuration] = useState<Duration>(null);
   const [currentLocation, setCurrentLocation] = useState<string>('Tokyo');
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [debugMode, setDebugMode] = useState(() => {
+    if (process.env.NODE_ENV === 'production') return false;
+    return localStorage.getItem('kibarashi-debug-mode') === 'true';
+  });
 
   // 初回ユーザーの場合、オンボーディングモーダルを表示
   useEffect(() => {
@@ -81,7 +86,12 @@ function App() {
         return <DurationSelector selected={duration} onSelect={handleDurationSelect} />;
       case 'suggestions':
         if (situation && duration) {
-          return <SuggestionList situation={situation} duration={duration} location={currentLocation} />;
+          return <SuggestionList 
+            situation={situation} 
+            duration={duration} 
+            location={currentLocation} 
+            debugMode={debugMode}
+          />;
         }
         return null;
       case 'favorites':
@@ -222,6 +232,11 @@ function App() {
       <AgeGroupOnboardingModal
         isOpen={showOnboarding}
         onClose={() => setShowOnboarding(false)}
+      />
+      
+      {/* デバッグモードトグル（開発環境のみ） */}
+      <DebugModeToggle 
+        onToggle={setDebugMode}
       />
     </>
   );

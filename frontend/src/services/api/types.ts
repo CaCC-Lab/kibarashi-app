@@ -11,6 +11,10 @@ export interface Suggestion {
   category: '認知的' | '行動的';
   steps?: string[];
   guide?: string;
+  // データソース情報
+  dataSource?: 'ai' | 'fallback' | 'cache' | 'error';
+  apiKeyIndex?: number;
+  responseTime?: number;
 }
 
 /**

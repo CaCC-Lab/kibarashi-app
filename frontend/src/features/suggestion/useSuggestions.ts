@@ -1,17 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
-import { fetchSuggestions } from '../../services/api/suggestions';
+import { fetchSuggestions, Suggestion } from '../../services/api/suggestions';
 import { SituationId } from '../../types/situation';
 import { AgeGroup } from '../../types/ageGroup';
-
-export interface Suggestion {
-  id: string;
-  title: string;
-  description: string;
-  duration: number;
-  category: '認知的' | '行動的';
-  steps?: string[];
-  guide?: string;
-}
 
 export const useSuggestions = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);

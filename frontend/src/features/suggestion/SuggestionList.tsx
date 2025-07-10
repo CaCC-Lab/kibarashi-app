@@ -21,6 +21,7 @@ interface SuggestionListProps {
   situation: SituationId; // 場所：年齢層に応じた状況
   duration: 5 | 15 | 30; // 所要時間：5分、15分、30分
   location?: string; // 地理的位置（地域別の提案生成用）
+  debugMode?: boolean; // デバッグモードの状態
 }
 
 /**
@@ -36,7 +37,7 @@ interface SuggestionListProps {
  * - 選択肢を一覧で表示し、興味を持ったものの詳細を確認できる
  * - ネットワークエラー等で失敗しても、ユーザーがあきらめずに済む
  */
-const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location }) => {
+const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
   
@@ -262,6 +263,10 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
           <SuggestionCard
             key={suggestion.id}
             {...suggestion}
+            dataSource={suggestion.dataSource}
+            apiKeyIndex={suggestion.apiKeyIndex}
+            responseTime={suggestion.responseTime}
+            debugMode={debugMode}
             onStart={() => {
               // ユーザーが「始める」ボタンをクリックした時の処理
               // 選択された提案をstateに保存し、詳細表示へ遷移

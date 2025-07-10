@@ -14,6 +14,10 @@ export interface Suggestion {
   category: '認知的' | '行動的'; // 気晴らしのタイプ
   steps?: string[]; // 実践手順（オプション）
   guide?: string; // 音声ガイド用テキスト（オプション）
+  // データソース情報
+  dataSource?: 'ai' | 'fallback' | 'cache' | 'error';
+  apiKeyIndex?: number;
+  responseTime?: number;
 }
 
 /**
@@ -46,6 +50,8 @@ export async function generateSuggestions(
   studentContext?: { concern?: string; subject?: string },
   jobHuntingContext?: Partial<JobHuntingPromptInput>
 ): Promise<Suggestion[]> {
+  const startTime = Date.now();
+  
   try {
     // ステップ1: Gemini APIの有効性を確認
     // なぜAPIキーを確認するか：APIキーが設定されていない場合、
@@ -55,10 +61,19 @@ export async function generateSuggestions(
       
       // ステップ2: AIを使ってパーソナライズされた提案を生成
       const suggestions = await geminiClient.generateSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
+      const responseTime = Date.now() - startTime;
+      
+      // データソース情報を追加
+      const suggestionsWithMetadata = suggestions.slice(0, 3).map(suggestion => ({
+        ...suggestion,
+        dataSource: 'ai' as const,
+        responseTime,
+        // TODO: APIキーインデックスは geminiClient から取得する必要がある
+      }));
       
       // ステップ3: 必ず3つの提案を返す
       // なぜ3つか：選択肢を提供しつつ、情報過多を避けるため
-      return suggestions.slice(0, 3);
+      return suggestionsWithMetadata;
     }
     
     // APIキーが設定されていない場合の処理
@@ -70,7 +85,13 @@ export async function generateSuggestions(
     });
     
     const suggestions = getFallbackSuggestions(situation, duration, ageGroup);
-    return suggestions.slice(0, 3);
+    const fallbackWithMetadata = suggestions.slice(0, 3).map(suggestion => ({
+      ...suggestion,
+      dataSource: 'fallback' as const,
+      responseTime: Date.now() - startTime
+    }));
+    
+    return fallbackWithMetadata;
     
   } catch (error) {
     // エラーハンドリング：AI生成が失敗してもサービスを継続
@@ -87,6 +108,13 @@ export async function generateSuggestions(
     
     // フォールバックデータを使用
     // ユーザーにはこの切り替えが透明に行われる
-    return getFallbackSuggestions(situation, duration, ageGroup).slice(0, 3);
+    const errorFallback = getFallbackSuggestions(situation, duration, ageGroup).slice(0, 3);
+    const errorWithMetadata = errorFallback.map(suggestion => ({
+      ...suggestion,
+      dataSource: 'error' as const,
+      responseTime: Date.now() - startTime
+    }));
+    
+    return errorWithMetadata;
   }
 }

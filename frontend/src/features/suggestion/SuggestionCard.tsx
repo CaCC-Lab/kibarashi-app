@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import FavoriteButton from '../../components/favorites/FavoriteButton';
+import DataSourceBadge, { DataSource } from '../../components/common/DataSourceBadge';
 import { VoiceGuidePlayer } from '../audio/VoiceGuidePlayer';
 import { useFeature } from '../config/featureFlags';
 import { useStudentABTest } from '../../hooks/useStudentABTest';
@@ -17,6 +18,10 @@ interface SuggestionCardProps {
   steps?: string[];
   voiceGuideScript?: VoiceGuideScript;
   ageGroup?: string;
+  dataSource?: DataSource;
+  apiKeyIndex?: number;
+  responseTime?: number;
+  debugMode?: boolean;
   onStart?: () => void;
 }
 
@@ -29,6 +34,10 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   steps,
   voiceGuideScript,
   ageGroup,
+  dataSource,
+  apiKeyIndex,
+  responseTime,
+  debugMode = false,
   onStart,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -161,7 +170,21 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-start justify-between mb-2">
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-white flex-1 pr-2">{title}</h3>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white pr-2">{title}</h3>
+                {/* データソースバッジ */}
+                {dataSource && (
+                  <div className="mt-1">
+                    <DataSourceBadge 
+                      source={dataSource}
+                      showDetails={debugMode}
+                      apiKeyIndex={apiKeyIndex}
+                      responseTime={responseTime}
+                      className="text-xs"
+                    />
+                  </div>
+                )}
+              </div>
               <FavoriteButton suggestion={suggestion} className="flex-shrink-0" />
             </div>
             <p className="text-gray-600 dark:text-gray-100 text-sm">{description}</p>
