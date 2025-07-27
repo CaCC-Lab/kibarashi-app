@@ -25,7 +25,7 @@ class ContextualPromptEnhancer {
 
       // 並列でデータを取得
       const [weather, seasonal] = await Promise.all([
-        weatherClient.getCurrentWeather('Tokyo').catch(error => {
+        weatherClient.getCurrentWeatherByCity('Tokyo').catch((error: any) => {
           logger.warn('Weather data unavailable', { error: error.message });
           return null;
         }),
@@ -154,7 +154,7 @@ ${suggestionInstructions}
 `;
 
       // 天候に基づく具体的なヒント
-      const weatherTips = weatherClient.generateWeatherBasedTips(context.weather);
+      const weatherTips = this.generateWeatherTips(context.weather);
       if (weatherTips.length > 0) {
         enhancement += `天候に適した活動のヒント: ${weatherTips.slice(0, 2).join('、')}`;
       }
@@ -203,6 +203,36 @@ ${userHistory.slice(-5).map((item, index) => `${index + 1}. ${item}`).join('\n')
 
 上記の履歴と重複しない、新鮮で多様な提案を心がけてください。
 `;
+  }
+
+  /**
+   * 天候に基づくヒントを生成
+   */
+  private generateWeatherTips(weather: any): string[] {
+    const tips: string[] = [];
+    
+    if (!weather) return tips;
+    
+    switch (weather.condition) {
+      case 'sunny':
+        tips.push('窓辺で日光浴をする');
+        tips.push('明るい音楽を聴く');
+        break;
+      case 'rainy':
+        tips.push('雨音を聴きながらリラックス');
+        tips.push('温かい飲み物を楽しむ');
+        break;
+      case 'cloudy':
+        tips.push('読書や瞑想に集中');
+        tips.push('柔らかい照明でリラックス');
+        break;
+      case 'snowy':
+        tips.push('窓から雪景色を眺める');
+        tips.push('温かいお茶を飲む');
+        break;
+    }
+    
+    return tips;
   }
 
   /**
