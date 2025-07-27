@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DataSourceBadge } from '../DataSourceBadge';
+import DataSourceBadge from '../DataSourceBadge';
 
 describe('DataSourceBadge', () => {
   describe('基本的な表示', () => {
