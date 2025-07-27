@@ -566,5 +566,9 @@ export const geminiClient = {
       instance = new GeminiClient();
     }
     return instance.generateEnhancedSuggestions(situation, duration, ageGroup);
+  },
+  
+  getCurrentApiKeyIndex: () => {
+    return apiKeyManager.getCurrentApiKeyIndex();
   }
 };
