@@ -8,6 +8,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipItem,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 
@@ -108,11 +109,11 @@ const MonthlyTrendChart: React.FC<MonthlyTrendChartProps> = ({ monthlyTrend }) =
         mode: 'index' as const,
         intersect: false,
         callbacks: {
-          label: (context: any) => {
+          label: (context: TooltipItem<'line'>) => {
             const label = context.dataset.label || '';
             return `${label}: ${context.parsed.y}回`;
           },
-          afterBody: (context: any) => {
+          afterBody: (context: TooltipItem<'line'>[]) => {
             if (context.length >= 2) {
               const total = context[0].parsed.y;
               const completed = context[1].parsed.y;

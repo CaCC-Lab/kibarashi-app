@@ -6,7 +6,7 @@
 export interface MetricsEvent {
   name: string;
   timestamp: number;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 /**
@@ -34,7 +34,7 @@ export function trackEvent(event: MetricsEvent): void {
 /**
  * ページビューをトラッキング
  */
-export function trackPageView(page: string, properties?: Record<string, any>): void {
+export function trackPageView(page: string, properties?: Record<string, unknown>): void {
   trackEvent({
     name: 'page_view',
     timestamp: Date.now(),
@@ -48,7 +48,7 @@ export function trackPageView(page: string, properties?: Record<string, any>): v
 /**
  * エラーをトラッキング
  */
-export function trackError(error: Error, context?: Record<string, any>): void {
+export function trackError(error: Error, context?: Record<string, unknown>): void {
   trackEvent({
     name: 'error',
     timestamp: Date.now(),

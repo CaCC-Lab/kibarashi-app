@@ -3,6 +3,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { ABTestService } from '../services/abtest/ABTestService';
+import { ABTestMetricData } from '../types/metrics';
 
 export interface StudentABTestFeatures {
   studentPrompts: boolean;
@@ -15,7 +16,7 @@ export interface StudentABTestFeatures {
 export interface StudentABTestMetricEvent {
   metric: string;
   testGroup: 'A' | 'B';
-  data: any;
+  data: ABTestMetricData;
   timestamp: string;
 }
 
@@ -34,7 +35,7 @@ export interface UseStudentABTestReturn {
   testGroup: 'A' | 'B';
   isStudentOptimized: boolean;
   features: StudentABTestFeatures;
-  trackMetric: (metric: string, data?: any) => void;
+  trackMetric: (metric: string, data?: ABTestMetricData) => void;
   trackCompletion: (suggestionId: string, duration: number) => void;
   shouldRender: (feature: 'studentFeature' | 'defaultFeature') => boolean;
   resetForTesting: () => void;
@@ -91,7 +92,7 @@ export function useStudentABTest(options: UseStudentABTestOptions = {}): UseStud
   };
 
   // メトリクストラッキング
-  const trackMetric = useCallback((metric: string, data: any = {}) => {
+  const trackMetric = useCallback((metric: string, data: ABTestMetricData = {}) => {
     if (onMetric) {
       onMetric({
         metric,
