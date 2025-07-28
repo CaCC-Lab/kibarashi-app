@@ -275,12 +275,17 @@ describe('HistoryList', () => {
       const mockRemoveChild = vi.spyOn(document.body, 'removeChild');
       const mockClick = vi.fn();
       
-      mockCreateElement.mockReturnValue({
+      const mockElement = {
         href: '',
         download: '',
         click: mockClick,
-        style: {}
-      } as any);
+        style: {},
+        setAttribute: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
+      } as unknown as HTMLAnchorElement;
+      mockCreateElement.mockReturnValue(mockElement);
 
       render(<HistoryList />);
 

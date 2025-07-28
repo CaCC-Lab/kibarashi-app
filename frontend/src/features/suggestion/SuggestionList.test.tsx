@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import SuggestionList from './SuggestionList';
-import { fetchSuggestions } from '../../services/api/suggestions';
 
 // fetchSuggestionsをモック
 vi.mock('../../services/api/suggestions', () => ({
   fetchSuggestions: vi.fn()
 }));
+
+import SuggestionList from './SuggestionList';
+import { fetchSuggestions } from '../../services/api/suggestions';
 
 /**
  * SuggestionListコンポーネントのテスト
@@ -51,7 +52,7 @@ describe('SuggestionList', () => {
           {
             id: 'test-2',
             title: 'テスト提案2',
-            description: '簡単なストレッチで体をほぐす',
+            description: '簁単なストレッチで体をほぐす',
             duration: 5,
             category: '行動的' as const,
             steps: ['ステップ1', 'ステップ2']
