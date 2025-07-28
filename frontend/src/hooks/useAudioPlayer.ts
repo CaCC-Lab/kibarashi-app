@@ -106,7 +106,7 @@ export function useAudioPlayer(audioUrl?: string | null): UseAudioPlayerReturn {
       setIsPlaying(false);
       setCurrentTime(0);
     }
-  }, [isPlaying]);
+  }, []);
 
   const setVolume = useCallback((newVolume: number) => {
     const clampedVolume = Math.max(0, Math.min(1, newVolume));

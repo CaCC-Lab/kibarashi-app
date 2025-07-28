@@ -102,7 +102,7 @@ describe('useABTest hook', () => {
       const trackEventSpy = vi.fn();
 
       // Act
-      const { result } = renderHook(() => useABTest({ onExposure: trackEventSpy }));
+      renderHook(() => useABTest({ onExposure: trackEventSpy }));
 
       // Assert
       expect(trackEventSpy).toHaveBeenCalledWith({

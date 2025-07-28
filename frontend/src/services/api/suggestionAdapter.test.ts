@@ -2,7 +2,6 @@
  * 提案型アダプターのテスト
  */
 
-const _transformSuggestion = transformSuggestion as { _original?: typeof transformSuggestion };
 import { describe, it, expect } from 'vitest';
 import { suggestionAdapter } from './suggestionAdapter';
 import type { Suggestion, EnhancedSuggestion } from './types';
@@ -209,7 +208,7 @@ describe('Suggestion Adapter', () => {
 
       const enhancedWithoutVoice: EnhancedSuggestion = {
         ...mockEnhancedSuggestion,
-        voiceGuideScript: undefined as any
+        voiceGuideScript: undefined as unknown as EnhancedSuggestion['voiceGuideScript']
       };
       expect(suggestionAdapter.getVoiceDuration(enhancedWithoutVoice)).toBe(5); // durationを返す
     });

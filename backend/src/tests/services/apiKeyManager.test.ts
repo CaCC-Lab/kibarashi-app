@@ -40,9 +40,8 @@ class APIKeyManager {
 
     // 番号付きキー
     let index = 1;
-    while (true) {
-      const key = process.env[`GEMINI_API_KEY_${index}`];
-      if (!key) break;
+    let key = process.env[`GEMINI_API_KEY_${index}`];
+    while (key) {
 
       if (!this.apiKeys.some(k => k.key === key)) {
         this.apiKeys.push({
@@ -56,6 +55,7 @@ class APIKeyManager {
       }
 
       index++;
+      key = process.env[`GEMINI_API_KEY_${index}`];
     }
   }
 

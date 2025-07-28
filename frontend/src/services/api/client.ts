@@ -131,7 +131,7 @@ class ApiClient {
 
       // 304 Not Modifiedは成功とみなし、nullを返すことでキャッシュ使用を示す
       if (response.status === 304) {
-        return null as any; // キャッシュが有効であることを示す
+        return null as unknown as T; // キャッシュが有効であることを示す
       }
 
       if (!response.ok) {
@@ -181,7 +181,7 @@ class ApiClient {
 
       // 304 Not Modifiedは成功とみなし、nullを返すことでキャッシュ使用を示す
       if (response.status === 304) {
-        return null as any; // キャッシュが有効であることを示す
+        return null as unknown as T; // キャッシュが有効であることを示す
       }
 
       if (!response.ok) {

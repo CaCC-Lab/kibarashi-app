@@ -15,7 +15,6 @@ describe('suggestionController', () => {
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
   let responseJson: any;
-  let responseStatus: number;
   let nextCallCount: number;
   let nextCalledWith: any;
 
@@ -27,17 +26,15 @@ describe('suggestionController', () => {
     
     // レスポンスオブジェクトの準備
     responseJson = undefined;
-    responseStatus = 200;
     mockResponse = {
       json: (data: any) => {
         responseJson = data;
         return mockResponse as Response;
       },
-      status: (code: number) => {
-        responseStatus = code;
+      status: (_code: number) => {
         return mockResponse as Response;
       },
-      set: (headers: any) => {
+      set: (_headers: any) => {
         // HTTPヘッダーの設定をモック
         return mockResponse as Response;
       }

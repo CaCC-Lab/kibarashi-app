@@ -94,19 +94,16 @@ global.speechSynthesis = {
 } as SpeechSynthesis;
 
 // Vibration APIの実装
-navigator.vibrate = function(_pattern?: number | number[]) {
+navigator.vibrate = function() {
   // 振動をシミュレート（実際には何もしない）
   return true;
 };
 
 // IntersectionObserverのモック
 global.IntersectionObserver = class IntersectionObserver {
-  constructor(
-    _callback: IntersectionObserverCallback,
-    _options?: IntersectionObserverInit
-  ) {}
-  observe(_target: Element): void {}
-  unobserve(_target: Element): void {}
+  constructor() {}
+  observe(): void {}
+  unobserve(): void {}
   disconnect(): void {}
   readonly root: Element | null = null;
   readonly rootMargin: string = '';

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import suggestionRouter from '../../src/api/routes/suggestions';
@@ -268,7 +268,7 @@ describe('Suggestion API Integration Tests', () => {
 
       const responses = await Promise.all(requests);
 
-      responses.forEach((response, index) => {
+      responses.forEach((response) => {
         expect(response.status).toBe(200);
         expect(response.body.suggestions).toBeDefined();
         expect(response.body.suggestions.length).toBeGreaterThan(0);

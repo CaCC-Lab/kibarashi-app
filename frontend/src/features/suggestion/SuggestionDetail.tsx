@@ -62,7 +62,7 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
     }
 
     return () => clearInterval(interval);
-  }, [isRunning, timeRemaining]);
+  }, [isRunning, timeRemaining, completeHistory, currentHistoryId, duration]);
 
   // コンポーネントがアンマウントされたときに音声URLを解放
   useEffect(() => {

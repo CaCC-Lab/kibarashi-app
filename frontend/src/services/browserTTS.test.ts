@@ -219,7 +219,7 @@ describe('BrowserTTS', () => {
       // speechSynthesisを一時的に削除
       const originalSpeechSynthesis = window.speechSynthesis;
       const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'speechSynthesis');
-      delete (window as any).speechSynthesis;
+      delete (window as Record<string, unknown>).speechSynthesis;
       
       expect(browserTTS.isAvailable()).toBe(false);
       
@@ -227,7 +227,7 @@ describe('BrowserTTS', () => {
       if (originalDescriptor) {
         Object.defineProperty(window, 'speechSynthesis', originalDescriptor);
       } else {
-        (window as any).speechSynthesis = originalSpeechSynthesis;
+        (window as Record<string, unknown>).speechSynthesis = originalSpeechSynthesis;
       }
     });
 

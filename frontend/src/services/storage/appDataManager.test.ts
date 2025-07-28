@@ -36,17 +36,17 @@ describe('AppDataManager', () => {
 
     it('ファイル読み込みエラーを処理できる', async () => {
       // FileReaderのreadAsTextでエラーを発生させるモック
-      const error = new DOMException("Test error");
+      // errorは使用されていないので削除
       const readerMock = {
         readAsText: vi.fn(function(this: FileReader) {
           if (this.onerror) {
             this.onerror(new ProgressEvent('error', { bubbles: true }));
           }
         }),
-        onerror: null as ((this: FileReader, ev: ProgressEvent) => any) | null,
+        onerror: null as ((this: FileReader, ev: ProgressEvent) => unknown) | null,
       };
       
-      vi.spyOn(global, 'FileReader').mockImplementation(() => readerMock as any);
+      vi.spyOn(global, 'FileReader').mockImplementation(() => readerMock as unknown as FileReader);
 
       const mockFile = new File([''], 'error.json');
       const result = await AppDataManager.importFromFile(mockFile);
