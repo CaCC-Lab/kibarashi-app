@@ -1,8 +1,24 @@
+// テスト用の型定義
+interface ApiKeyInfo {
+  key: string;
+  index: number;
+  lastUsed: Date | null;
+  failureCount: number;
+  isOnCooldown: boolean;
+  cooldownUntil: Date | null;
+}
+
+interface ApiKeyConfig {
+  rotationEnabled: boolean;
+  retryAttempts: number;
+  cooldownMinutes: number;
+}
+
 // APIKeyManagerクラスを直接インポートしてテスト用にモック
 class APIKeyManager {
-  private apiKeys: any[] = [];
+  private apiKeys: ApiKeyInfo[] = [];
   private currentKeyIndex: number = 0;
-  private config: any;
+  private config: ApiKeyConfig;
   private stats = {
     totalRequests: 0,
     successfulRequests: 0,
@@ -129,7 +145,7 @@ class APIKeyManager {
     }
   }
 
-  private setCooldown(keyInfo: any): void {
+  private setCooldown(keyInfo: ApiKeyInfo): void {
     keyInfo.isOnCooldown = true;
     keyInfo.cooldownUntil = new Date(Date.now() + this.config.cooldownMinutes * 60 * 1000);
     

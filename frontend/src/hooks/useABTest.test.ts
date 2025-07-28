@@ -4,15 +4,27 @@
 import { renderHook, act } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useABTest } from './useABTest';
-import { ABTestService } from '../services/abtest/ABTestService';
+import { ABTestService } from '../services/analytics/abTestService';
+import { UserProfileStorage } from '../services/storage/userProfileStorage';
 
 // ABTestServiceをモック化
-vi.mock('../services/abtest/ABTestService', () => ({
+vi.mock('../services/analytics/abTestService', () => ({
   ABTestService: {
-    getTestGroup: vi.fn(),
-    isStudentOptimized: vi.fn(),
-    getAssignment: vi.fn(),
-    resetTestGroup: vi.fn()
+    assignVariant: vi.fn(),
+    trackEvent: vi.fn(),
+    trackAgeGroupSelection: vi.fn(),
+    trackSuggestionSatisfaction: vi.fn(),
+    trackSessionCompletion: vi.fn(),
+    trackError: vi.fn(),
+    analyzeResults: vi.fn()
+  }
+}));
+
+// UserProfileStorageをモック化
+vi.mock('../services/storage/userProfileStorage', () => ({
+  UserProfileStorage: {
+    getProfile: vi.fn(),
+    saveProfile: vi.fn()
   }
 }));
 
@@ -29,218 +41,172 @@ describe('useABTest hook', () => {
   });
 
   describe('基本機能', () => {
-    it('should return test group from ABTestService', () => {
+    it('should return test variant from ABTestService', () => {
       // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('B');
-      vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(true);
+      vi.mocked(UserProfileStorage.getProfile).mockReturnValue({
+        userId: 'test-user-123',
+        ageGroup: 'office_worker',
+        selectedAt: '2025-01-01T00:00:00Z',
+        isFirstTimeUser: false,
+        createdAt: '2025-01-01T00:00:00Z',
+        lastUpdated: '2025-01-01T00:00:00Z'
+      });
+      vi.mocked(ABTestService.assignVariant).mockReturnValue('treatment');
 
       // Act
-      renderHook(() => useABTest());
+      const { result } = renderHook(() => useABTest('age_group_feature'));
 
       // Assert
-      expect(result.current.testGroup).toBe('B');
-      expect(result.current.isStudentOptimized).toBe(true);
-      expect(ABTestService.getTestGroup).toHaveBeenCalledTimes(1);
+      expect(result.current.variant).toBe('treatment');
+      expect(result.current.userId).toBe('test-user-123');
+      expect(ABTestService.assignVariant).toHaveBeenCalledWith('age_group_feature', 'test-user-123');
+      expect(ABTestService.trackEvent).toHaveBeenCalledWith({
+        eventType: 'page_view',
+        eventName: 'age_group_feature_view',
+        userId: 'test-user-123',
+        abTestVariant: 'treatment'
+      });
     });
 
-    it('should handle control group (A)', () => {
+    it('should handle control variant', () => {
       // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('A');
-      vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(false);
+      vi.mocked(UserProfileStorage.getProfile).mockReturnValue(null);
+      vi.mocked(ABTestService.assignVariant).mockReturnValue('control');
 
       // Act
-      renderHook(() => useABTest());
+      const { result } = renderHook(() => useABTest('age_group_feature'));
 
       // Assert
-      expect(result.current.testGroup).toBe('A');
-      expect(result.current.isStudentOptimized).toBe(false);
+      expect(result.current.variant).toBe('control');
+      expect(result.current.userId).toMatch(/^user_\d+_[a-z0-9]+$/);
+      expect(ABTestService.assignVariant).toHaveBeenCalled();
     });
   });
 
-  describe('実験的な機能フラグ', () => {
-    it('should provide feature flags based on test group', () => {
+  describe('ユーザーIDの管理', () => {
+    it('should generate new userId if profile does not exist', () => {
       // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('B');
-      vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(true);
+      vi.mocked(UserProfileStorage.getProfile).mockReturnValue(null);
+      vi.mocked(ABTestService.assignVariant).mockReturnValue('control');
 
       // Act
-      renderHook(() => useABTest());
+      const { result } = renderHook(() => useABTest('age_group_feature'));
 
       // Assert
-      expect(result.current.features).toEqual({
-        studentPrompts: true,
-        ageGroupSelector: true,
-        benefitDisplay: true,
-        returnToStudyTips: true,
-        enhancedMetrics: true
-      });
+      expect(result.current.userId).toMatch(/^user_\d+_[a-z0-9]+$/);
+      expect(UserProfileStorage.saveProfile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: result.current.userId,
+          ageGroup: 'office_worker',
+          isFirstTimeUser: true
+        })
+      );
     });
 
-    it('should disable features for control group', () => {
+    it('should use existing userId from profile', () => {
       // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('A');
-      vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(false);
+      const mockProfile = {
+        userId: 'existing-user-456',
+        ageGroup: 'student' as const,
+        selectedAt: '2025-01-01T00:00:00Z',
+        isFirstTimeUser: false,
+        createdAt: '2025-01-01T00:00:00Z',
+        lastUpdated: '2025-01-01T00:00:00Z'
+      };
+      vi.mocked(UserProfileStorage.getProfile).mockReturnValue(mockProfile);
+      vi.mocked(ABTestService.assignVariant).mockReturnValue('treatment');
 
       // Act
-      renderHook(() => useABTest());
+      const { result } = renderHook(() => useABTest('age_group_feature'));
 
       // Assert
-      expect(result.current.features).toEqual({
-        studentPrompts: false,
-        ageGroupSelector: false,
-        benefitDisplay: false,
-        returnToStudyTips: false,
-        enhancedMetrics: false
-      });
+      expect(result.current.userId).toBe('existing-user-456');
+      expect(UserProfileStorage.saveProfile).not.toHaveBeenCalled();
     });
   });
 
   describe('イベントトラッキング', () => {
-    it('should track experiment exposure', () => {
+    it('should track page view on mount', () => {
       // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('B');
-      const trackEventSpy = vi.fn();
+      vi.mocked(UserProfileStorage.getProfile).mockReturnValue({
+        userId: 'test-user-789',
+        ageGroup: 'office_worker',
+        selectedAt: '2025-01-01T00:00:00Z',
+        isFirstTimeUser: false,
+        createdAt: '2025-01-01T00:00:00Z',
+        lastUpdated: '2025-01-01T00:00:00Z'
+      });
+      vi.mocked(ABTestService.assignVariant).mockReturnValue('treatment');
 
       // Act
-      renderHook(() => useABTest({ onExposure: trackEventSpy }));
+      renderHook(() => useABTest('age_group_feature'));
 
       // Assert
-      expect(trackEventSpy).toHaveBeenCalledWith({
-        experiment: 'student_optimization_v1',
-        variant: 'B',
-        timestamp: expect.any(String)
+      expect(ABTestService.trackEvent).toHaveBeenCalledWith({
+        eventType: 'page_view',
+        eventName: 'age_group_feature_view',
+        userId: 'test-user-789',
+        abTestVariant: 'treatment'
       });
     });
 
-    it('should only track exposure once per session', () => {
+    it('should track page view once per mount', () => {
       // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('B');
-      const trackEventSpy = vi.fn();
+      vi.mocked(UserProfileStorage.getProfile).mockReturnValue(null);
+      vi.mocked(ABTestService.assignVariant).mockReturnValue('control');
 
       // Act
-      const { rerender } = renderHook(() => useABTest({ onExposure: trackEventSpy }));
+      const { rerender } = renderHook(() => useABTest('age_group_feature'));
+      
+      // Clear previous calls
+      vi.mocked(ABTestService.trackEvent).mockClear();
       
       // Re-render multiple times
       rerender();
       rerender();
 
-      // Assert
-      expect(trackEventSpy).toHaveBeenCalledTimes(1);
+      // Assert - trackEvent should not be called on re-renders
+      expect(ABTestService.trackEvent).not.toHaveBeenCalled();
     });
   });
 
-  describe('リセット機能', () => {
-    it('should provide reset function for development', () => {
+  describe('テスト名の変更', () => {
+    it('should re-assign variant when test name changes', () => {
       // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('A');
-
-      // Act
-      renderHook(() => useABTest());
-      
-      act(() => {
-        result.current.resetForTesting();
+      vi.mocked(UserProfileStorage.getProfile).mockReturnValue({
+        userId: 'test-user-999',
+        ageGroup: 'office_worker',
+        selectedAt: '2025-01-01T00:00:00Z',
+        isFirstTimeUser: false,
+        createdAt: '2025-01-01T00:00:00Z',
+        lastUpdated: '2025-01-01T00:00:00Z'
       });
+      vi.mocked(ABTestService.assignVariant).mockReturnValue('control');
+
+      // Act - initial render
+      const { rerender } = renderHook(
+        ({ testName }) => useABTest(testName),
+        { initialProps: { testName: 'age_group_feature' as const } }
+      );
+
+      // Clear previous calls
+      vi.mocked(ABTestService.assignVariant).mockClear();
+      vi.mocked(ABTestService.trackEvent).mockClear();
+
+      // Change test name
+      rerender({ testName: 'student_mode' as const });
 
       // Assert
-      expect(ABTestService.resetTestGroup).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('A/Bテストメトリクス', () => {
-    it('should provide tracking functions for metrics', () => {
-      // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('B');
-      const metricsCallback = vi.fn();
-
-      // Act
-      const { result } = renderHook(() => useABTest({ onMetric: metricsCallback }));
-
-      // Track suggestion click
-      act(() => {
-        result.current.trackMetric('suggestionClick', { suggestionId: 'test-123' });
-      });
-
-      // Assert
-      expect(metricsCallback).toHaveBeenCalledWith({
-        metric: 'suggestionClick',
-        testGroup: 'B',
-        data: { suggestionId: 'test-123' },
-        timestamp: expect.any(String)
-      });
-    });
-
-    it('should track completion metrics', () => {
-      // Arrange
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('B');
-      const metricsCallback = vi.fn();
-
-      // Act
-      const { result } = renderHook(() => useABTest({ onMetric: metricsCallback }));
-
-      act(() => {
-        result.current.trackCompletion('test-123', 300); // 5分間
-      });
-
-      // Assert
-      expect(metricsCallback).toHaveBeenCalledWith({
-        metric: 'suggestionComplete',
-        testGroup: 'B',
-        data: {
-          suggestionId: 'test-123',
-          duration: 300,
-          completed: true
-        },
-        timestamp: expect.any(String)
+      expect(ABTestService.assignVariant).toHaveBeenCalledWith('student_mode', 'test-user-999');
+      expect(ABTestService.trackEvent).toHaveBeenCalledWith({
+        eventType: 'page_view',
+        eventName: 'student_mode_view',
+        userId: 'test-user-999',
+        abTestVariant: 'control'
       });
     });
   });
 
-  describe('条件付きレンダリング支援', () => {
-    it('should provide shouldRender helper for conditional rendering', () => {
-      // Arrange & Act - Test group B
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('B');
-      vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(true);
-      const { result: resultB } = renderHook(() => useABTest());
 
-      // Assert
-      expect(resultB.current.shouldRender('studentFeature')).toBe(true);
-      expect(resultB.current.shouldRender('defaultFeature')).toBe(false);
 
-      // Arrange & Act - Test group A
-      vi.mocked(ABTestService.getTestGroup).mockReturnValue('A');
-      vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(false);
-      const { result: resultA } = renderHook(() => useABTest());
-
-      // Assert
-      expect(resultA.current.shouldRender('studentFeature')).toBe(false);
-      expect(resultA.current.shouldRender('defaultFeature')).toBe(true);
-    });
-  });
-
-  describe('サーバーサイドレンダリング対応', () => {
-    it('should handle SSR environment gracefully', () => {
-      // Arrange - LocalStorageでエラーが発生する環境をシミュレート
-      const originalGetItem = Storage.prototype.getItem;
-      const originalSetItem = Storage.prototype.setItem;
-      
-      // localStorage でエラーが発生するようにモック
-      Storage.prototype.getItem = vi.fn(() => {
-        throw new Error('localStorage is not available');
-      });
-      Storage.prototype.setItem = vi.fn(() => {
-        throw new Error('localStorage is not available');
-      });
-
-      // Act
-      renderHook(() => useABTest());
-
-      // Assert - デフォルト値が返される（エラーでも動作する）
-      expect(result.current.testGroup).toBe('A');
-      expect(result.current.isStudentOptimized).toBe(false);
-
-      // Cleanup
-      Storage.prototype.getItem = originalGetItem;
-      Storage.prototype.setItem = originalSetItem;
-    });
-  });
 });
