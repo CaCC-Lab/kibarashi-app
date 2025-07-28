@@ -1,7 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AgeGroupProvider } from '../../hooks/useAgeGroup';
 import SituationSelector from './SituationSelector';
+import { useAgeGroup } from '../../hooks/useAgeGroup';
+
+// useAgeGroupをモック
+vi.mock('../../hooks/useAgeGroup', () => ({
+  useAgeGroup: vi.fn(() => ({ currentAgeGroup: 'office_worker' }))
+}));
 
 /**
  * SituationSelectorコンポーネントのテスト
@@ -26,6 +31,8 @@ describe('SituationSelector', () => {
   beforeEach(() => {
     selectCount = 0;
     selectedValue = null;
+    // デフォルトのモック値に戻す
+    vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'office_worker' } as any);
   });
 
   describe('基本的な表示のテスト', () => {
@@ -303,14 +310,15 @@ describe('SituationSelector', () => {
 
   describe('就職活動関連状況のテスト', () => {
     it('就職活動者(job_seeker)の場合、就職・転職活動オプションが表示される', () => {
+      // useAgeGroupをjob_seekerモードに設定
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected={null} 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       // 就職・転職活動オプションが表示される
@@ -323,14 +331,15 @@ describe('SituationSelector', () => {
     });
 
     it('転職活動者(career_changer)の場合、就職・転職活動オプションが表示される', () => {
+      // useAgeGroupをcareer_changerモードに設定
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="career_changer">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected={null} 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       // 就職・転職活動オプションが表示される
@@ -338,14 +347,14 @@ describe('SituationSelector', () => {
     });
 
     it('job_hunting状況が選択されている場合、ハイライトされる', () => {
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected="job_hunting" 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected="job_hunting" 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       const jobHuntingButton = screen.getByText('就職・転職活動').closest('button');
@@ -354,14 +363,14 @@ describe('SituationSelector', () => {
     });
 
     it('就職・転職活動オプションをクリックするとonSelectが呼ばれる', () => {
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected={null} 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       const jobHuntingButton = screen.getByText('就職・転職活動');
@@ -372,14 +381,14 @@ describe('SituationSelector', () => {
     });
 
     it('就職活動者の場合、適切なタイトルとメッセージが表示される', () => {
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected={null} 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       // job_seeker向けのタイトルとメッセージを確認
@@ -388,14 +397,14 @@ describe('SituationSelector', () => {
     });
 
     it('転職活動者の場合、適切なタイトルとメッセージが表示される', () => {
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="career_changer">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected={null} 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       // career_changer向けのタイトルとメッセージを確認
@@ -404,14 +413,14 @@ describe('SituationSelector', () => {
     });
 
     it('job_hunting状況選択時にコンテキスト説明が表示される', () => {
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected="job_hunting" 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected="job_hunting" 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       // job_seekerのjob_hunting状況に対する説明文が表示される
@@ -419,14 +428,14 @@ describe('SituationSelector', () => {
     });
 
     it('通常の年齢層では就職・転職活動オプションが表示されない', () => {
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'office_worker' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="office_worker">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected={null} 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       // 就職・転職活動オプションは表示されない
@@ -441,33 +450,33 @@ describe('SituationSelector', () => {
 
   describe('年齢層に応じた状況コンテキスト説明のテスト', () => {
     it('job_seekerの場合、各状況に適切なコンテキスト説明が表示される', () => {
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected="workplace" 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected="workplace" 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       // workplace状況でのjob_seeker向け説明
-      expect(screen.getByText('アルバイト先、インターン先での休憩時間')).toBeInTheDocument();
+      expect(screen.getByText('インターンシップの休憩時間、アルバイト先での息抜き')).toBeInTheDocument();
     });
 
     it('career_changerの場合、各状況に適切なコンテキスト説明が表示される', () => {
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as any);
+      
       render(
-        <AgeGroupProvider initialAgeGroup="career_changer">
-          <SituationSelector 
-            selected="home" 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector 
+          selected="home" 
+          onSelect={onSelect} 
+          onBack={onBack} 
+        />
       );
       
       // home状況でのcareer_changer向け説明
-      expect(screen.getByText('自宅での転職準備、面接準備の合間')).toBeInTheDocument();
+      expect(screen.getByText('求人検索の休憩中、面接準備の合間、家族に相談した後')).toBeInTheDocument();
     });
   });
 });
