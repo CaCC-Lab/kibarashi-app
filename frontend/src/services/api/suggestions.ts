@@ -21,14 +21,7 @@ export async function fetchSuggestions(
   const randomId = Math.random().toString(36).substring(2, 15);
   const performanceNow = performance.now();
   
-  console.log('🔄 Fetching suggestions with cache-busting:', {
-    situation,
-    duration,
-    ageGroup,
-    timestamp,
-    randomId,
-    performanceNow
-  });
+  // Cache-busting parameters to ensure fresh data
   
   // URLパラメータを構築
   const params = new URLSearchParams({
@@ -65,7 +58,6 @@ export async function fetchSuggestions(
   }
   
   const url = `/api/v1/suggestions?${params.toString()}`;
-  console.log('📡 API Request URL:', url);
   
   const response = await apiClient.get<SuggestionsResponse>(url, {
     headers: {
@@ -75,11 +67,8 @@ export async function fetchSuggestions(
     }
   });
   
-  console.log('📨 API Response:', response);
-  
   // 304 Not Modifiedの場合、nullが返される可能性があるため、デフォルトレスポンスを返す
   if (response === null) {
-    console.log('📦 304 Not Modified - returning empty suggestions');
     return {
       suggestions: [],
       metadata: {

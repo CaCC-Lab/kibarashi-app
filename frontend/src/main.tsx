@@ -8,7 +8,6 @@ import { reportWebVitals } from './utils/reportWebVitals';
 if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then(registrations => {
     registrations.forEach(registration => {
-      console.log('🗑️ Unregistering Service Worker:', registration);
       registration.unregister();
     });
   });
@@ -17,7 +16,6 @@ if (import.meta.env.DEV && 'serviceWorker' in navigator) {
   if ('caches' in window) {
     caches.keys().then(cacheNames => {
       cacheNames.forEach(cacheName => {
-        console.log('🗑️ Deleting cache:', cacheName);
         caches.delete(cacheName);
       });
     });
@@ -30,5 +28,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 
 // Web Vitalsのパフォーマンス計測
 if (import.meta.env.DEV) {
-  reportWebVitals(console.log);
+  reportWebVitals(() => {
+    // Web Vitals metrics would be logged here in production
+  });
 }

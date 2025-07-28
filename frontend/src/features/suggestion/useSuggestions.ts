@@ -54,8 +54,16 @@ export const useSuggestions = () => {
         skipCache
       );
 
-      // @ts-ignore
-      const data = await Promise.race([fetchPromise, timeoutPromise]);
+      const data = await Promise.race([fetchPromise, timeoutPromise]) as {
+        suggestions: Array<{
+          id: string;
+          title: string;
+          description: string;
+          category: string;
+          duration: number;
+          steps?: string[];
+        }>;
+      };
       
       console.log('✅ API Response received:', data);
 

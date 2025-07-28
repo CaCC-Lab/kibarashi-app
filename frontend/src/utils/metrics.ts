@@ -14,9 +14,9 @@ export interface MetricsEvent {
  * 実際の環境では、Google Analytics、Mixpanel、Amplitudeなどに送信
  */
 export function trackEvent(event: MetricsEvent): void {
-  // 開発環境ではコンソールに出力
+  // 開発環境でのデバッグ用処理
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Metrics]', event);
+    // Metrics tracking would go here in development
   }
 
   // TODO: 本番環境では実際のアナリティクスサービスに送信

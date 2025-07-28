@@ -19,17 +19,14 @@ class ContextAPI {
       if (this.cache && Date.now() - this.cache.timestamp < this.cacheTimeout) {
         // 場所が変わった場合はキャッシュをクリア
         if (location && this.cache.data.weather?.location !== this.getLocationDisplayName(location)) {
-          console.log('Location changed, clearing cache');
           this.cache = null;
         } else {
-          console.log('Context data returned from cache');
           return this.cache.data;
         }
       }
 
       // バックエンドAPIからデータを取得
       const url = location ? `/api/v1/context?location=${encodeURIComponent(location)}` : '/api/v1/context';
-      console.log('Fetching context data from:', url);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -41,15 +38,12 @@ class ContextAPI {
       });
 
       if (!response.ok) {
-        console.error('Context API error:', response.status, response.statusText);
         throw new Error(`Context API error: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log('Context API response:', result);
       
       if (!result.success || !result.data) {
-        console.error('Invalid context API response:', result);
         throw new Error('Invalid context API response');
       }
 
@@ -61,16 +55,9 @@ class ContextAPI {
         timestamp: Date.now()
       };
 
-      console.log('Context data fetched from API', {
-        hasWeather: !!contextData.weather,
-        season: contextData.seasonal?.season
-      });
-
       return contextData;
 
     } catch (error) {
-      console.error('Failed to fetch context data from API, falling back to mock:', error);
-      console.log('Using mock data for location:', location);
       // エラー時はモックデータを返す
       return this.getMockContextData(location);
     }
