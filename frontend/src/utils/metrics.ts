@@ -6,7 +6,7 @@
 export interface MetricsEvent {
   name: string;
   timestamp: number;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 /**
@@ -14,9 +14,9 @@ export interface MetricsEvent {
  * 実際の環境では、Google Analytics、Mixpanel、Amplitudeなどに送信
  */
 export function trackEvent(event: MetricsEvent): void {
-  // 開発環境ではコンソールに出力
+  // 開発環境でのデバッグ用処理
   if (process.env.NODE_ENV === 'development') {
-    console.log('[Metrics]', event);
+    // Metrics tracking would go here in development
   }
 
   // TODO: 本番環境では実際のアナリティクスサービスに送信
@@ -34,7 +34,7 @@ export function trackEvent(event: MetricsEvent): void {
 /**
  * ページビューをトラッキング
  */
-export function trackPageView(page: string, properties?: Record<string, any>): void {
+export function trackPageView(page: string, properties?: Record<string, unknown>): void {
   trackEvent({
     name: 'page_view',
     timestamp: Date.now(),
@@ -48,7 +48,7 @@ export function trackPageView(page: string, properties?: Record<string, any>): v
 /**
  * エラーをトラッキング
  */
-export function trackError(error: Error, context?: Record<string, any>): void {
+export function trackError(error: Error, context?: Record<string, unknown>): void {
   trackEvent({
     name: 'error',
     timestamp: Date.now(),

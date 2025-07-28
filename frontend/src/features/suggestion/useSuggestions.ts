@@ -2,6 +2,9 @@ import { useState, useCallback, useRef } from 'react';
 import { fetchSuggestions, Suggestion } from '../../services/api/suggestions';
 import { SituationId } from '../../types/situation';
 import { AgeGroup } from '../../types/ageGroup';
+import { fallbackSuggestions } from './fallbackSuggestions';
+
+const API_TIMEOUT = 8000; // 8秒
 
 export const useSuggestions = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -17,50 +20,87 @@ export const useSuggestions = () => {
     location?: string,
     skipCache?: boolean
   ) => {
-    // 前回のリクエストをキャンセル
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
-    // 新しいAbortControllerを作成
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
-    
+
     console.log('🚀 Starting fetchSuggestions with params:', {
       situation,
       duration,
       ageGroup,
       studentContext,
       location,
-      skipCache
+      skipCache,
     });
-    
-    // 強制的に前の状態をクリア
+
     setSuggestions([]);
     setLoading(true);
     setError(null);
-    
+
     try {
-      const data = await fetchSuggestions(situation, duration, ageGroup, studentContext, location, skipCache);
-      console.log('✅ API Response received:', data);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('API timeout')), API_TIMEOUT)
+      );
+
+      const fetchPromise = fetchSuggestions(
+        situation,
+        duration,
+        ageGroup,
+        studentContext,
+        location,
+        skipCache
+      );
+
+      const data = await Promise.race([fetchPromise, timeoutPromise]) as {
+        suggestions: Array<{
+          id: string;
+          title: string;
+          description: string;
+          category: string;
+          duration: number;
+          steps?: string[];
+        }>;
+      };
       
-      // リクエストがキャンセルされていない場合のみ状態を更新
+      console.log('✅ API Response received:', data);
+
       if (!abortController.signal.aborted) {
         console.log('📝 Setting suggestions to state:', data.suggestions);
-        
-        // 強制的に新しい配列として設定（参照を確実に変更）
         setSuggestions([...data.suggestions]);
-        
-        // 設定後の確認ログ
         console.log('✅ Suggestions set successfully. Count:', data.suggestions.length);
       }
     } catch (err) {
       console.error('❌ Error in fetchSuggestions:', err);
-      
-      // リクエストがキャンセルされた場合はエラーを無視
+
       if (!abortController.signal.aborted) {
-        setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
-        setSuggestions([]);
+        if (err instanceof Error && (err.message === 'API timeout' || !navigator.onLine)) {
+          setError('通信環境が不安定なため、代わりの提案を表示します。');
+          // フォールバック提案にメタデータを追加
+          const fallbackResponse = {
+            suggestions: fallbackSuggestions,
+            metadata: {
+              source: 'fallback' as const,
+              reason: err.message === 'API timeout' ? 'タイムアウト' : 'オフライン',
+              timestamp: new Date().toISOString()
+            }
+          };
+          setSuggestions(fallbackResponse.suggestions);
+        } else {
+          setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
+          // エラー時もフォールバック提案にメタデータを追加
+          const fallbackResponse = {
+            suggestions: fallbackSuggestions,
+            metadata: {
+              source: 'fallback' as const,
+              reason: 'APIエラー',
+              timestamp: new Date().toISOString()
+            }
+          };
+          setSuggestions(fallbackResponse.suggestions);
+        }
       }
     } finally {
       if (!abortController.signal.aborted) {

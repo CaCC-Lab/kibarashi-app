@@ -36,7 +36,7 @@ describe('apiClient', () => {
         expect(response).toBeDefined();
         expect(response.status).toBe('ok');
         expect(response.timestamp).toBeDefined();
-      } catch (error: any) {
+      } catch (error) {
         // サーバーが起動していない場合のエラーメッセージを確認
         expect(error.message).toContain('ネットワークエラー');
         expect(error.message).toContain('インターネット接続を確認');
@@ -57,7 +57,7 @@ describe('apiClient', () => {
         
         // レスポンスの検証（サーバーが起動している場合）
         expect(response).toBeDefined();
-      } catch (error: any) {
+      } catch (error) {
         // エラーレスポンスの検証
         if (error.message.includes('ネットワークエラー')) {
           // サーバーが起動していない場合
@@ -76,14 +76,15 @@ describe('apiClient', () => {
         await apiClient.get('/api/v1/nonexistent');
         // エラーが発生しない場合はテスト失敗
         expect.fail('エラーが発生するはずです');
-      } catch (error: any) {
+      } catch (error) {
         // エラーメッセージの検証
-        expect(error.message).toBeDefined();
+        const errorMessage = (error as Error).message;
+        expect(errorMessage).toBeDefined();
         
         // サーバーが起動している場合は404エラー
         // 起動していない場合はネットワークエラー
-        const isNetworkError = error.message.includes('ネットワークエラー');
-        const is404Error = error.message.includes('見つかりません');
+        const isNetworkError = errorMessage.includes('ネットワークエラー');
+        const is404Error = errorMessage.includes('見つかりません');
         
         expect(isNetworkError || is404Error).toBe(true);
       }
@@ -91,15 +92,16 @@ describe('apiClient', () => {
 
     it('ネットワークエラーを適切に処理する', async () => {
       // 存在しないホストへのリクエスト
-      (import.meta.env as any).VITE_API_URL = 'http://localhost:9999';
+      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
       
       try {
         await apiClient.get('/health');
         expect.fail('ネットワークエラーが発生するはずです');
-      } catch (error: any) {
-        expect(error.message).toContain('ネットワークエラー');
-        expect(error.message).toContain('サーバーに接続できません');
-        expect(error.message).toContain('インターネット接続を確認');
+      } catch (error) {
+        const errorMessage = (error as Error).message;
+        expect(errorMessage).toContain('ネットワークエラー');
+        expect(errorMessage).toContain('サーバーに接続できません');
+        expect(errorMessage).toContain('インターネット接続を確認');
       }
     });
   });
@@ -116,7 +118,7 @@ describe('apiClient', () => {
         
         // タイムアウトしなかった場合はスキップ
         console.log('API応答が高速なためタイムアウトテストをスキップ');
-      } catch (error: any) {
+      } catch (error) {
         // タイムアウトエラーの検証
         if (error.message.includes('タイムアウト')) {
           expect(error.message).toContain('リクエストがタイムアウトしました');
@@ -138,7 +140,7 @@ describe('apiClient', () => {
       try {
         // 実際のAPIにリクエストを送信
         await apiClient.post('/api/v1/test', testData);
-      } catch (error: any) {
+      } catch (error) {
         // エラーでもヘッダーは設定されているはず
         // （実際のリクエストが送信されていることを確認）
         expect(error).toBeDefined();
@@ -154,7 +156,7 @@ describe('apiClient', () => {
         // JSONとしてパースされていることを確認
         expect(typeof response).toBe('object');
         expect(response).not.toBe(null);
-      } catch (error: any) {
+      } catch (error) {
         // サーバーが起動していない場合はスキップ
         console.log('サーバーが起動していないためスキップ:', error.message);
       }
@@ -167,7 +169,7 @@ describe('apiClient', () => {
         
         // 空のレスポンスまたはエラー
         expect(response === null || response === undefined || typeof response === 'object').toBe(true);
-      } catch (error: any) {
+      } catch (error) {
         // エラーも正常な動作
         expect(error).toBeDefined();
       }

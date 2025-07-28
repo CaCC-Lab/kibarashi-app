@@ -5,7 +5,7 @@
 
 import { logger } from '../../utils/logger';
 import { getFallbackSuggestions } from './fallbackData';
-import { geminiClient } from '../gemini/geminiClient';
+import { geminiClient } from 'core-logic';
 import { EnhancedSuggestionGenerator } from './enhancedSuggestionGenerator.js';
 
 // 拡張提案のデータ構造（後方互換性を保持）

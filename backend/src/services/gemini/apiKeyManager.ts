@@ -57,7 +57,8 @@ export class APIKeyManager {
           cooldownUntil: null
         });
       } else {
-        throw new Error('No valid Gemini API keys found in environment variables');
+        logger.warn('No Gemini API keys found. Application will run in fallback mode.');
+        // フォールバックモードを許可する
       }
     }
 
@@ -114,6 +115,11 @@ export class APIKeyManager {
    * 現在使用可能なAPIキーを取得
    */
   getCurrentApiKey(): string {
+    // APIキーが設定されていない場合は空文字を返す
+    if (this.apiKeys.length === 0) {
+      return '';
+    }
+    
     this.updateCooldownStatus();
     
     const availableKeys = this.apiKeys.filter(key => !key.isOnCooldown);
@@ -143,6 +149,16 @@ export class APIKeyManager {
 
     // 次の利用可能なキーに切り替え
     return this.rotateToNextAvailableKey();
+  }
+
+  /**
+   * 現在使用中のAPIキーのインデックスを取得
+   */
+  getCurrentApiKeyIndex(): number {
+    if (this.apiKeys.length === 0) {
+      return -1;
+    }
+    return this.currentKeyIndex;
   }
 
   /**

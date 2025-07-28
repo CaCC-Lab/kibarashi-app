@@ -1,6 +1,6 @@
 import { logger } from '../../utils/logger';
 import { getFallbackSuggestions } from './fallbackData';
-import { geminiClient } from '../gemini/geminiClient';
+import { geminiClient } from 'core-logic';
 import { JobHuntingPromptInput } from './jobHuntingPromptTemplates';
 
 // 気晴らし提案のデータ構造
@@ -64,11 +64,12 @@ export async function generateSuggestions(
       const responseTime = Date.now() - startTime;
       
       // データソース情報を追加
+      const apiKeyIndex = geminiClient.getCurrentApiKeyIndex();
       const suggestionsWithMetadata = suggestions.slice(0, 3).map(suggestion => ({
         ...suggestion,
         dataSource: 'ai' as const,
         responseTime,
-        // TODO: APIキーインデックスは geminiClient から取得する必要がある
+        apiKeyIndex: apiKeyIndex >= 0 ? apiKeyIndex : undefined
       }));
       
       // ステップ3: 必ず3つの提案を返す

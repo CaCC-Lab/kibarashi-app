@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>データソースバッジ手動確認</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 40px;
+            background-color: #f3f4f6;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .status { 
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d1fae5; color: #065f46; }
+        .error { background-color: #fee2e2; color: #991b1b; }
+        .info { background-color: #dbeafe; color: #1e40af; }
+        .code {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>データソースバッジ表示確認ツール</h1>
+    
+    <div class="section">
+        <h2>1. サーバー状態確認</h2>
+        <div id="server-status"></div>
+        <button onclick="checkServers()">サーバー状態を確認</button>
+    </div>
+    
+    <div class="section">
+        <h2>2. API動作確認</h2>
+        <div id="api-status"></div>
+        <button onclick="checkAPI()">APIをテスト</button>
+    </div>
+    
+    <div class="section">
+        <h2>3. フロントエンド確認</h2>
+        <p>以下の手順でバッジを確認してください：</p>
+        <ol>
+            <li><a href="http://localhost:3001" target="_blank">http://localhost:3001</a> を新しいタブで開く</li>
+            <li>年齢層の選択をスキップ（または選択）</li>
+            <li>状況を選択（職場/家/外出先）</li>
+            <li>時間を選択（5分/15分/30分）</li>
+            <li>提案カードが表示されたら、各カードを確認</li>
+        </ol>
+        
+        <h3>期待される表示:</h3>
+        <ul>
+            <li>各提案カードの右上または適切な位置にバッジが表示される</li>
+            <li>現在の環境では「⚠️ フォールバック」と表示されるはず（APIキーなしのため）</li>
+            <li>バッジは黄色の背景色</li>
+            <li>右下にデバッグモードトグルボタンが表示される</li>
+        </ul>
+    </div>
+    
+    <div class="section">
+        <h2>4. API応答確認</h2>
+        <div id="api-response" class="code"></div>
+    </div>
+
+    <script>
+        async function checkServers() {
+            const status = document.getElementById('server-status');
+            status.innerHTML = '';
+            
+            // バックエンド確認
+            try {
+                const backendRes = await fetch('http://localhost:8081/health');
+                if (backendRes.ok) {
+                    status.innerHTML += '<div class="status success">✅ バックエンド: 起動中 (port 8081)</div>';
+                } else {
+                    status.innerHTML += '<div class="status error">❌ バックエンド: エラー</div>';
+                }
+            } catch (e) {
+                status.innerHTML += '<div class="status error">❌ バックエンド: 接続失敗</div>';
+            }
+            
+            // フロントエンド確認
+            try {
+                const frontendRes = await fetch('http://localhost:3001');
+                if (frontendRes.ok) {
+                    status.innerHTML += '<div class="status success">✅ フロントエンド: 起動中 (port 3001)</div>';
+                } else {
+                    status.innerHTML += '<div class="status error">❌ フロントエンド: エラー</div>';
+                }
+            } catch (e) {
+                status.innerHTML += '<div class="status error">❌ フロントエンド: 接続失敗</div>';
+            }
+        }
+        
+        async function checkAPI() {
+            const status = document.getElementById('api-status');
+            const responseDiv = document.getElementById('api-response');
+            status.innerHTML = '<div class="status info">API呼び出し中...</div>';
+            
+            try {
+                const res = await fetch('http://localhost:8081/api/v1/suggestions?situation=workplace&duration=5');
+                const data = await res.json();
+                
+                if (res.ok) {
+                    status.innerHTML = '<div class="status success">✅ API応答: 成功</div>';
+                    
+                    // dataSourceの確認
+                    const dataSourcesFound = data.suggestions.map(s => s.dataSource).filter(Boolean);
+                    if (dataSourcesFound.length > 0) {
+                        status.innerHTML += '<div class="status success">✅ dataSourceフィールド: 存在 (' + dataSourcesFound.join(', ') + ')</div>';
+                    } else {
+                        status.innerHTML += '<div class="status error">❌ dataSourceフィールド: 存在しない</div>';
+                    }
+                    
+                    // 応答の表示
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                } else {
+                    status.innerHTML = '<div class="status error">❌ API応答: エラー (' + res.status + ')</div>';
+                    responseDiv.textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (e) {
+                status.innerHTML = '<div class="status error">❌ API呼び出し失敗: ' + e.message + '</div>';
+                responseDiv.textContent = 'エラー: ' + e.message;
+            }
+        }
+        
+        // ページ読み込み時に自動実行
+        window.onload = () => {
+            checkServers();
+        };
+    </script>
+</body>
+</html>

@@ -7,6 +7,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipItem,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 
@@ -88,8 +89,8 @@ const WeeklyPatternChart: React.FC<WeeklyPatternChartProps> = ({ weeklyPattern }
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => `${context.parsed.y}回`,
-          afterLabel: (context: any) => {
+          label: (context: TooltipItem<'bar'>) => `${context.parsed.y}回`,
+          afterLabel: (context: TooltipItem<'bar'>) => {
             const day = context.dataIndex;
             return day === 0 || day === 6 ? '(休日)' : '(平日)';
           },

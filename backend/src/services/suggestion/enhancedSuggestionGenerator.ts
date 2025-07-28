@@ -128,7 +128,7 @@ ${ageGroup === 'student' ? '高校生・大学生' : '社会人'}向けの${situ
     const mainDuration = (data.duration * 60) - 60; // 全体時間 - イントロ30秒 - 締め30秒
     const stepDuration = Math.floor(mainDuration / data.detailedSteps.length);
 
-    data.detailedSteps.forEach((step, index) => {
+    data.detailedSteps.forEach((step: any, index: number) => {
       // stepがオブジェクトの場合はinstructionプロパティを使用、文字列の場合はそのまま使用
       const stepText = typeof step === 'object' && step !== null && 'instruction' in step 
         ? step.instruction 
