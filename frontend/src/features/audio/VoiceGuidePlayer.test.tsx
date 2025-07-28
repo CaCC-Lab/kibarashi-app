@@ -39,7 +39,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 // フィーチャーフラグのモック
-vi.mock('../config/featureFlags', () => ({
+vi.mock('../../features/config/featureFlags', () => ({
   useFeature: vi.fn().mockImplementation((feature: string) => {
     const enabledFeatures = {
       'enhancedVoiceGuide': true,
