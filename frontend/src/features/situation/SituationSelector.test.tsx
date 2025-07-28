@@ -2,10 +2,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import SituationSelector from './SituationSelector';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
+import type { AgeGroup } from '../../types/ageGroup';
+
+// モック用の型定義
+interface MockUseAgeGroupReturn {
+  currentAgeGroup: AgeGroup;
+}
 
 // useAgeGroupをモック
 vi.mock('../../hooks/useAgeGroup', () => ({
-  useAgeGroup: vi.fn(() => ({ currentAgeGroup: 'office_worker' }))
+  useAgeGroup: vi.fn(() => ({ currentAgeGroup: 'office_worker' } as MockUseAgeGroupReturn))
 }));
 
 /**
@@ -32,7 +38,7 @@ describe('SituationSelector', () => {
     selectCount = 0;
     selectedValue = null;
     // デフォルトのモック値に戻す
-    vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'office_worker' } as any);
+    vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'office_worker' } as MockUseAgeGroupReturn);
   });
 
   describe('基本的な表示のテスト', () => {
@@ -311,7 +317,7 @@ describe('SituationSelector', () => {
   describe('就職活動関連状況のテスト', () => {
     it('就職活動者(job_seeker)の場合、就職・転職活動オプションが表示される', () => {
       // useAgeGroupをjob_seekerモードに設定
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -332,7 +338,7 @@ describe('SituationSelector', () => {
 
     it('転職活動者(career_changer)の場合、就職・転職活動オプションが表示される', () => {
       // useAgeGroupをcareer_changerモードに設定
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -347,7 +353,7 @@ describe('SituationSelector', () => {
     });
 
     it('job_hunting状況が選択されている場合、ハイライトされる', () => {
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -363,7 +369,7 @@ describe('SituationSelector', () => {
     });
 
     it('就職・転職活動オプションをクリックするとonSelectが呼ばれる', () => {
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -381,7 +387,7 @@ describe('SituationSelector', () => {
     });
 
     it('就職活動者の場合、適切なタイトルとメッセージが表示される', () => {
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -397,7 +403,7 @@ describe('SituationSelector', () => {
     });
 
     it('転職活動者の場合、適切なタイトルとメッセージが表示される', () => {
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -413,7 +419,7 @@ describe('SituationSelector', () => {
     });
 
     it('job_hunting状況選択時にコンテキスト説明が表示される', () => {
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -428,7 +434,7 @@ describe('SituationSelector', () => {
     });
 
     it('通常の年齢層では就職・転職活動オプションが表示されない', () => {
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'office_worker' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'office_worker' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -450,7 +456,7 @@ describe('SituationSelector', () => {
 
   describe('年齢層に応じた状況コンテキスト説明のテスト', () => {
     it('job_seekerの場合、各状況に適切なコンテキスト説明が表示される', () => {
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'job_seeker' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
@@ -465,7 +471,7 @@ describe('SituationSelector', () => {
     });
 
     it('career_changerの場合、各状況に適切なコンテキスト説明が表示される', () => {
-      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as any);
+      vi.mocked(useAgeGroup).mockReturnValue({ currentAgeGroup: 'career_changer' } as MockUseAgeGroupReturn);
       
       render(
         <SituationSelector 
