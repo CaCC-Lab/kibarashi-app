@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useABTestResults } from '../../hooks/useABTest';
-import { ABTestService, ABTestType, ABTestResults } from '../../services/analytics/abTestService';
+import { ABTestService, ABTestType, ABTestResults, MetricEvent } from '../../services/analytics/abTestService';
 
 interface ABTestDashboardProps {
   className?: string;
@@ -13,7 +13,7 @@ interface ABTestDashboardProps {
 
 export const ABTestDashboard: React.FC<ABTestDashboardProps> = ({ className = '' }) => {
   const [selectedTest, setSelectedTest] = useState<ABTestType>('age_group_feature');
-  const [rawMetrics, setRawMetrics] = useState<any[]>([]);
+  const [rawMetrics, setRawMetrics] = useState<MetricEvent[]>([]);
   
   const { results, loading, refreshResults } = useABTestResults(selectedTest);
   
@@ -272,7 +272,7 @@ interface AgeGroupStats {
 }
 
 // 年齢層別分析コンポーネント
-const AgeGroupAnalysis: React.FC<{ metrics: any[] }> = ({ metrics }) => {
+const AgeGroupAnalysis: React.FC<{ metrics: MetricEvent[] }> = ({ metrics }) => {
   const ageGroupStats = metrics
     .filter(m => m.ageGroup)
     .reduce((stats, metric) => {
@@ -318,7 +318,7 @@ const AgeGroupAnalysis: React.FC<{ metrics: any[] }> = ({ metrics }) => {
 };
 
 // 最近のイベント表示コンポーネント
-const RecentEvents: React.FC<{ metrics: any[] }> = ({ metrics }) => {
+const RecentEvents: React.FC<{ metrics: MetricEvent[] }> = ({ metrics }) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border border-gray-200 rounded-lg">

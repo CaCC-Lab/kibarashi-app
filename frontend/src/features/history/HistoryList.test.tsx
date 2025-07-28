@@ -5,13 +5,21 @@ import userEvent from '@testing-library/user-event';
 import HistoryList from './HistoryList';
 import { useHistory } from '../../hooks/useHistory';
 import type { HistoryItem } from '../../types/history';
+import type { FilterValue } from './HistoryFilter';
 
 // useHistoryフックをモック
 vi.mock('../../hooks/useHistory');
 
 // 子コンポーネントをモック
+interface MockHistoryItemProps {
+  item: HistoryItem;
+  onDelete: (id: string) => boolean;
+  onUpdateRating: (id: string, rating: 1 | 2 | 3 | 4 | 5) => boolean;
+  onUpdateNote: (id: string, note: string) => boolean;
+}
+
 vi.mock('./HistoryItem', () => ({
-  default: ({ item, onDelete: _onDelete, onUpdateRating: _onUpdateRating, onUpdateNote: _onUpdateNote }: any) => (
+  default: ({ item, onDelete: _onDelete, onUpdateRating: _onUpdateRating, onUpdateNote: _onUpdateNote }: MockHistoryItemProps) => (
     <div data-testid="history-item">
       <div>{item.title}</div>
       <div>{item.description}</div>
@@ -19,8 +27,18 @@ vi.mock('./HistoryItem', () => ({
   )
 }));
 
+interface MockHistoryStatsProps {
+  stats: {
+    totalCount: number;
+    categoryCounts: Record<string, number>;
+    weeklyPattern: Record<number, number>;
+    hourlyPattern: Record<number, number>;
+    monthlyTrend: Array<{ month: string; total: number; completed: number; }>;
+  };
+}
+
 vi.mock('./HistoryStats', () => ({
-  default: ({ stats }: any) => (
+  default: ({ stats }: MockHistoryStatsProps) => (
     <div data-testid="history-stats">
       <div>統計情報</div>
       <div>総実行回数: {stats.totalCount}</div>
@@ -28,8 +46,15 @@ vi.mock('./HistoryStats', () => ({
   )
 }));
 
+interface MockHistoryFilterProps {
+  filterType: string;
+  filterValue: FilterValue;
+  onFilterTypeChange: (type: string) => void;
+  onFilterValueChange: (value: FilterValue) => void;
+}
+
 vi.mock('./HistoryFilter', () => ({
-  default: ({ filterType, onFilterTypeChange, onFilterValueChange }: any) => (
+  default: ({ filterType, onFilterTypeChange, onFilterValueChange }: MockHistoryFilterProps) => (
     <div data-testid="history-filter">
       <div>フィルター:</div>
       <button onClick={() => onFilterTypeChange('all')}>すべて</button>
@@ -49,8 +74,13 @@ vi.mock('../../components/common/Loading', () => ({
   default: () => <div>読み込み中...</div>
 }));
 
+interface MockErrorMessageProps {
+  message: string;
+  onRetry?: () => void;
+}
+
 vi.mock('../../components/common/ErrorMessage', () => ({
-  default: ({ message, onRetry }: any) => (
+  default: ({ message, onRetry }: MockErrorMessageProps) => (
     <div>
       <div>{message}</div>
       {onRetry && <button onClick={onRetry}>再試行</button>}

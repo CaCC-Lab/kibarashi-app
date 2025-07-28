@@ -9,6 +9,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { ChartTooltipContext } from '../../types/charts';
 
 ChartJS.register(
   CategoryScale,
@@ -69,7 +70,7 @@ const HourlyPatternChart: React.FC<HourlyPatternChartProps> = ({ hourlyPattern }
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => `${context.parsed.y}回`,
+          label: (context: ChartTooltipContext) => `${context.parsed.y}回`,
         },
       },
     },

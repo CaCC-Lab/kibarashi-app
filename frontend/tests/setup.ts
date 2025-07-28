@@ -19,78 +19,79 @@ global.ResizeObserver = class ResizeObserver {
 };
 
 // Web Audio APIのモック
-global.Audio = class Audio {
-  play() { return Promise.resolve(); }
-  pause() {}
-  addEventListener() {}
-  removeEventListener() {}
-} as any;
+global.Audio = class Audio extends EventTarget {
+  play(): Promise<void> { return Promise.resolve(); }
+  pause(): void {}
+  currentTime: number = 0;
+  duration: number = 0;
+  volume: number = 1;
+  src: string = '';
+} as unknown as typeof Audio;
 
 // Speech Synthesis APIの実装
 // モックを使用せず、実際の動作をシミュレート
-global.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
+type EventHandler = ((this: SpeechSynthesisUtterance, ev: Event) => void) | null;
+
+global.SpeechSynthesisUtterance = class SpeechSynthesisUtterance extends EventTarget {
   text: string;
   lang: string = 'ja-JP';
-  voice: any = null;
+  voice: SpeechSynthesisVoice | null = null;
   volume: number = 1;
   rate: number = 1;
   pitch: number = 1;
-  onstart: any = null;
-  onend: any = null;
-  onerror: any = null;
-  onpause: any = null;
-  onresume: any = null;
-  onmark: any = null;
-  onboundary: any = null;
+  onstart: EventHandler = null;
+  onend: EventHandler = null;
+  onerror: EventHandler = null;
+  onpause: EventHandler = null;
+  onresume: EventHandler = null;
+  onmark: EventHandler = null;
+  onboundary: EventHandler = null;
 
   constructor(text?: string) {
+    super();
     this.text = text || '';
   }
-
-  addEventListener() {}
-  removeEventListener() {}
-  dispatchEvent() { return true; }
-} as any;
+} as unknown as typeof SpeechSynthesisUtterance;
 
 global.SpeechSynthesisErrorEvent = class SpeechSynthesisErrorEvent extends Event {
-  error: string;
+  error: SpeechSynthesisErrorCode;
   
-  constructor(type: string, init?: { error?: string }) {
+  constructor(type: string, init?: { error?: SpeechSynthesisErrorCode }) {
     super(type);
-    this.error = init?.error || 'unknown';
+    this.error = init?.error || 'canceled';
   }
-} as any;
+} as unknown as typeof SpeechSynthesisErrorEvent;
 
 global.speechSynthesis = {
-  speak: function(utterance: any) {
+  speak: function(utterance: SpeechSynthesisUtterance): void {
     // 音声合成をシミュレート
     if (utterance.onstart) {
-      setTimeout(() => utterance.onstart(new Event('start')), 0);
+      setTimeout(() => utterance.onstart?.call(utterance, new Event('start')), 0);
     }
     if (utterance.onend) {
-      setTimeout(() => utterance.onend(new Event('end')), 100);
+      setTimeout(() => utterance.onend?.call(utterance, new Event('end')), 100);
     }
   },
-  cancel: function() {
+  cancel: function(): void {
     // キャンセル処理
   },
-  pause: function() {
+  pause: function(): void {
     // 一時停止処理
   },
-  resume: function() {
+  resume: function(): void {
     // 再開処理
   },
-  getVoices: function() {
+  getVoices: function(): SpeechSynthesisVoice[] {
     return [];
   },
-  addEventListener: function() {},
-  removeEventListener: function() {},
-  dispatchEvent: function() { return true; },
+  addEventListener: function(): void {},
+  removeEventListener: function(): void {},
+  dispatchEvent: function(): boolean { return true; },
   speaking: false,
   paused: false,
   pending: false,
   onvoiceschanged: null,
-} as any;
+} as SpeechSynthesis;
 
 // Vibration APIの実装
 navigator.vibrate = function(_pattern?: number | number[]) {
@@ -100,11 +101,18 @@ navigator.vibrate = function(_pattern?: number | number[]) {
 
 // IntersectionObserverのモック
 global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-} as any;
+  constructor(
+    _callback: IntersectionObserverCallback,
+    _options?: IntersectionObserverInit
+  ) {}
+  observe(_target: Element): void {}
+  unobserve(_target: Element): void {}
+  disconnect(): void {}
+  readonly root: Element | null = null;
+  readonly rootMargin: string = '';
+  readonly thresholds: ReadonlyArray<number> = [];
+  takeRecords(): IntersectionObserverEntry[] { return []; }
+} as unknown as typeof IntersectionObserver;
 
 // matchMediaの実装
 Object.defineProperty(window, 'matchMedia', {
