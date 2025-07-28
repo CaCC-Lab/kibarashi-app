@@ -183,3 +183,23 @@ Object.defineProperty(window, 'sessionStorage', {
 // global に localStorage を設定（一部のテストで global.localStorage を使用するため）
 global.localStorage = window.localStorage;
 global.sessionStorage = window.sessionStorage;
+
+// APIクライアントのグローバルモック
+vi.mock('../src/services/api/client', () => ({
+  apiClient: {
+    get: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。テストでAPIクライアントをモックしてください。')),
+    post: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。テストでAPIクライアントをモックしてください。')),
+    put: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。テストでAPIクライアントをモックしてください。')),
+    delete: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。テストでAPIクライアントをモックしてください。')),
+    defaults: {
+      baseURL: 'http://localhost:8080/api/v1'
+    }
+  },
+  ApiClient: vi.fn().mockImplementation(() => ({
+    get: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。')),
+    post: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。')),
+    put: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。')),
+    delete: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。')),
+    fetchWithTimeout: vi.fn().mockRejectedValue(new Error('APIモックが設定されていません。'))
+  }))
+}));

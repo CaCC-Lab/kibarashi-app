@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from './App';
+import * as suggestionsApi from './services/api/suggestions';
+
+// fetchSuggestionsをモック
+vi.mock('./services/api/suggestions', () => ({
+  fetchSuggestions: vi.fn()
+}));
 
 /**
  * Appコンポーネントの統合テスト
@@ -11,17 +17,19 @@ import App from './App';
  * - レイアウトコンポーネント（Header, Footer）も含めて検証
  */
 describe('App', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
   describe('初期表示', () => {
     it('ヘッダーとフッターが表示される', () => {
       render(<App />);
       
       // ヘッダーの確認
-      expect(screen.getByText('5分気晴らし')).toBeInTheDocument();
+      expect(screen.getByText('気晴らしアプリ')).toBeInTheDocument();
       
       // フッターの確認（フッター内のテキストを確認）
       const footer = screen.getByRole('contentinfo');
       expect(footer).toBeInTheDocument();
-      expect(footer).toHaveTextContent('5分気晴らし');
     });
 
     it('初期状態では状況選択画面が表示される', async () => {
@@ -108,6 +116,28 @@ describe('App', () => {
 
   describe('時間選択フロー', () => {
     it('5分を選択すると提案一覧が表示される', async () => {
+      // モックレスポンスを設定
+      vi.mocked(suggestionsApi.fetchSuggestions).mockResolvedValue({
+        suggestions: [
+          {
+            id: 'test-1',
+            title: 'テスト提案1',
+            description: '職場で深呼吸をしてリラックス',
+            duration: 5,
+            category: '認知的' as const,
+            steps: ['ステップ1', 'ステップ2']
+          },
+          {
+            id: 'test-2',
+            title: 'テスト提案2',
+            description: '簡単なストレッチで体をほぐす',
+            duration: 5,
+            category: '行動的' as const,
+            steps: ['ステップ1', 'ステップ2']
+          }
+        ]
+      });
+
       render(<App />);
       
       // 職場を選択
@@ -122,20 +152,32 @@ describe('App', () => {
       });
       fireEvent.click(screen.getByText('5分'));
       
-      // ローディング表示を確認
+      // 提案の表示を待つ（ローディング表示は一瞬で消える可能性があるので、直接結果を待つ）
       await waitFor(() => {
-        expect(screen.getByText(/気晴らし方法を探しています.../)).toBeInTheDocument();
-      });
+        expect(screen.getByText(/あなたにおすすめの気晴らし方法/)).toBeInTheDocument();
+      }, { timeout: 5000 });
       
-      // 提案の表示を待つ（APIレスポンスまたはエラー）
-      await waitFor(() => {
-        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
-        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
-        expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 12000 });
+      // 提案が表示されることを確認
+      expect(screen.getByText('テスト提案1')).toBeInTheDocument();
+      expect(screen.getByText('テスト提案2')).toBeInTheDocument();
     });
 
     it('15分を選択すると提案一覧が表示される', async () => {
+      // モックをリセットして再設定
+      vi.clearAllMocks();
+      vi.mocked(suggestionsApi.fetchSuggestions).mockResolvedValue({
+        suggestions: [
+          {
+            id: 'test-3',
+            title: 'テスト提案3',
+            description: '家でゆっくりストレッチ',
+            duration: 15,
+            category: '行動的' as const,
+            steps: ['ステップ1', 'ステップ2', 'ステップ3']
+          }
+        ]
+      });
+
       render(<App />);
       
       await waitFor(() => {
@@ -153,13 +195,29 @@ describe('App', () => {
       });
       
       await waitFor(() => {
-        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
-        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
-        expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 12000 });
+        expect(screen.getByText(/あなたにおすすめの気晴らし方法/)).toBeInTheDocument();
+      });
+      
+      // 提案が表示されることを確認
+      expect(screen.getByText('テスト提案3')).toBeInTheDocument();
     });
 
     it('30分を選択すると提案一覧が表示される', async () => {
+      // モックをリセットして再設定
+      vi.clearAllMocks();
+      vi.mocked(suggestionsApi.fetchSuggestions).mockResolvedValue({
+        suggestions: [
+          {
+            id: 'test-4',
+            title: 'テスト提案4',
+            description: '外出先で散歩を楽しむ',
+            duration: 30,
+            category: '行動的' as const,
+            steps: ['ステップ1', 'ステップ2', 'ステップ3', 'ステップ4']
+          }
+        ]
+      });
+
       render(<App />);
       
       await waitFor(() => {
@@ -177,10 +235,11 @@ describe('App', () => {
       });
       
       await waitFor(() => {
-        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
-        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
-        expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 12000 });
+        expect(screen.getByText(/あなたにおすすめの気晴らし方法/)).toBeInTheDocument();
+      });
+      
+      // 提案が表示されることを確認
+      expect(screen.getByText('テスト提案4')).toBeInTheDocument();
     });
   });
 
@@ -209,6 +268,21 @@ describe('App', () => {
     });
 
     it('提案表示画面からブレッドクラムで戻れる', async () => {
+      // モックをリセットして再設定
+      vi.clearAllMocks();
+      vi.mocked(suggestionsApi.fetchSuggestions).mockResolvedValue({
+        suggestions: [
+          {
+            id: 'test-breadcrumb',
+            title: 'ブレッドクラムテスト',
+            description: 'ブレッドクラムのテスト用',
+            duration: 5,
+            category: '認知的' as const,
+            steps: ['ステップ1']
+          }
+        ]
+      });
+
       render(<App />);
       
       // 職場 → 5分を選択
@@ -222,12 +296,10 @@ describe('App', () => {
       });
       fireEvent.click(screen.getByText('5分'));
       
-      // 提案またはエラーの表示を待つ
+      // 提案の表示を待つ
       await waitFor(() => {
-        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
-        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
-        expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 12000 });
+        expect(screen.getByText(/あなたにおすすめの気晴らし方法/)).toBeInTheDocument();
+      });
       
       // ブレッドクラムのステップ2（時間）をクリック
       const step2Button = screen.getByText('2').parentElement as HTMLElement;
@@ -314,6 +386,21 @@ describe('App', () => {
     });
 
     it('最初からやり直すボタンが機能する', async () => {
+      // モックをリセットして再設定
+      vi.clearAllMocks();
+      vi.mocked(suggestionsApi.fetchSuggestions).mockResolvedValue({
+        suggestions: [
+          {
+            id: 'test-reset',
+            title: 'リセットテスト',
+            description: 'リセットボタンのテスト用',
+            duration: 5,
+            category: '認知的' as const,
+            steps: ['ステップ1']
+          }
+        ]
+      });
+
       render(<App />);
       
       // 職場 → 5分を選択
@@ -329,9 +416,8 @@ describe('App', () => {
       
       // 提案の表示を待つ
       await waitFor(() => {
-        const resetButton = screen.queryByText('最初からやり直す');
-        expect(resetButton).toBeInTheDocument();
-      }, { timeout: 10000 });
+        expect(screen.getByText(/あなたにおすすめの気晴らし方法/)).toBeInTheDocument();
+      });
       
       // 最初からやり直すボタンをクリック
       fireEvent.click(screen.getByText('最初からやり直す'));
@@ -345,9 +431,11 @@ describe('App', () => {
 
   describe('エラー処理', () => {
     it('APIエラー時にエラーメッセージが表示される', async () => {
-      // 環境変数を一時的に変更して存在しないサーバーを指定
-      const originalUrl = import.meta.env.VITE_API_URL;
-      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
+      // モックをリセットして再設定
+      vi.clearAllMocks();
+      vi.mocked(suggestionsApi.fetchSuggestions).mockRejectedValue(
+        new Error('Network error')
+      );
       
       render(<App />);
       
@@ -363,17 +451,32 @@ describe('App', () => {
       
       await waitFor(() => {
         expect(screen.getByText('気晴らし方法の取得に失敗しました')).toBeInTheDocument();
-      }, { timeout: 12000 });
+      });
       
       // エラーメッセージの構造を確認
       expect(screen.getByText('気晴らし方法の取得に失敗しました')).toBeInTheDocument();
       expect(screen.getByText(/サーバーからデータを取得できませんでした/)).toBeInTheDocument();
-      
-      // 環境変数を復元
-      (import.meta.env as Record<string, string>).VITE_API_URL = originalUrl;
     });
 
     it('エラー後に再試行できる', async () => {
+      // モックをリセットして再設定
+      vi.clearAllMocks();
+      // 最初はエラー、再試行時は成功するようにモック
+      vi.mocked(suggestionsApi.fetchSuggestions)
+        .mockRejectedValueOnce(new Error('Network error'))
+        .mockResolvedValueOnce({
+          suggestions: [
+            {
+              id: 'retry-success',
+              title: '再試行成功',
+              description: '再試行後の提案',
+              duration: 15,
+              category: '認知的' as const,
+              steps: ['ステップ1']
+            }
+          ]
+        });
+
       render(<App />);
       
       await waitFor(() => {
@@ -386,12 +489,11 @@ describe('App', () => {
       });
       fireEvent.click(screen.getByText('5分'));
       
-      // エラーまたは成功を待つ
+      // フォールバック提案が表示されるのを待つ（エラーでもフォールバックが表示される）
       await waitFor(() => {
-        const errorMessage = screen.queryByText('気晴らし方法の取得に失敗しました');
-        const suggestionTitle = screen.queryByText(/あなたにおすすめの気晴らし方法/);
-        expect(errorMessage || suggestionTitle).toBeInTheDocument();
-      }, { timeout: 12000 });
+        // エラーが発生してもフォールバック提案が表示される
+        expect(screen.getByText(/あなたにおすすめの気晴らし方法/)).toBeInTheDocument();
+      });
       
       // ブレッドクラムで時間選択に戻る
       const step2Button = screen.getByText('2').parentElement as HTMLElement;
@@ -402,10 +504,12 @@ describe('App', () => {
       });
       fireEvent.click(screen.getByText('15分'));
       
-      // 再度ローディングが表示されることを確認
+      
+      // 成功することを確認
       await waitFor(() => {
-        expect(screen.getByText(/気晴らし方法を探しています.../)).toBeInTheDocument();
+        expect(screen.getByText(/あなたにおすすめの気晴らし方法/)).toBeInTheDocument();
       });
+      expect(screen.getByText('再試行成功')).toBeInTheDocument();
     });
   });
 

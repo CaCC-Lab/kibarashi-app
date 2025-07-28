@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { fetchSuggestions, Suggestion } from '../../services/api/suggestions';
+import { SuggestionsResponse } from '../../services/api/types';
 import { SituationId } from '../../types/situation';
 import { AgeGroup } from '../../types/ageGroup';
 import { fallbackSuggestions } from './fallbackSuggestions';
@@ -54,16 +55,7 @@ export const useSuggestions = () => {
         skipCache
       );
 
-      const data = await Promise.race([fetchPromise, timeoutPromise]) as {
-        suggestions: Array<{
-          id: string;
-          title: string;
-          description: string;
-          category: string;
-          duration: number;
-          steps?: string[];
-        }>;
-      };
+      const data = await Promise.race([fetchPromise, timeoutPromise]) as SuggestionsResponse;
       
       console.log('✅ API Response received:', data);
 

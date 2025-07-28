@@ -46,13 +46,16 @@ describe('AppDataManager', () => {
         onerror: null as ((this: FileReader, ev: ProgressEvent) => unknown) | null,
       };
       
-      vi.spyOn(global, 'FileReader').mockImplementation(() => readerMock as unknown as FileReader);
+      const fileReaderSpy = vi.spyOn(global, 'FileReader').mockImplementation(() => readerMock as unknown as FileReader);
 
       const mockFile = new File([''], 'error.json');
       const result = await AppDataManager.importFromFile(mockFile);
 
       expect(result.success).toBe(false);
       expect(result.errors).toContain('ファイルの読み込みに失敗しました');
+      
+      // モックをリストア
+      fileReaderSpy.mockRestore();
     });
   });
 

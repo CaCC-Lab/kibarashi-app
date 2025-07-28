@@ -269,11 +269,31 @@ describe('HistoryList', () => {
 
   describe('エクスポート機能', () => {
     it('エクスポートボタンをクリックするとファイルがダウンロードされる', () => {
+      // DOM操作のモック
+      const mockCreateElement = vi.spyOn(document, 'createElement');
+      const mockAppendChild = vi.spyOn(document.body, 'appendChild');
+      const mockRemoveChild = vi.spyOn(document.body, 'removeChild');
+      const mockClick = vi.fn();
+      
+      mockCreateElement.mockReturnValue({
+        href: '',
+        download: '',
+        click: mockClick,
+        style: {}
+      } as any);
+
       render(<HistoryList />);
 
       fireEvent.click(screen.getByLabelText('エクスポート'));
 
       expect(mockHooks.exportHistory).toHaveBeenCalled();
+      expect(mockCreateElement).toHaveBeenCalledWith('a');
+      expect(mockClick).toHaveBeenCalled();
+      
+      // モックをクリーンアップ
+      mockCreateElement.mockRestore();
+      mockAppendChild.mockRestore();
+      mockRemoveChild.mockRestore();
     });
   });
 

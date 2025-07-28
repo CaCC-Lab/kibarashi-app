@@ -37,6 +37,7 @@ describe('useStudentABTest hook', () => {
       vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(true);
 
       // Act
+      const { result } = renderHook(() => useStudentABTest());
 
       // Assert
       expect(result.current.testGroup).toBe('B');
@@ -50,6 +51,7 @@ describe('useStudentABTest hook', () => {
       vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(false);
 
       // Act
+      const { result } = renderHook(() => useStudentABTest());
 
       // Assert
       expect(result.current.testGroup).toBe('A');
@@ -64,6 +66,7 @@ describe('useStudentABTest hook', () => {
       vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(true);
 
       // Act
+      const { result } = renderHook(() => useStudentABTest());
 
       // Assert
       expect(result.current.features).toEqual({
@@ -81,6 +84,7 @@ describe('useStudentABTest hook', () => {
       vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(false);
 
       // Act
+      const { result } = renderHook(() => useStudentABTest());
 
       // Assert
       expect(result.current.features).toEqual({
@@ -133,6 +137,7 @@ describe('useStudentABTest hook', () => {
       vi.mocked(ABTestService.getTestGroup).mockReturnValue('A');
 
       // Act
+      const { result } = renderHook(() => useStudentABTest());
       
       act(() => {
         result.current.resetForTesting();
@@ -224,6 +229,7 @@ describe('useStudentABTest hook', () => {
       });
 
       // Act
+      const { result } = renderHook(() => useStudentABTest());
 
       // Assert - デフォルト値が返される
       expect(result.current.testGroup).toBe('A');

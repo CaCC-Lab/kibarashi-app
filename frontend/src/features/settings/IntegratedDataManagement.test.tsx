@@ -29,6 +29,29 @@ describe('Settings - 統合データ管理機能', () => {
   const mockOnBack = vi.fn();
   let user: ReturnType<typeof userEvent.setup>;
 
+  // DOM操作のモックを設定
+  beforeAll(() => {
+    // document.createElementのモック
+    const originalCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+      if (tagName === 'a') {
+        const element = originalCreateElement('a');
+        // clickメソッドをモック
+        element.click = vi.fn();
+        return element;
+      }
+      return originalCreateElement(tagName);
+    });
+    
+    // document.body.appendChildとremoveChildのモック
+    vi.spyOn(document.body, 'appendChild').mockImplementation((node) => node);
+    vi.spyOn(document.body, 'removeChild').mockImplementation((node) => node);
+  });
+  
+  afterAll(() => {
+    vi.restoreAllMocks();
+  });
+
   // 各テストの前にローカルストレージをクリアし、userEventをセットアップ
   beforeEach(() => {
     localStorage.clear();
