@@ -1,6 +1,6 @@
 import { logger } from '../../utils/logger';
 import { getFallbackSuggestions } from './fallbackData';
-import { geminiClient } from '../gemini/geminiClient';
+import { geminiClient } from 'core-logic';
 import { JobHuntingPromptInput } from './jobHuntingPromptTemplates';
 
 // 気晴らし提案のデータ構造

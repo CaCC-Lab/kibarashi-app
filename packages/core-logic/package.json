@@ -12,14 +12,23 @@
   "dependencies": {
     "@google-ai/generativelanguage": "1.1.0",
     "@google-cloud/text-to-speech": "5.0.1",
+    "@google/generative-ai": "^0.24.1",
     "axios": "^1.6.2",
+    "node-fetch": "^2.7.0",
+    "uuid": "^11.1.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/node": "^20.10.4",
+    "@types/node-fetch": "^2.6.12",
+    "@types/uuid": "^10.0.0",
     "typescript": "5.3.3"
   },
-  "keywords": ["kibarashi", "backend", "shared"],
+  "keywords": [
+    "kibarashi",
+    "backend",
+    "shared"
+  ],
   "author": "",
   "license": "MIT"
 }

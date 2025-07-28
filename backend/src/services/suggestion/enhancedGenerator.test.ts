@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { generateEnhancedSuggestions, toLegacySuggestion } from './enhancedGenerator';
 
 // Gemini APIクライアントをモック
-vi.mock('../gemini/geminiClient', () => ({
+vi.mock('core-logic', () => ({
   geminiClient: {
     generateEnhancedSuggestions: vi.fn()
   }
