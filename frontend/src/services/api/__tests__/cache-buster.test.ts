@@ -1,6 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { fetchSuggestions } from '../suggestions';
-import { apiClient } from '../client';
 
 // fetchのモックを作成
 const mockFetch = vi.fn();

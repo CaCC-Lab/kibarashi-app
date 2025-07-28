@@ -8,8 +8,9 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, renderHook, act, screen } from '@testing-library/react';
-import { AudioProvider, useAudio } from './AudioContext';
+import { renderHook, act } from '@testing-library/react';
+import { AudioProvider } from './AudioContext';
+import { useAudio } from './audioHooks';
 import React from 'react';
 
 // Wrapper component for testing

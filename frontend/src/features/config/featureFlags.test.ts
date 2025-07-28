@@ -8,7 +8,7 @@ import {
   features,
   FeatureFlagManager
 } from './featureFlags';
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 
 // localStorageのモック
 const localStorageMock = (() => {
@@ -98,7 +98,9 @@ describe('Feature Flags', () => {
       expect(result.current).toBe(true);
       
       // 実装の動作を確認：FeatureFlagManagerの設定変更が機能することをテスト
-      FeatureFlagManager.setUserPreference('a11yKeyboardShortcuts', false);
+      act(() => {
+        FeatureFlagManager.setUserPreference('a11yKeyboardShortcuts', false);
+      });
       
       // 実装では手動で確認する必要がある
       expect(FeatureFlagManager.isFeatureEnabled('a11yKeyboardShortcuts')).toBe(false);

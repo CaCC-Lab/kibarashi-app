@@ -300,7 +300,7 @@ export class AppDataManager {
   /**
    * インポートデータの検証
    */
-  private static validateImportData(data: any): string[] {
+  private static validateImportData(data: unknown): string[] {
     const errors: string[] = [];
 
     // 基本構造の検証

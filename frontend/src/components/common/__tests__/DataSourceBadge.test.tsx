@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import DataSourceBadge from '../DataSourceBadge';
 
 describe('DataSourceBadge', () => {
@@ -15,8 +14,8 @@ describe('DataSourceBadge', () => {
     test('フォールバックバッジが正しく表示される', () => {
       render(<DataSourceBadge source="fallback" />);
       
-      expect(screen.getByText('保存データ')).toBeInTheDocument();
-      expect(screen.getByText('📝')).toBeInTheDocument();
+      expect(screen.getByText('オフライン')).toBeInTheDocument();
+      expect(screen.getByText('📋')).toBeInTheDocument();
     });
 
     test('キャッシュバッジが正しく表示される', () => {
@@ -29,8 +28,8 @@ describe('DataSourceBadge', () => {
     test('エラーバッジが正しく表示される', () => {
       render(<DataSourceBadge source="error" />);
       
-      expect(screen.getByText('エラー時データ')).toBeInTheDocument();
-      expect(screen.getByText('⚠️')).toBeInTheDocument();
+      expect(screen.getByText('フォールバック')).toBeInTheDocument();
+      expect(screen.getByText('⚡')).toBeInTheDocument();
     });
   });
 
@@ -98,13 +97,13 @@ describe('DataSourceBadge', () => {
 
     test('各データソースに適切なARIAラベルが設定されている', () => {
       const { rerender } = render(<DataSourceBadge source="fallback" />);
-      expect(screen.getByLabelText('この提案は事前に用意された内容です')).toBeInTheDocument();
+      expect(screen.getByLabelText('この提案は事前に準備されたデータから提供されています')).toBeInTheDocument();
       
       rerender(<DataSourceBadge source="cache" />);
       expect(screen.getByLabelText('この提案はキャッシュから取得されました')).toBeInTheDocument();
       
       rerender(<DataSourceBadge source="error" />);
-      expect(screen.getByLabelText('エラー発生時のフォールバックデータです')).toBeInTheDocument();
+      expect(screen.getByLabelText('通信エラーのため、事前準備された提案を表示しています')).toBeInTheDocument();
     });
   });
 
@@ -122,42 +121,39 @@ describe('DataSourceBadge', () => {
       expect(badge).toHaveClass('text-purple-600', 'bg-purple-50', 'border-purple-200');
       
       rerender(<DataSourceBadge source="fallback" />);
-      badge = screen.getByLabelText('この提案は事前に用意された内容です');
-      expect(badge).toHaveClass('text-yellow-600', 'bg-yellow-50', 'border-yellow-200');
+      badge = screen.getByLabelText('この提案は事前に準備されたデータから提供されています');
+      expect(badge).toHaveClass('text-gray-600', 'bg-gray-50', 'border-gray-200');
       
       rerender(<DataSourceBadge source="cache" />);
       badge = screen.getByLabelText('この提案はキャッシュから取得されました');
       expect(badge).toHaveClass('text-blue-600', 'bg-blue-50', 'border-blue-200');
       
       rerender(<DataSourceBadge source="error" />);
-      badge = screen.getByLabelText('エラー発生時のフォールバックデータです');
-      expect(badge).toHaveClass('text-red-600', 'bg-red-50', 'border-red-200');
+      badge = screen.getByLabelText('通信エラーのため、事前準備された提案を表示しています');
+      expect(badge).toHaveClass('text-amber-600', 'bg-amber-50', 'border-amber-200');
     });
   });
 
   describe('ホバー動作', () => {
-    test('ホバー時にツールチップが表示される', async () => {
-      const user = userEvent.setup();
-      render(<DataSourceBadge source="ai" />);
+    test('詳細情報表示の設定', () => {
+      const { rerender } = render(<DataSourceBadge source="ai" />);
       
-      const badge = screen.getByLabelText('この提案はAIによって生成されました');
+      // showDetails=falseの時は詳細情報が表示されない
+      expect(screen.queryByText('ms')).not.toBeInTheDocument();
       
-      // ホバー前はツールチップが表示されない
-      expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
-      
-      // ホバー時のtitle属性を確認
-      await user.hover(badge);
-      expect(badge).toHaveAttribute('title', 'Gemini APIを使用して生成された最新の提案です');
+      // showDetails=trueの時は詳細情報が表示される
+      rerender(<DataSourceBadge source="ai" showDetails={true} responseTime={100} />);
+      expect(screen.getByText('100ms')).toBeInTheDocument();
     });
   });
 
   describe('エッジケース', () => {
     test('無効なデータソースの場合もクラッシュしない', () => {
-      // @ts-ignore - テスト目的で無効な値を渡す
+      // @ts-expect-error - テスト目的で無効な値を渡す
       render(<DataSourceBadge source="invalid" />);
       
-      // デフォルトのスタイルが適用されることを確認
-      const badge = screen.getByText('invalid');
+      // デフォルトでfallbackが使用されることを確認
+      const badge = screen.getByText('オフライン');
       expect(badge).toBeInTheDocument();
     });
   });

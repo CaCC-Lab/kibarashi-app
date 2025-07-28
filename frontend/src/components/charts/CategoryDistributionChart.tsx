@@ -6,6 +6,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { ChartTooltipContext } from '../../types/charts';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -97,7 +98,7 @@ const CategoryDistributionChart: React.FC<CategoryDistributionChartProps> = ({
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => {
+          label: (context: ChartTooltipContext) => {
             const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
             if (total === 0 || context.label === 'データなし') {
               return 'まだデータがありません';

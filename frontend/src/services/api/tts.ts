@@ -30,7 +30,7 @@ export const ttsService = {
 
     try {
       // バックエンドからJSONレスポンスを取得
-      const response = await apiClient.post<any>('/api/v1/tts', requestBody, {
+      const response = await apiClient.post<{type: string; audioContent?: string; error?: string}>('/api/v1/tts', requestBody, {
         timeout: 30000, // 30秒のタイムアウト
         // responseType は指定しない（JSONを受け取るため）
       });

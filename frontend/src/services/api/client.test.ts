@@ -17,13 +17,13 @@ describe('apiClient', () => {
     // 環境変数を保存
     originalEnv = import.meta.env.VITE_API_URL;
     // テスト用URLを設定
-    (import.meta.env as any).VITE_API_URL = baseURL;
+    (import.meta.env as Record<string, string>).VITE_API_URL = baseURL;
   });
 
   afterEach(() => {
     // 環境変数を復元
     if (originalEnv !== undefined) {
-      (import.meta.env as any).VITE_API_URL = originalEnv;
+      (import.meta.env as Record<string, string>).VITE_API_URL = originalEnv;
     }
   });
 
@@ -38,8 +38,10 @@ describe('apiClient', () => {
         expect(response.timestamp).toBeDefined();
       } catch (error) {
         // サーバーが起動していない場合のエラーメッセージを確認
-        expect(error.message).toContain('ネットワークエラー');
-        expect(error.message).toContain('インターネット接続を確認');
+        if (error instanceof Error) {
+          expect(error.message).toContain('ネットワークエラー');
+          expect(error.message).toContain('インターネット接続を確認');
+        }
       }
     });
 
@@ -59,12 +61,14 @@ describe('apiClient', () => {
         expect(response).toBeDefined();
       } catch (error) {
         // エラーレスポンスの検証
-        if (error.message.includes('ネットワークエラー')) {
-          // サーバーが起動していない場合
-          expect(error.message).toContain('サーバーに接続できません');
-        } else {
-          // その他のエラー（認証エラー等）
-          expect(error.message).toBeDefined();
+        if (error instanceof Error) {
+          if (error.message.includes('ネットワークエラー')) {
+            // サーバーが起動していない場合
+            expect(error.message).toContain('サーバーに接続できません');
+          } else {
+            // その他のエラー（認証エラー等）
+            expect(error.message).toBeDefined();
+          }
         }
       }
     });
@@ -78,15 +82,16 @@ describe('apiClient', () => {
         expect.fail('エラーが発生するはずです');
       } catch (error) {
         // エラーメッセージの検証
-        const errorMessage = (error as Error).message;
-        expect(errorMessage).toBeDefined();
-        
-        // サーバーが起動している場合は404エラー
-        // 起動していない場合はネットワークエラー
-        const isNetworkError = errorMessage.includes('ネットワークエラー');
-        const is404Error = errorMessage.includes('見つかりません');
-        
-        expect(isNetworkError || is404Error).toBe(true);
+        if (error instanceof Error) {
+          expect(error.message).toBeDefined();
+          
+          // サーバーが起動している場合は404エラー
+          // 起動していない場合はネットワークエラー
+          const isNetworkError = error.message.includes('ネットワークエラー');
+          const is404Error = error.message.includes('見つかりません');
+          
+          expect(isNetworkError || is404Error).toBe(true);
+        }
       }
     });
 
@@ -98,10 +103,11 @@ describe('apiClient', () => {
         await apiClient.get('/health');
         expect.fail('ネットワークエラーが発生するはずです');
       } catch (error) {
-        const errorMessage = (error as Error).message;
-        expect(errorMessage).toContain('ネットワークエラー');
-        expect(errorMessage).toContain('サーバーに接続できません');
-        expect(errorMessage).toContain('インターネット接続を確認');
+        if (error instanceof Error) {
+          expect(error.message).toContain('ネットワークエラー');
+          expect(error.message).toContain('サーバーに接続できません');
+          expect(error.message).toContain('インターネット接続を確認');
+        }
       }
     });
   });
@@ -110,7 +116,7 @@ describe('apiClient', () => {
     it('タイムアウト時間を超えるとエラーになる', async () => {
       // 短いタイムアウトを設定
       const originalTimeout = import.meta.env.VITE_API_TIMEOUT;
-      (import.meta.env as any).VITE_API_TIMEOUT = '100'; // 100ms
+      (import.meta.env as Record<string, string>).VITE_API_TIMEOUT = '100'; // 100ms
       
       try {
         // 実際のAPIリクエスト（タイムアウトする可能性がある）
@@ -120,14 +126,14 @@ describe('apiClient', () => {
         console.log('API応答が高速なためタイムアウトテストをスキップ');
       } catch (error) {
         // タイムアウトエラーの検証
-        if (error.message.includes('タイムアウト')) {
+        if (error instanceof Error && error.message.includes('タイムアウト')) {
           expect(error.message).toContain('リクエストがタイムアウトしました');
           expect(error.message).toContain('時間がかかりすぎています');
         }
       } finally {
         // タイムアウト設定を復元
         if (originalTimeout !== undefined) {
-          (import.meta.env as any).VITE_API_TIMEOUT = originalTimeout;
+          (import.meta.env as Record<string, string>).VITE_API_TIMEOUT = originalTimeout;
         }
       }
     });
@@ -158,7 +164,9 @@ describe('apiClient', () => {
         expect(response).not.toBe(null);
       } catch (error) {
         // サーバーが起動していない場合はスキップ
-        console.log('サーバーが起動していないためスキップ:', error.message);
+        if (error instanceof Error) {
+          console.log('サーバーが起動していないためスキップ:', error.message);
+        }
       }
     });
 

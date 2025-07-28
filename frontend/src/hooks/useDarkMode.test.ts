@@ -11,7 +11,7 @@ import { useDarkMode } from './useDarkMode';
  * - matchMedia APIの動作を検証
  */
 describe('useDarkMode', () => {
-  let consoleSpy: any;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
   let originalLocalStorage: Storage;
   
   beforeEach(() => {

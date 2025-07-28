@@ -4,7 +4,8 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, renderHook, act, screen } from '@testing-library/react';
-import { AudioProvider, useAudio, useAudioSettings, useAudioPlayback, useAudioAvailability } from './AudioContext';
+import { AudioProvider } from './AudioContext';
+import { useAudio, useAudioSettings, useAudioPlayback, useAudioAvailability } from './audioHooks';
 import React from 'react';
 
 // LocalStorageモックは setup.ts で定義されているので削除

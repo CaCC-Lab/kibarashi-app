@@ -8,6 +8,7 @@ import { browserTTS } from './browserTTS';
  * - モックを使用せず、実際のSpeechSynthesis APIをテスト
  * - エラーハンドリングと境界値のテストを重視
  * - ブラウザサポートの有無を考慮したテスト
+const _speechSynthesis = window.speechSynthesis as SpeechSynthesis & { _voices?: SpeechSynthesisVoice[] };
  */
 describe('BrowserTTS', () => {
   beforeEach(() => {
@@ -218,7 +219,7 @@ describe('BrowserTTS', () => {
       // speechSynthesisを一時的に削除
       const originalSpeechSynthesis = window.speechSynthesis;
       const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'speechSynthesis');
-      delete (window as any).speechSynthesis;
+      delete (window as Record<string, unknown>).speechSynthesis;
       
       expect(browserTTS.isAvailable()).toBe(false);
       
@@ -226,7 +227,7 @@ describe('BrowserTTS', () => {
       if (originalDescriptor) {
         Object.defineProperty(window, 'speechSynthesis', originalDescriptor);
       } else {
-        (window as any).speechSynthesis = originalSpeechSynthesis;
+        (window as Record<string, unknown>).speechSynthesis = originalSpeechSynthesis;
       }
     });
 

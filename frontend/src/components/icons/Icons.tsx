@@ -45,3 +45,23 @@ export const Clock30MinIcon = () => (
     <text x="12" y="19" textAnchor="middle" fill="currentColor" fontSize="6" fontWeight="bold">30</text>
   </svg>
 );
+
+export const PlayIcon = () => (
+  <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="5 3 19 12 5 21 5 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="currentColor"/>
+  </svg>
+);
+
+export const PauseIcon = () => (
+  <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="4" width="4" height="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="currentColor"/>
+    <rect x="14" y="4" width="4" height="16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="currentColor"/>
+  </svg>
+);
+
+export const VolumeIcon = () => (
+  <svg className="w-full h-full" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M19.07 4.93C20.1968 6.05314 20.893 7.53356 21.0372 9.11542C21.1814 10.6973 20.7647 12.2856 19.8596 13.6C18.9546 14.9145 17.6197 15.8744 16.0837 16.3154C14.5476 16.7565 12.9052 16.651 11.44 16.02" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);

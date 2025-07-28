@@ -90,7 +90,7 @@ class ContextAPI {
     // 季節のイベント
     const seasonalEvents = this.getSeasonalEvents(month);
     const holidays = this.getCurrentHolidays(month, now.getDate());
-    const seasonalTips = this.getSeasonalTips(season, month);
+    const seasonalTips = this.getSeasonalTips(season);
 
     return {
       weather: {
@@ -169,7 +169,7 @@ class ContextAPI {
     return periods;
   }
 
-  private getSeasonalTips(season: SeasonalData['season'], _month: number): string[] {
+  private getSeasonalTips(season: SeasonalData['season']): string[] {
     const tips: string[] = [];
 
     switch (season) {

@@ -1,7 +1,18 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import SuggestionDetail from './SuggestionDetail';
 import type { Suggestion } from '@/types';
+import * as ttsApi from '../../services/api/tts';
+
+// TTSをモック
+vi.mock('../../services/api/tts', () => ({
+  synthesizeSpeech: vi.fn(),
+  ttsService: {
+    synthesizeSpeech: vi.fn(),
+    createAudioUrl: vi.fn(),
+    revokeAudioUrl: vi.fn()
+  }
+}));
 
 /**
  * SuggestionDetailコンポーネントのテスト
@@ -39,6 +50,21 @@ describe('SuggestionDetail', () => {
   beforeEach(() => {
     onBackCallCount = 0;
     localStorage.clear();
+    vi.clearAllMocks();
+    
+    // TTSのモック設定
+    vi.mocked(ttsApi.synthesizeSpeech).mockResolvedValue({
+      audioUrl: 'blob:mock-audio-url',
+      duration: 10
+    });
+    
+    // ttsServiceのモック設定
+    vi.mocked(ttsApi.ttsService.synthesizeSpeech).mockResolvedValue({
+      audioUrl: 'blob:mock-audio-url',
+      duration: 10
+    });
+    
+    vi.mocked(ttsApi.ttsService.createAudioUrl).mockResolvedValue('blob:mock-audio-url');
   });
 
   describe('基本的な表示', () => {

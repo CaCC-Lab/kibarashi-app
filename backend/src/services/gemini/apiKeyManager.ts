@@ -89,9 +89,8 @@ export class APIKeyManager {
 
     // 番号付きキー（GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.）
     let index = 1;
-    while (true) {
-      const key = process.env[`GEMINI_API_KEY_${index}`];
-      if (!key) break;
+    let key = process.env[`GEMINI_API_KEY_${index}`];
+    while (key) {
 
       // 重複チェック
       if (!this.apiKeys.some(k => k.key === key)) {
@@ -106,6 +105,7 @@ export class APIKeyManager {
       }
 
       index++;
+      key = process.env[`GEMINI_API_KEY_${index}`];
     }
 
     logger.info(`Loaded ${this.apiKeys.length} API keys`);

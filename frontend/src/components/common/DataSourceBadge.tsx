@@ -64,7 +64,7 @@ export const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
   responseTime,
   className = ''
 }) => {
-  const config = sourceConfig[source];
+  const config = sourceConfig[source] || sourceConfig.fallback; // デフォルトをfallbackに設定
   
   return (
     <div className="group relative inline-block">

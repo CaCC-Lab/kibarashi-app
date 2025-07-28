@@ -165,7 +165,7 @@ describe('HistoryStorage', () => {
       HistoryStorage.addHistoryItem(mockHistoryItem);
       
       HistoryStorage.updateHistoryItem('history-1', {
-        id: 'new-id' as any,
+        id: 'new-id' as unknown as string,
         title: '新しいタイトル'
       });
       

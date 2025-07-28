@@ -15,7 +15,7 @@ export interface HousewifeABTestFeatures {
 export interface HousewifeABTestMetricEvent {
   metric: string;
   testGroup: 'A' | 'B';
-  data: any;
+  data: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -34,7 +34,7 @@ export interface UseHousewifeABTestReturn {
   testGroup: 'A' | 'B';
   isHousewifeOptimized: boolean;
   features: HousewifeABTestFeatures;
-  trackMetric: (metric: string, data?: any) => void;
+  trackMetric: (metric: string, data?: Record<string, unknown>) => void;
   trackCompletion: (suggestionId: string, duration: number) => void;
   shouldRender: (feature: 'housewifeFeature' | 'defaultFeature') => boolean;
   resetForTesting: () => void;
@@ -91,7 +91,7 @@ export function useHousewifeABTest(options: UseHousewifeABTestOptions = {}): Use
   };
 
   // メトリクストラッキング
-  const trackMetric = useCallback((metric: string, data: any = {}) => {
+  const trackMetric = useCallback((metric: string, data: Record<string, unknown> = {}) => {
     try {
       if (onMetric) {
         onMetric({

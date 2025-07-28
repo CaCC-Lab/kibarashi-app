@@ -9,7 +9,7 @@
  */
 
 import React from 'react';
-import { useAudio } from '../../contexts/AudioContext';
+import { useAudio } from '../../contexts/audioHooks';
 
 interface GlobalAudioControlsProps {
   className?: string;

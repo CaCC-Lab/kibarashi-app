@@ -193,7 +193,7 @@ describe('DurationSelector', () => {
       
       // 実際の振動APIを一時的に置き換え
       const originalVibrate = navigator.vibrate;
-      (navigator as any).vibrate = (pattern: number | number[]) => {
+      (navigator as Record<string, unknown>).vibrate = (pattern: number | number[]) => {
         vibrateCallCount++;
         vibrateValue = pattern;
         return true;
@@ -215,7 +215,7 @@ describe('DurationSelector', () => {
       expect(vibrateValue).toBe(30);
       
       // 元の状態に戻す
-      (navigator as any).vibrate = originalVibrate;
+      (navigator as Record<string, unknown>).vibrate = originalVibrate;
     });
 
     it('振動APIがサポートされていない場合でも正常に動作する', () => {
@@ -223,7 +223,7 @@ describe('DurationSelector', () => {
       const originalVibrate = navigator.vibrate;
       
       // vibrateを一時的にundefinedに設定
-      (navigator as any).vibrate = undefined;
+      (navigator as Record<string, unknown>).vibrate = undefined;
       
       render(
         <DurationSelector 
@@ -241,7 +241,7 @@ describe('DurationSelector', () => {
       expect(selectedValue).toBe(5);
       
       // 元の状態に戻す
-      (navigator as any).vibrate = originalVibrate;
+      (navigator as Record<string, unknown>).vibrate = originalVibrate;
     });
   });
 

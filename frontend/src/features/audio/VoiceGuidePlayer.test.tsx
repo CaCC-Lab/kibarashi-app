@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { VoiceGuidePlayer } from './VoiceGuidePlayer';
+import VoiceGuidePlayer from './VoiceGuidePlayer';
 import { AudioProvider } from '../../contexts/AudioContext';
 import type { VoiceGuideScript } from '../../services/api/types';
 import React from 'react';
@@ -31,6 +31,37 @@ vi.mock('./AudioPlayer', () => ({
   }))
 }));
 
+// useAudioフックのモック
+vi.mock('../../contexts/audioHooks', () => ({
+  useAudio: vi.fn().mockReturnValue({
+    settings: {
+      enabled: true,
+      volume: 1,
+      playbackRate: 1,
+      autoPlay: false,
+      subtitles: true,
+      detailLevel: 'standard'
+    },
+    updateSettings: vi.fn(),
+    playbackState: {
+      isPlaying: false,
+      currentSuggestionId: null,
+      currentSegmentId: null,
+      progress: 0
+    },
+    play: vi.fn(),
+    pause: vi.fn(),
+    stop: vi.fn(),
+    setVolume: vi.fn(),
+    setPlaybackRate: vi.fn(),
+    registerPlayer: vi.fn(),
+    unregisterPlayer: vi.fn(),
+    isActivePlayer: vi.fn().mockReturnValue(true),
+    requestPlayback: vi.fn().mockReturnValue(true),
+    activePlayerId: null
+  })
+}));
+
 // テスト用ラッパー
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <AudioProvider>
@@ -39,7 +70,7 @@ const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 // フィーチャーフラグのモック
-vi.mock('../config/featureFlags', () => ({
+vi.mock('../../features/config/featureFlags', () => ({
   useFeature: vi.fn().mockImplementation((feature: string) => {
     const enabledFeatures = {
       'enhancedVoiceGuide': true,
@@ -86,13 +117,16 @@ describe('VoiceGuidePlayer', () => {
       pauseBetweenSegments: 1,
       detailLevel: 'standard',
       includeEncouragement: true,
-      breathingCues: false
+      breathingCues: false,
+      showSubtitles: true,
+      allowSpeedControl: true
     }
   };
 
   const defaultProps = {
     voiceGuideScript: mockVoiceGuideScript,
-    suggestionId: 'test-suggestion'
+    suggestionId: 'test-suggestion',
+    isVoiceEnabled: true
   };
 
   beforeEach(() => {
@@ -129,7 +163,8 @@ describe('VoiceGuidePlayer', () => {
       const { container } = render(
         <VoiceGuidePlayer 
           {...defaultProps} 
-          voiceGuideScript={emptyScript} 
+          voiceGuideScript={emptyScript}
+          isVoiceEnabled={false}
         />,
         { wrapper: TestWrapper }
       );

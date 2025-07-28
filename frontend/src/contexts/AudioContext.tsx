@@ -8,7 +8,7 @@
  * - 設定の永続化（localStorage）
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
 /**
  * 音声設定
@@ -394,49 +394,6 @@ export const AudioProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   );
 };
 
-/**
- * 音声コンテキストを使用するカスタムフック
- * 
- * 使用例：
- * const { settings, updateSettings, play } = useAudio();
- */
-export const useAudio = (): AudioContextType => {
-  const context = useContext(AudioContext);
-  
-  if (!context) {
-    throw new Error('useAudio must be used within AudioProvider');
-  }
-  
-  return context;
-};
-
-/**
- * 音声設定のみを使用するフック
- */
-export const useAudioSettings = () => {
-  const { settings, updateSettings } = useAudio();
-  return { settings, updateSettings };
-};
-
-/**
- * 音声再生状態のみを使用するフック
- */
-export const useAudioPlayback = () => {
-  const { playbackState, play, pause, stop } = useAudio();
-  return { playbackState, play, pause, stop };
-};
-
-/**
- * 音声機能の可用性をチェックするフック
- */
-export const useAudioAvailability = () => {
-  const { isAudioSupported, hasUserInteracted, settings } = useAudio();
-  
-  return {
-    isAvailable: isAudioSupported && settings.enabled,
-    isReady: isAudioSupported && settings.enabled && hasUserInteracted,
-    isAudioSupported,
-    hasUserInteracted,
-    isEnabled: settings.enabled
-  };
-};
+// AudioContextをエクスポート（audioHooks.tsで使用）
+export { AudioContext };
+export type { AudioContextType };

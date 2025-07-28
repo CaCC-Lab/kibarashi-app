@@ -20,7 +20,7 @@ interface UseCareerChangerABTestReturn {
   /** 現在のユーザーが転職活動者最適化版かどうか */
   isCareerChangerOptimized: boolean;
   /** メトリクスをトラッキングする関数 */
-  trackMetric: (eventName: string, properties?: Record<string, any>) => void;
+  trackMetric: (eventName: string, properties?: Record<string, unknown>) => void;
   /** 機能の表示可否を判定する関数 */
   shouldRender: (featureName: string) => boolean;
 }
@@ -62,7 +62,7 @@ export function useCareerChangerABTest(
   }, [isCareerChanger, isCareerChangerOptimized, testGroup, currentAgeGroup, options]);
   
   // メトリクストラッキング関数
-  const trackMetric = useCallback((eventName: string, properties: Record<string, any> = {}) => {
+  const trackMetric = useCallback((eventName: string, properties: Record<string, unknown> = {}) => {
     const event: MetricsEvent = {
       name: `career_changer_${eventName}`,
       timestamp: Date.now(),

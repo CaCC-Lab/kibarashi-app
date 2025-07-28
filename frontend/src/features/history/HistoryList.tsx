@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from '../../hooks/useHistory';
 import HistoryItem from './HistoryItem';
 import HistoryStats from './HistoryStats';
-import HistoryFilter from './HistoryFilter';
+import HistoryFilter, { FilterValue } from './HistoryFilter';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import type { HistoryItem as HistoryItemType } from '../../types/history';
 
@@ -31,7 +31,7 @@ const HistoryList: React.FC = () => {
   } = useHistory();
 
   const [filterType, setFilterType] = useState<'all' | 'date' | 'situation' | 'category'>('all');
-  const [filterValue, setFilterValue] = useState<any>(null);
+  const [filterValue, setFilterValue] = useState<FilterValue>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showStats, setShowStats] = useState(false);

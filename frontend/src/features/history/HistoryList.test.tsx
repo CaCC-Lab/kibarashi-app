@@ -5,13 +5,21 @@ import userEvent from '@testing-library/user-event';
 import HistoryList from './HistoryList';
 import { useHistory } from '../../hooks/useHistory';
 import type { HistoryItem } from '../../types/history';
+import type { FilterValue } from './HistoryFilter';
 
 // useHistoryフックをモック
 vi.mock('../../hooks/useHistory');
 
 // 子コンポーネントをモック
+interface MockHistoryItemProps {
+  item: HistoryItem;
+  onDelete: (id: string) => boolean;
+  onUpdateRating: (id: string, rating: 1 | 2 | 3 | 4 | 5) => boolean;
+  onUpdateNote: (id: string, note: string) => boolean;
+}
+
 vi.mock('./HistoryItem', () => ({
-  default: ({ item, onDelete: _onDelete, onUpdateRating: _onUpdateRating, onUpdateNote: _onUpdateNote }: any) => (
+  default: ({ item }: MockHistoryItemProps) => (
     <div data-testid="history-item">
       <div>{item.title}</div>
       <div>{item.description}</div>
@@ -19,8 +27,18 @@ vi.mock('./HistoryItem', () => ({
   )
 }));
 
+interface MockHistoryStatsProps {
+  stats: {
+    totalCount: number;
+    categoryCounts: Record<string, number>;
+    weeklyPattern: Record<number, number>;
+    hourlyPattern: Record<number, number>;
+    monthlyTrend: Array<{ month: string; total: number; completed: number; }>;
+  };
+}
+
 vi.mock('./HistoryStats', () => ({
-  default: ({ stats }: any) => (
+  default: ({ stats }: MockHistoryStatsProps) => (
     <div data-testid="history-stats">
       <div>統計情報</div>
       <div>総実行回数: {stats.totalCount}</div>
@@ -28,8 +46,15 @@ vi.mock('./HistoryStats', () => ({
   )
 }));
 
+interface MockHistoryFilterProps {
+  filterType: string;
+  filterValue: FilterValue;
+  onFilterTypeChange: (type: string) => void;
+  onFilterValueChange: (value: FilterValue) => void;
+}
+
 vi.mock('./HistoryFilter', () => ({
-  default: ({ filterType, onFilterTypeChange, onFilterValueChange }: any) => (
+  default: ({ filterType, onFilterTypeChange, onFilterValueChange }: MockHistoryFilterProps) => (
     <div data-testid="history-filter">
       <div>フィルター:</div>
       <button onClick={() => onFilterTypeChange('all')}>すべて</button>
@@ -49,8 +74,13 @@ vi.mock('../../components/common/Loading', () => ({
   default: () => <div>読み込み中...</div>
 }));
 
+interface MockErrorMessageProps {
+  message: string;
+  onRetry?: () => void;
+}
+
 vi.mock('../../components/common/ErrorMessage', () => ({
-  default: ({ message, onRetry }: any) => (
+  default: ({ message, onRetry }: MockErrorMessageProps) => (
     <div>
       <div>{message}</div>
       {onRetry && <button onClick={onRetry}>再試行</button>}
@@ -137,12 +167,12 @@ describe('HistoryList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useHistory as any).mockReturnValue(mockHooks);
+    (useHistory as ReturnType<typeof vi.fn>).mockReturnValue(mockHooks);
   });
 
   describe('空状態の表示', () => {
     it('履歴がない場合、空状態メッセージが表示される', () => {
-      (useHistory as any).mockReturnValue({
+      (useHistory as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockHooks,
         history: [],
         stats: {
@@ -223,7 +253,7 @@ describe('HistoryList', () => {
     });
 
     it('フィルターで一致する項目がない場合メッセージが表示される', () => {
-      (useHistory as any).mockReturnValue({
+      (useHistory as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockHooks,
         getHistoryBySituation: vi.fn().mockReturnValue([])
       });
@@ -239,11 +269,36 @@ describe('HistoryList', () => {
 
   describe('エクスポート機能', () => {
     it('エクスポートボタンをクリックするとファイルがダウンロードされる', () => {
+      // DOM操作のモック
+      const mockCreateElement = vi.spyOn(document, 'createElement');
+      const mockAppendChild = vi.spyOn(document.body, 'appendChild');
+      const mockRemoveChild = vi.spyOn(document.body, 'removeChild');
+      const mockClick = vi.fn();
+      
+      const mockElement = {
+        href: '',
+        download: '',
+        click: mockClick,
+        style: {},
+        setAttribute: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn()
+      } as unknown as HTMLAnchorElement;
+      mockCreateElement.mockReturnValue(mockElement);
+
       render(<HistoryList />);
 
       fireEvent.click(screen.getByLabelText('エクスポート'));
 
       expect(mockHooks.exportHistory).toHaveBeenCalled();
+      expect(mockCreateElement).toHaveBeenCalledWith('a');
+      expect(mockClick).toHaveBeenCalled();
+      
+      // モックをクリーンアップ
+      mockCreateElement.mockRestore();
+      mockAppendChild.mockRestore();
+      mockRemoveChild.mockRestore();
     });
   });
 
@@ -302,7 +357,7 @@ describe('HistoryList', () => {
     it.skip('インポートに失敗した場合エラーが表示される', async () => {
       // このテストはモックを使用しているため、実際の実装では
       // ナビゲーションエラーが発生するためスキップ
-      (useHistory as any).mockReturnValue({
+      (useHistory as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockHooks,
         importHistory: vi.fn().mockReturnValue(false)
       });
@@ -360,7 +415,7 @@ describe('HistoryList', () => {
     });
 
     it('履歴がない場合クリアボタンは表示されない', () => {
-      (useHistory as any).mockReturnValue({
+      (useHistory as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockHooks,
         history: []
       });
