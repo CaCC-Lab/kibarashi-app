@@ -1,7 +1,7 @@
 // CLAUDE-GENERATED: useABTestフックのテスト
 // TDD: Red Phase - 失敗するテストを先に作成
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useABTest } from './useABTest';
 import { ABTestService } from '../services/analytics/abTestService';
