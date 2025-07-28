@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { VoiceGuideScript, VoiceSegment } from '../../types/audio';
 import { AudioPlayer } from './AudioPlayer';
 import { useAudio } from '../../contexts/audioHooks';
-import { PlayIcon, PauseIcon, VolumeIcon } from '../common/Icon';
+import { PlayIcon, PauseIcon, VolumeIcon } from '../../components/icons/Icons';
 
 interface VoiceGuidePlayerProps {
   suggestionId: string;
