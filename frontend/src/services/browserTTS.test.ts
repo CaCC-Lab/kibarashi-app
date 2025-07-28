@@ -8,6 +8,7 @@ import { browserTTS } from './browserTTS';
  * - モックを使用せず、実際のSpeechSynthesis APIをテスト
  * - エラーハンドリングと境界値のテストを重視
  * - ブラウザサポートの有無を考慮したテスト
+const _speechSynthesis = window.speechSynthesis as SpeechSynthesis & { _voices?: SpeechSynthesisVoice[] };
  */
 describe('BrowserTTS', () => {
   beforeEach(() => {

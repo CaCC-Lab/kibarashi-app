@@ -19,7 +19,7 @@ interface MockHistoryItemProps {
 }
 
 vi.mock('./HistoryItem', () => ({
-  default: ({ item, onDelete: _onDelete, onUpdateRating: _onUpdateRating, onUpdateNote: _onUpdateNote }: MockHistoryItemProps) => (
+  default: ({ item }: MockHistoryItemProps) => (
     <div data-testid="history-item">
       <div>{item.title}</div>
       <div>{item.description}</div>
@@ -167,12 +167,12 @@ describe('HistoryList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useHistory as any).mockReturnValue(mockHooks);
+    (useHistory as ReturnType<typeof vi.fn>).mockReturnValue(mockHooks);
   });
 
   describe('空状態の表示', () => {
     it('履歴がない場合、空状態メッセージが表示される', () => {
-      (useHistory as any).mockReturnValue({
+      (useHistory as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockHooks,
         history: [],
         stats: {
@@ -253,7 +253,7 @@ describe('HistoryList', () => {
     });
 
     it('フィルターで一致する項目がない場合メッセージが表示される', () => {
-      (useHistory as any).mockReturnValue({
+      (useHistory as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockHooks,
         getHistoryBySituation: vi.fn().mockReturnValue([])
       });
@@ -332,7 +332,7 @@ describe('HistoryList', () => {
     it.skip('インポートに失敗した場合エラーが表示される', async () => {
       // このテストはモックを使用しているため、実際の実装では
       // ナビゲーションエラーが発生するためスキップ
-      (useHistory as any).mockReturnValue({
+      (useHistory as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockHooks,
         importHistory: vi.fn().mockReturnValue(false)
       });
@@ -390,7 +390,7 @@ describe('HistoryList', () => {
     });
 
     it('履歴がない場合クリアボタンは表示されない', () => {
-      (useHistory as any).mockReturnValue({
+      (useHistory as ReturnType<typeof vi.fn>).mockReturnValue({
         ...mockHooks,
         history: []
       });

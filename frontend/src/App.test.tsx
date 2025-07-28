@@ -347,7 +347,7 @@ describe('App', () => {
     it('APIエラー時にエラーメッセージが表示される', async () => {
       // 環境変数を一時的に変更して存在しないサーバーを指定
       const originalUrl = import.meta.env.VITE_API_URL;
-      (import.meta.env as any).VITE_API_URL = 'http://localhost:9999';
+      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
       
       render(<App />);
       
@@ -370,7 +370,7 @@ describe('App', () => {
       expect(screen.getByText(/サーバーからデータを取得できませんでした/)).toBeInTheDocument();
       
       // 環境変数を復元
-      (import.meta.env as any).VITE_API_URL = originalUrl;
+      (import.meta.env as Record<string, string>).VITE_API_URL = originalUrl;
     });
 
     it('エラー後に再試行できる', async () => {

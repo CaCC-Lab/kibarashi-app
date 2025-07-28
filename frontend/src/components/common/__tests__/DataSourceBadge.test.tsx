@@ -153,7 +153,7 @@ describe('DataSourceBadge', () => {
 
   describe('エッジケース', () => {
     test('無効なデータソースの場合もクラッシュしない', () => {
-      // @ts-ignore - テスト目的で無効な値を渡す
+      // @ts-expect-error - テスト目的で無効な値を渡す
       render(<DataSourceBadge source="invalid" />);
       
       // デフォルトのスタイルが適用されることを確認

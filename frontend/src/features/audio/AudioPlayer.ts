@@ -48,6 +48,13 @@ export class AudioPlayer {
   }
   
   /**
+   * コールバックを更新
+   */
+  setCallbacks(events: AudioPlayerEvents): void {
+    this.events = { ...this.events, ...events };
+  }
+  
+  /**
    * 状態の更新と通知
    */
   private setState(newState: AudioPlayerState): void {
@@ -113,7 +120,7 @@ export class AudioPlayer {
       this.setState('playing');
     } catch (error) {
       // ユーザー操作なしでの自動再生がブロックされた場合
-      if ((error as any).name === 'NotAllowedError') {
+      if (error instanceof Error && error.name === 'NotAllowedError') {
         console.warn('Autoplay blocked. User interaction required.');
         this.setState('paused');
       } else {
@@ -296,7 +303,7 @@ export class AudioPlayer {
     
     // エラー
     this.audio.addEventListener('error', (e) => {
-      const error = new Error(`Audio playback error: ${(e as any).message || 'Unknown error'}`);
+      const error = new Error(`Audio playback error: ${(e.target as HTMLAudioElement).error?.message || 'Unknown error'}`);
       this.handleError(error);
     });
     

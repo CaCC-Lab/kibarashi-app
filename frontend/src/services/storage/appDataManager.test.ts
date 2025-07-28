@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AppDataManager, type AppDataExport } from './appDataManager';
 import { FavoritesStorage } from './favoritesStorage';
-import { HistoryStorage } from './historyStorage';
-import { CustomStorage } from './customStorage';
 
 describe('AppDataManager', () => {
   beforeEach(() => {

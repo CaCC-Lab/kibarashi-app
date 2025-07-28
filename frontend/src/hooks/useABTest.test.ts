@@ -35,7 +35,7 @@ describe('useABTest hook', () => {
       vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(true);
 
       // Act
-      const { result } = renderHook(() => useABTest());
+      renderHook(() => useABTest());
 
       // Assert
       expect(result.current.testGroup).toBe('B');
@@ -49,7 +49,7 @@ describe('useABTest hook', () => {
       vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(false);
 
       // Act
-      const { result } = renderHook(() => useABTest());
+      renderHook(() => useABTest());
 
       // Assert
       expect(result.current.testGroup).toBe('A');
@@ -64,7 +64,7 @@ describe('useABTest hook', () => {
       vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(true);
 
       // Act
-      const { result } = renderHook(() => useABTest());
+      renderHook(() => useABTest());
 
       // Assert
       expect(result.current.features).toEqual({
@@ -82,7 +82,7 @@ describe('useABTest hook', () => {
       vi.mocked(ABTestService.isStudentOptimized).mockReturnValue(false);
 
       // Act
-      const { result } = renderHook(() => useABTest());
+      renderHook(() => useABTest());
 
       // Assert
       expect(result.current.features).toEqual({
@@ -135,7 +135,7 @@ describe('useABTest hook', () => {
       vi.mocked(ABTestService.getTestGroup).mockReturnValue('A');
 
       // Act
-      const { result } = renderHook(() => useABTest());
+      renderHook(() => useABTest());
       
       act(() => {
         result.current.resetForTesting();
@@ -232,7 +232,7 @@ describe('useABTest hook', () => {
       });
 
       // Act
-      const { result } = renderHook(() => useABTest());
+      renderHook(() => useABTest());
 
       // Assert - デフォルト値が返される（エラーでも動作する）
       expect(result.current.testGroup).toBe('A');

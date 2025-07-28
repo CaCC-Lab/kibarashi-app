@@ -1,94 +1,64 @@
-/**
- * 音声ガイドプレイヤーコンポーネント
- * セグメント分割された音声を順次再生
- * 
- * 設計思想：
- * - シンプルで直感的なUI
- * - 3タップ以内で音声開始
- * - エラーに対する静かな失敗
- */
-
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { AudioPlayer, AudioPlayerState } from './AudioPlayer';
-import type { VoiceGuideScript, VoiceSegment } from '../../services/api/types';
-import { useFeature } from '../config/featureFlags';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { VoiceGuideScript, VoiceSegment } from '../../types/audio';
+import { AudioPlayer } from './AudioPlayer';
 import { useAudio } from '../../contexts/AudioContext';
+import { PlayIcon, PauseIcon, VolumeIcon } from '../common/Icon';
 
-/**
- * 音声ガイドプレイヤーのプロパティ
- */
 interface VoiceGuidePlayerProps {
-  voiceGuideScript: VoiceGuideScript;
   suggestionId: string;
+  voiceGuideScript: VoiceGuideScript;
+  isVoiceEnabled: boolean;
+  className?: string;
   onComplete?: () => void;
   onError?: (error: Error) => void;
-  className?: string;
 }
 
 /**
- * 再生コントロールアイコン
- */
-const PlayIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const PauseIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const VolumeIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-  </svg>
-);
-
-/**
- * 音声ガイドプレイヤーコンポーネント
+ * 音声ガイドプレイヤー
  * 
- * なぜこの実装か：
- * - 最小限のUIで直感的操作
- * - プログレスバーで進捗を可視化
- * - エラー時は静かに失敗（音声なしで継続）
+ * 機能:
+ * - 音声セグメントの順次再生
+ * - グローバル音声コントロールとの連携
+ * - 再生速度・音量調整
+ * - 字幕表示
+ * - プログレスバー
+ * 
+ * 設計思想:
+ * - AudioContextによる排他制御
+ * - スクリプトベースの自動再生
+ * - エラー時の静かな失敗
  */
-export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
-  voiceGuideScript,
+const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
   suggestionId,
+  voiceGuideScript,
+  isVoiceEnabled,
+  className = '',
   onComplete,
-  onError,
-  className = ''
+  onError
 }) => {
-  // フィーチャーフラグ
-  const isVoiceEnabled = useFeature('enhancedVoiceGuide');
-  const hasSubtitles = useFeature('subtitles');
-  const hasSpeedControl = useFeature('voiceSpeedControl');
-  
-  // 音声コンテキスト
-  const { 
-    registerPlayer, 
-    unregisterPlayer, 
-    requestPlayback, 
+  // AudioContext
+  const {
     activePlayerId,
-    settings 
+    requestPlayback,
+    registerPlayer,
+    unregisterPlayer
   } = useAudio();
   
-  // 状態管理
-  const [playerState, setPlayerState] = useState<AudioPlayerState>('idle');
+  // 内部状態
+  const [playerState, setPlayerState] = useState<'idle' | 'loading' | 'playing' | 'paused' | 'error'>('idle');
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
+  const [volume, setVolume] = useState(1.0);
+  const [playbackRate, setPlaybackRate] = useState(1.0);
   const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(settings.volume);
-  const [playbackRate, setPlaybackRate] = useState(settings.playbackRate);
   const [showControls, setShowControls] = useState(false);
   const [currentSubtitle, setCurrentSubtitle] = useState('');
   
+  // 設定フラグ
+  const hasSubtitles = voiceGuideScript.settings.showSubtitles;
+  const hasSpeedControl = voiceGuideScript.settings.allowSpeedControl;
+  
   // Refs
   const audioPlayerRef = useRef<AudioPlayer | null>(null);
-  // TODO: プログレスバーの実装時に使用
-  // const progressIntervalRef = useRef<number | null>(null);
   
   // プレイヤーID
   const playerId = `voice-guide-${suggestionId}`;
@@ -98,11 +68,42 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
   
   // 現在のセグメント
   const currentSegment = voiceGuideScript.segments[currentSegmentIndex];
+
+  /**
+   * セグメント終了時の処理
+   */
+  const handleSegmentEnd = useCallback(() => {
+    // 次のセグメントがある場合
+    if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
+      const pauseDuration = voiceGuideScript.settings.pauseBetweenSegments * 1000;
+      
+      setTimeout(() => {
+        setCurrentSegmentIndex(prev => prev + 1);
+      }, pauseDuration);
+    }
+  }, [currentSegmentIndex, voiceGuideScript]);
   
-  // 音声ガイドが無効な場合は何も表示しない
-  if (!isVoiceEnabled || !voiceGuideScript.segments.length) {
-    return null;
-  }
+  /**
+   * エラーハンドリング
+   */
+  const handleError = useCallback((error: Error) => {
+    console.error('Voice guide playback error:', error);
+    onError?.(error);
+    
+    // エラー時は静かに失敗（UIには表示しない）
+    // 次のセグメントに進む
+    if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
+      setCurrentSegmentIndex(prev => prev + 1);
+    }
+  }, [currentSegmentIndex, voiceGuideScript, onError]);
+  
+  /**
+   * 完了時の処理
+   */
+  const handleComplete = useCallback(() => {
+    setCurrentSubtitle('');
+    onComplete?.();
+  }, [onComplete]);
   
   /**
    * プレイヤー登録
@@ -159,7 +160,7 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
     return () => {
       audioPlayerRef.current?.destroy();
     };
-  }, []);
+  }, [handleSegmentEnd, handleError, handleComplete]);
   
   /**
    * セグメントの読み込みと再生
@@ -188,7 +189,7 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
     } catch (error) {
       handleError(error as Error);
     }
-  }, [volume, playbackRate, hasSubtitles]);
+  }, [volume, playbackRate, hasSubtitles, handleError]);
   
   /**
    * 再生/一時停止の切り替え
@@ -214,49 +215,13 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
   }, [playerState, currentSegment, loadAndPlaySegment, requestPlayback, playerId]);
   
   /**
-   * セグメント終了時の処理
-   */
-  const handleSegmentEnd = useCallback(() => {
-    // 次のセグメントがある場合
-    if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
-      const pauseDuration = voiceGuideScript.settings.pauseBetweenSegments * 1000;
-      
-      setTimeout(() => {
-        setCurrentSegmentIndex(prev => prev + 1);
-      }, pauseDuration);
-    }
-  }, [currentSegmentIndex, voiceGuideScript]);
-  
-  /**
-   * エラーハンドリング
-   */
-  const handleError = useCallback((error: Error) => {
-    console.error('Voice guide playback error:', error);
-    onError?.(error);
-    
-    // エラー時は静かに失敗（UIには表示しない）
-    // 次のセグメントに進む
-    if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
-      setCurrentSegmentIndex(prev => prev + 1);
-    }
-  }, [currentSegmentIndex, voiceGuideScript, onError]);
-  
-  /**
-   * 完了時の処理
-   */
-  const handleComplete = useCallback(() => {
-    setCurrentSubtitle('');
-    onComplete?.();
-  }, [onComplete]);
-  
-  /**
    * セグメント変更時の自動再生
    */
   useEffect(() => {
     if (currentSegmentIndex > 0 && playerState !== 'idle') {
       loadAndPlaySegment(voiceGuideScript.segments[currentSegmentIndex]);
     }
-  }, [currentSegmentIndex]);
+  }, [currentSegmentIndex, playerState, voiceGuideScript.segments, loadAndPlaySegment]);
   
   /**
    * 音量変更
@@ -285,6 +250,11 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
     const newTime = (audioPlayerRef.current?.getPlaybackInfo()?.duration || 0) * percentage;
     audioPlayerRef.current?.seek(newTime);
   }, []);
+  
+  // 音声ガイドが無効な場合は何も表示しない
+  if (!isVoiceEnabled || !voiceGuideScript.segments.length) {
+    return null;
+  }
   
   return (
     <div className={`bg-white rounded-lg shadow-md p-4 transition-all duration-200 ${isActive ? 'ring-2 ring-blue-500 shadow-lg' : ''} ${className}`}>
@@ -388,3 +358,5 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
     </div>
   );
 };
+
+export default VoiceGuidePlayer;

@@ -1,3 +1,4 @@
+import { formatTime, calculateDuration, isAudioSupported, getAudioErrorMessage } from './AudioContext.exports';
 /**
  * 音声コンテキスト
  * アプリ全体で音声状態を管理
@@ -439,4 +440,4 @@ export const useAudioAvailability = () => {
     hasUserInteracted,
     isEnabled: settings.enabled
   };
-};
+};export { formatTime, calculateDuration, isAudioSupported, getAudioErrorMessage };

@@ -2,6 +2,7 @@
  * 提案型アダプターのテスト
  */
 
+const _transformSuggestion = transformSuggestion as { _original?: typeof transformSuggestion };
 import { describe, it, expect } from 'vitest';
 import { suggestionAdapter } from './suggestionAdapter';
 import type { Suggestion, EnhancedSuggestion } from './types';
