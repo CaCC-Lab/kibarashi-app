@@ -186,15 +186,23 @@ class GeminiClient {
       
       // Markdownコードブロックを除去
       let cleanText = text;
-      if (text.includes('```json')) {
-        cleanText = text.replace(/```json\s*/, '').replace(/```\s*$/, '');
-      } else if (text.includes('```')) {
-        cleanText = text.replace(/```\s*/, '').replace(/```\s*$/, '');
+
+      // ```json ... ``` ブロックを抽出
+      const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        cleanText = codeBlockMatch[1].trim();
       }
-      
-      // JSON配列を抽出
+
+      // JSON配列を抽出（テキスト内のどこにあっても見つける）
       const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
+        // 配列が見つからない場合、オブジェクト内のsuggestionsを探す
+        const objMatch = cleanText.match(/\{[\s\S]*"suggestions"\s*:\s*(\[[\s\S]*?\])[\s\S]*\}/);
+        if (objMatch) {
+          const suggestions = JSON.parse(objMatch[1]);
+          return this._normalizeSuggestions(suggestions, duration);
+        }
+        console.error('[GeminiClient] Raw text:', text?.substring(0, 1000));
         throw new Error('No JSON array found in response');
       }
       
@@ -209,21 +217,30 @@ class GeminiClient {
         throw new Error('No suggestions in response');
       }
       
-      // 最大3つまで、必要なフィールドを確保
-      return suggestions.slice(0, 3).map((suggestion, index) => ({
-        id: `gemini-${Date.now()}-${index}`,
-        title: suggestion.title || '気晴らし提案',
-        description: suggestion.description || '',
-        duration: duration,
-        category: suggestion.category || '認知的',
-        steps: Array.isArray(suggestion.steps) ? suggestion.steps : []
-      }));
-      
+      return this._normalizeSuggestions(suggestions, duration);
+
     } catch (error) {
       console.error('[GeminiClient] Parse error:', error.message);
-      console.error('[GeminiClient] Raw response:', text?.substring(0, 500));
+      console.error('[GeminiClient] Raw response:', text?.substring(0, 1000));
       throw new Error(`Failed to parse AI response: ${error.message}`);
     }
+  }
+
+  _normalizeSuggestions(suggestions, duration) {
+    if (!Array.isArray(suggestions)) {
+      throw new Error('Response is not an array');
+    }
+    if (suggestions.length === 0) {
+      throw new Error('No suggestions in response');
+    }
+    return suggestions.slice(0, 3).map((suggestion, index) => ({
+      id: `gemini-${Date.now()}-${index}`,
+      title: suggestion.title || '気晴らし提案',
+      description: suggestion.description || '',
+      duration: duration,
+      category: suggestion.category || '認知的',
+      steps: Array.isArray(suggestion.steps) ? suggestion.steps : []
+    }));
   }
 }
 
