@@ -8,9 +8,6 @@ import {
   JobHuntingPromptInput,
 } from 'core-logic';
 
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma4:26b';
-const OLLAMA_TIMEOUT = parseInt(process.env.OLLAMA_TIMEOUT || '120000');
 const MAX_RETRIES = 2;
 
 interface OllamaSuggestion {
@@ -27,6 +24,10 @@ interface OllamaSuggestion {
  * Ollama APIにリクエストを送信し、テキストレスポンスを取得
  */
 async function callOllama(prompt: string): Promise<string> {
+  const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
+  const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma4:26b';
+  const OLLAMA_TIMEOUT = parseInt(process.env.OLLAMA_TIMEOUT || '120000');
+  
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), OLLAMA_TIMEOUT);
 
@@ -182,6 +183,7 @@ export const ollamaClient = {
     jobHuntingContext?: Partial<JobHuntingPromptInput>,
   ): Promise<OllamaSuggestion[]> {
     const prompt = createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext);
+    const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma4:26b';
 
     let lastError: Error | null = null;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {

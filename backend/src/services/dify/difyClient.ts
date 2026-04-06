@@ -1,9 +1,5 @@
 import { logger } from '../../utils/logger';
 
-const DIFY_BASE_URL = process.env.DIFY_BASE_URL || 'http://localhost:5001';
-const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
-const DIFY_TIMEOUT = parseInt(process.env.DIFY_TIMEOUT || '120000');
-
 interface DifySuggestion {
   id: string;
   title: string;
@@ -22,6 +18,10 @@ async function callDify(
   duration: number,
   ageGroup: string,
 ): Promise<string> {
+  const DIFY_BASE_URL = process.env.DIFY_BASE_URL || 'http://localhost:5001';
+  const DIFY_API_KEY = process.env.DIFY_API_KEY || '';
+  const DIFY_TIMEOUT = parseInt(process.env.DIFY_TIMEOUT || '120000');
+  
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), DIFY_TIMEOUT);
 

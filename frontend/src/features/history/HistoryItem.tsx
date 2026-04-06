@@ -43,8 +43,7 @@ const HistoryItem: React.FC<HistoryItemProps> = ({
       month: 'numeric',
       day: 'numeric',
       hour: 'numeric',
-      minute: 'numeric',
-      timeZone: 'Asia/Tokyo'
+      minute: 'numeric'
     }).format(date);
   };
 
