@@ -31,7 +31,7 @@ class GeminiClient {
     try {
       this.currentApiKey = apiKeyManager.getCurrentApiKey();
       this.genAI = new GoogleGenerativeAI(this.currentApiKey);
-      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       this.isInitialized = true;
       
       logger.info('Gemini client initialized with API key manager');
@@ -53,7 +53,7 @@ class GeminiClient {
 
       this.currentApiKey = newApiKey;
       this.genAI = new GoogleGenerativeAI(newApiKey);
-      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
       this.isInitialized = true;
       
       logger.info('API key rotated and client reinitialized');

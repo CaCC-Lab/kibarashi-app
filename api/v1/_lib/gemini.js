@@ -15,13 +15,14 @@ class GeminiClient {
     try {
       const apiKey = this.keyManager.getCurrentKey();
       this.genAI = new GoogleGenerativeAI(apiKey);
-      this.model = this.genAI.getGenerativeModel({ 
-        model: 'gemini-1.5-flash',
+      this.model = this.genAI.getGenerativeModel({
+        model: 'gemini-2.5-flash',
         generationConfig: {
           temperature: 0.9,
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 2048,
+          responseMimeType: 'application/json',
         }
       });
       console.log('[GeminiClient] Initialized successfully');
@@ -182,48 +183,70 @@ class GeminiClient {
   
   parseResponse(text, duration) {
     try {
-      console.log('[GeminiClient] Parsing response...');
-      
-      // Markdownコードブロックを除去
-      let cleanText = text;
-      if (text.includes('```json')) {
-        cleanText = text.replace(/```json\s*/, '').replace(/```\s*$/, '');
-      } else if (text.includes('```')) {
-        cleanText = text.replace(/```\s*/, '').replace(/```\s*$/, '');
+      console.log('[GeminiClient] Parsing response, length:', text?.length);
+
+      // Step 1: そのままJSONパース
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch (e1) {
+        // Step 2: コードブロック除去してリトライ
+        const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        const cleanText = codeBlockMatch ? codeBlockMatch[1].trim() : text.trim();
+        try {
+          parsed = JSON.parse(cleanText);
+        } catch (e2) {
+          // Step 3: 配列部分だけ抽出
+          const arrayMatch = cleanText.match(/\[[\s\S]*\]/);
+          if (arrayMatch) {
+            parsed = JSON.parse(arrayMatch[0]);
+          } else {
+            console.error('[GeminiClient] Cannot parse. Raw:', text?.substring(0, 1000));
+            throw new Error('No valid JSON found');
+          }
+        }
       }
-      
-      // JSON配列を抽出
-      const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) {
-        throw new Error('No JSON array found in response');
+
+      // パース結果から提案配列を取得
+      let suggestions;
+      if (Array.isArray(parsed)) {
+        suggestions = parsed;
+      } else if (parsed && Array.isArray(parsed.suggestions)) {
+        suggestions = parsed.suggestions;
+      } else if (parsed && typeof parsed === 'object') {
+        const arrayKey = Object.keys(parsed).find(k => Array.isArray(parsed[k]));
+        suggestions = arrayKey ? parsed[arrayKey] : null;
       }
-      
-      const suggestions = JSON.parse(jsonMatch[0]);
-      
-      // バリデーションと正規化
-      if (!Array.isArray(suggestions)) {
-        throw new Error('Response is not an array');
+
+      if (!suggestions || !Array.isArray(suggestions) || suggestions.length === 0) {
+        console.error('[GeminiClient] No suggestions found in:', JSON.stringify(parsed)?.substring(0, 500));
+        throw new Error('No suggestions in parsed response');
       }
-      
-      if (suggestions.length === 0) {
-        throw new Error('No suggestions in response');
-      }
-      
-      // 最大3つまで、必要なフィールドを確保
-      return suggestions.slice(0, 3).map((suggestion, index) => ({
-        id: `gemini-${Date.now()}-${index}`,
-        title: suggestion.title || '気晴らし提案',
-        description: suggestion.description || '',
-        duration: duration,
-        category: suggestion.category || '認知的',
-        steps: Array.isArray(suggestion.steps) ? suggestion.steps : []
-      }));
-      
+
+      console.log('[GeminiClient] Parsed', suggestions.length, 'suggestions');
+      return this._normalizeSuggestions(suggestions, duration);
+
     } catch (error) {
       console.error('[GeminiClient] Parse error:', error.message);
-      console.error('[GeminiClient] Raw response:', text?.substring(0, 500));
       throw new Error(`Failed to parse AI response: ${error.message}`);
     }
+  }
+
+  _normalizeSuggestions(suggestions, duration) {
+    if (!Array.isArray(suggestions)) {
+      throw new Error('Response is not an array');
+    }
+    if (suggestions.length === 0) {
+      throw new Error('No suggestions in response');
+    }
+    return suggestions.slice(0, 3).map((suggestion, index) => ({
+      id: `gemini-${Date.now()}-${index}`,
+      title: suggestion.title || '気晴らし提案',
+      description: suggestion.description || '',
+      duration: duration,
+      category: suggestion.category || '認知的',
+      steps: Array.isArray(suggestion.steps) ? suggestion.steps : []
+    }));
   }
 }
 

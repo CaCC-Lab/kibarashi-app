@@ -16,7 +16,6 @@ export interface MetricsEvent {
 export function trackEvent(event: MetricsEvent): void {
   // TODO: 本番環境では実際のアナリティクスサービスに送信
   if (process.env.NODE_ENV === 'development') {
-    // Development環境では何もしない（将来的にはconsole.debugで出力可能）
     void event;
   }
 }

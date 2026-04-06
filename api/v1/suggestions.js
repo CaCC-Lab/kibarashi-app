@@ -1,5 +1,5 @@
-// CLAUDE-GENERATED: Gemini API統合版
-// AI-PAIRED: Geminiと協調して動的な提案生成を実現
+// Gemini API統合版 - 動的な提案生成
+// Updated: 2026-04-06 - gemini-2.5-flash + robust parser
 
 const { GeminiClient } = require('./_lib/gemini.js');
 const { SimpleAPIKeyManager } = require('./_lib/apiKeyManager.js');
