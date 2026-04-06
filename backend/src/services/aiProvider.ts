@@ -1,12 +1,14 @@
 import { geminiClient, StudentPromptInput, JobHuntingPromptInput } from 'core-logic';
 import { ollamaClient } from './ollama';
+import { difyClient } from './dify';
 import { logger } from '../utils/logger';
 
-type AIProvider = 'gemini' | 'ollama';
+type AIProvider = 'gemini' | 'ollama' | 'dify';
 
 function getProvider(): AIProvider {
   const provider = process.env.AI_PROVIDER?.toLowerCase();
   if (provider === 'ollama') return 'ollama';
+  if (provider === 'dify') return 'dify';
   return 'gemini';
 }
 
@@ -15,8 +17,8 @@ function getProvider(): AIProvider {
  */
 export function isAIProviderConfigured(): boolean {
   const provider = getProvider();
-  if (provider === 'ollama') return true; // Ollama はローカルなので API キー不要
-  // Gemini は API キーが必要
+  if (provider === 'ollama') return true;
+  if (provider === 'dify') return !!process.env.DIFY_API_KEY;
   return !!(
     process.env.GEMINI_API_KEY ||
     process.env.GEMINI_API_KEY_1
@@ -35,11 +37,17 @@ export function getAIProviderInfo(): { provider: string; model?: string; url?: s
       url: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
     };
   }
+  if (provider === 'dify') {
+    return {
+      provider: 'dify',
+      url: process.env.DIFY_BASE_URL || 'http://localhost:5001',
+    };
+  }
   return { provider: 'gemini' };
 }
 
 /**
- * AI 提案を生成（provider に応じて Ollama / Gemini を呼び分け）
+ * AI 提案を生成（provider に応じて Dify / Ollama / Gemini を呼び分け）
  */
 export async function generateAISuggestions(
   situation: 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting',
@@ -49,6 +57,11 @@ export async function generateAISuggestions(
   jobHuntingContext?: Partial<JobHuntingPromptInput>,
 ): Promise<unknown[]> {
   const provider = getProvider();
+
+  if (provider === 'dify') {
+    logger.info('Using Dify for suggestion generation');
+    return difyClient.generateSuggestions(situation, duration, ageGroup);
+  }
 
   if (provider === 'ollama') {
     logger.info('Using Ollama for suggestion generation');
@@ -60,7 +73,7 @@ export async function generateAISuggestions(
 }
 
 /**
- * AI 拡張提案を生成（provider に応じて Ollama / Gemini を呼び分け）
+ * AI 拡張提案を生成（provider に応じて Dify / Ollama / Gemini を呼び分け）
  */
 export async function generateAIEnhancedSuggestions(
   situation: string,
@@ -71,6 +84,11 @@ export async function generateAIEnhancedSuggestions(
   location?: string,
 ): Promise<unknown[]> {
   const provider = getProvider();
+
+  if (provider === 'dify') {
+    logger.info('Using Dify for enhanced suggestion generation');
+    return difyClient.generateEnhancedSuggestions(situation, duration, ageGroup);
+  }
 
   if (provider === 'ollama') {
     logger.info('Using Ollama for enhanced suggestion generation');
