@@ -177,10 +177,10 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     return <Loading message="気晴らし方法を探しています..." />;
   }
 
-  if (error) {
+  if (error && (!suggestions || suggestions.length === 0)) {
     return (
-      <ErrorMessage 
-        message="気晴らし方法の取得に失敗しました" 
+      <ErrorMessage
+        message="気晴らし方法の取得に失敗しました"
         onRetry={refetch}
       />
     );
