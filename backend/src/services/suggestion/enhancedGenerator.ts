@@ -5,7 +5,7 @@
 
 import { logger } from '../../utils/logger';
 import { getFallbackSuggestions } from './fallbackData';
-import { geminiClient } from 'core-logic';
+import { generateAIEnhancedSuggestions, isAIProviderConfigured, getAIProviderInfo } from '../aiProvider';
 import { EnhancedSuggestionGenerator } from './enhancedSuggestionGenerator.js';
 
 // 拡張提案のデータ構造（後方互換性を保持）
@@ -83,18 +83,20 @@ export async function generateEnhancedSuggestions(
   
   try {
     // ステップ1: Gemini APIの有効性を確認
-    if (process.env.GEMINI_API_KEY && includeVoiceGuide) {
-      logger.info('Generating enhanced suggestions with Gemini API', { 
-        situation, 
-        duration, 
+    if (isAIProviderConfigured() && includeVoiceGuide) {
+      const providerInfo = getAIProviderInfo();
+      logger.info('Generating enhanced suggestions with AI', {
+        ...providerInfo,
+        situation,
+        duration,
         ageGroup,
-        detailLevel 
+        detailLevel
       });
-      
+
       // ステップ2: AIを使って拡張提案を生成
-      const enhancedSuggestions = await geminiClient.generateEnhancedSuggestions(
-        situation, 
-        duration, 
+      const enhancedSuggestions = await generateAIEnhancedSuggestions(
+        situation,
+        duration,
         ageGroup
       );
       
@@ -109,7 +111,7 @@ export async function generateEnhancedSuggestions(
     logger.info('Using enhanced fallback suggestions', {
       situation,
       duration,
-      reason: !process.env.GEMINI_API_KEY ? 'GEMINI_API_KEY not configured' : 'Voice guide disabled',
+      reason: !isAIProviderConfigured() ? 'No AI provider configured' : 'Voice guide disabled',
       includeVoiceGuide
     });
     
