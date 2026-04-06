@@ -183,46 +183,51 @@ class GeminiClient {
   
   parseResponse(text, duration) {
     try {
-      console.log('[GeminiClient] Parsing response...');
-      
-      // Markdownコードブロックを除去
-      let cleanText = text;
+      console.log('[GeminiClient] Parsing response, length:', text?.length);
 
-      // ```json ... ``` ブロックを抽出
-      const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-      if (codeBlockMatch) {
-        cleanText = codeBlockMatch[1].trim();
-      }
-
-      // JSON配列を抽出（テキスト内のどこにあっても見つける）
-      const jsonMatch = cleanText.match(/\[[\s\S]*\]/);
-      if (!jsonMatch) {
-        // 配列が見つからない場合、オブジェクト内のsuggestionsを探す
-        const objMatch = cleanText.match(/\{[\s\S]*"suggestions"\s*:\s*(\[[\s\S]*?\])[\s\S]*\}/);
-        if (objMatch) {
-          const suggestions = JSON.parse(objMatch[1]);
-          return this._normalizeSuggestions(suggestions, duration);
+      // Step 1: そのままJSONパース
+      let parsed;
+      try {
+        parsed = JSON.parse(text);
+      } catch (e1) {
+        // Step 2: コードブロック除去してリトライ
+        const codeBlockMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        const cleanText = codeBlockMatch ? codeBlockMatch[1].trim() : text.trim();
+        try {
+          parsed = JSON.parse(cleanText);
+        } catch (e2) {
+          // Step 3: 配列部分だけ抽出
+          const arrayMatch = cleanText.match(/\[[\s\S]*\]/);
+          if (arrayMatch) {
+            parsed = JSON.parse(arrayMatch[0]);
+          } else {
+            console.error('[GeminiClient] Cannot parse. Raw:', text?.substring(0, 1000));
+            throw new Error('No valid JSON found');
+          }
         }
-        console.error('[GeminiClient] Raw text:', text?.substring(0, 1000));
-        throw new Error('No JSON array found in response');
       }
-      
-      const suggestions = JSON.parse(jsonMatch[0]);
-      
-      // バリデーションと正規化
-      if (!Array.isArray(suggestions)) {
-        throw new Error('Response is not an array');
+
+      // パース結果から提案配列を取得
+      let suggestions;
+      if (Array.isArray(parsed)) {
+        suggestions = parsed;
+      } else if (parsed && Array.isArray(parsed.suggestions)) {
+        suggestions = parsed.suggestions;
+      } else if (parsed && typeof parsed === 'object') {
+        const arrayKey = Object.keys(parsed).find(k => Array.isArray(parsed[k]));
+        suggestions = arrayKey ? parsed[arrayKey] : null;
       }
-      
-      if (suggestions.length === 0) {
-        throw new Error('No suggestions in response');
+
+      if (!suggestions || !Array.isArray(suggestions) || suggestions.length === 0) {
+        console.error('[GeminiClient] No suggestions found in:', JSON.stringify(parsed)?.substring(0, 500));
+        throw new Error('No suggestions in parsed response');
       }
-      
+
+      console.log('[GeminiClient] Parsed', suggestions.length, 'suggestions');
       return this._normalizeSuggestions(suggestions, duration);
 
     } catch (error) {
       console.error('[GeminiClient] Parse error:', error.message);
-      console.error('[GeminiClient] Raw response:', text?.substring(0, 1000));
       throw new Error(`Failed to parse AI response: ${error.message}`);
     }
   }
