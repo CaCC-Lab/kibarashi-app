@@ -15,13 +15,14 @@ class GeminiClient {
     try {
       const apiKey = this.keyManager.getCurrentKey();
       this.genAI = new GoogleGenerativeAI(apiKey);
-      this.model = this.genAI.getGenerativeModel({ 
+      this.model = this.genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         generationConfig: {
           temperature: 0.9,
           topK: 40,
           topP: 0.95,
           maxOutputTokens: 2048,
+          responseMimeType: 'application/json',
         }
       });
       console.log('[GeminiClient] Initialized successfully');
