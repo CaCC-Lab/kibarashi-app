@@ -276,7 +276,7 @@ const AgeGroupAnalysis: React.FC<{ metrics: MetricEvent[] }> = ({ metrics }) => 
   const ageGroupStats = metrics
     .filter(m => m.ageGroup)
     .reduce((stats, metric) => {
-      const ageGroup = metric.ageGroup;
+      const ageGroup = metric.ageGroup ?? 'unknown';
       if (!stats[ageGroup]) {
         stats[ageGroup] = { events: 0, users: new Set(), conversions: 0 };
       }

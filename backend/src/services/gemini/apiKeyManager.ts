@@ -89,6 +89,7 @@ export class APIKeyManager {
 
     // 番号付きキー（GEMINI_API_KEY_1, GEMINI_API_KEY_2, etc.）
     let index = 1;
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const key = process.env[`GEMINI_API_KEY_${index}`];
       if (!key) break;

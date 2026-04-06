@@ -30,6 +30,7 @@ class ConsoleTransport extends winston.transports.Console {
       // colorizeされていない元のレベルを取得
       const rawLevel = info[Symbol.for('level')] || info.level;
       // カラーエスケープコードを除去
+      // eslint-disable-next-line no-control-regex
       const level = rawLevel.replace(/\x1B\[\d+m/g, '');
       
       // ログレベルチェック：現在の環境での設定レベルより低い場合は出力しない

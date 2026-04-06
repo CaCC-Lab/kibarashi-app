@@ -385,7 +385,7 @@ export class ABTestService {
     const sessionEvents = events.filter(e => e.properties?.sessionDuration);
     if (sessionEvents.length === 0) return 0;
     
-    const totalDuration = sessionEvents.reduce((sum, e) => sum + (e.properties?.sessionDuration || 0), 0);
+    const totalDuration = sessionEvents.reduce((sum, e) => sum + (Number(e.properties?.sessionDuration) || 0), 0);
     return totalDuration / sessionEvents.length;
   }
   
@@ -396,7 +396,7 @@ export class ABTestService {
     const ratingEvents = events.filter(e => e.properties?.rating);
     if (ratingEvents.length === 0) return 0;
     
-    const totalRating = ratingEvents.reduce((sum, e) => sum + (e.properties?.rating || 0), 0);
+    const totalRating = ratingEvents.reduce((sum, e) => sum + (Number(e.properties?.rating) || 0), 0);
     return totalRating / ratingEvents.length;
   }
   

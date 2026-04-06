@@ -49,12 +49,12 @@ const HistoryList: React.FC = () => {
         return history;
       case 'situation':
         if (filterValue && typeof filterValue === 'string') {
-          return getHistoryBySituation(filterValue);
+          return getHistoryBySituation(filterValue as 'workplace' | 'home' | 'outside');
         }
         return history;
       case 'category':
         if (filterValue && typeof filterValue === 'string') {
-          return getHistoryByCategory(filterValue);
+          return getHistoryByCategory(filterValue as '認知的' | '行動的');
         }
         return history;
       default:
