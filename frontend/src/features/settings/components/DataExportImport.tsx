@@ -27,7 +27,7 @@ export const DataExportImport: React.FC<DataExportImportProps> = ({
   const handleExportAll = async () => {
     setIsProcessing(true);
     try {
-      AppDataManager.downloadBackup();
+      await AppDataManager.downloadBackup();
       onExportMessage('全データをエクスポートしました');
     } catch (error) {
       console.error('Failed to export all data:', error);

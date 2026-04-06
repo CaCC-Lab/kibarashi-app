@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 
+export type FilterValue = string | { startDate: Date; endDate: Date } | null;
+
 interface HistoryFilterProps {
   filterType: 'all' | 'date' | 'situation' | 'category';
-  filterValue: any;
+  filterValue: FilterValue;
   onFilterTypeChange: (type: 'all' | 'date' | 'situation' | 'category') => void;
-  onFilterValueChange: (value: any) => void;
+  onFilterValueChange: (value: FilterValue) => void;
 }
 
 /**

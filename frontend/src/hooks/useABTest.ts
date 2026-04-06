@@ -88,7 +88,7 @@ export function useMetrics() {
   }, [userId]);
   
   // カスタムイベントのトラッキング
-  const trackCustomEvent = useCallback((eventName: string, properties?: Record<string, any>) => {
+  const trackCustomEvent = useCallback((eventName: string, properties?: Record<string, unknown>) => {
     const profile = UserProfileStorage.getProfile();
     ABTestService.trackEvent({
       eventType: 'interaction',
@@ -188,7 +188,7 @@ export function useAgeGroupFeature() {
   const isEnabled = useFeatureFlag('age_group_feature');
   const { trackCustomEvent } = useMetrics();
   
-  const trackFeatureUsage = useCallback((action: string, properties?: Record<string, any>) => {
+  const trackFeatureUsage = useCallback((action: string, properties?: Record<string, unknown>) => {
     trackCustomEvent(`age_group_feature_${action}`, {
       ...properties,
       featureEnabled: isEnabled

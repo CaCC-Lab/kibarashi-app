@@ -8,7 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, renderHook, act, screen } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { AudioProvider, useAudio } from './AudioContext';
 import React from 'react';
 

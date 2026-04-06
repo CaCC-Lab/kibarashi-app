@@ -13,7 +13,8 @@ export interface MetricsEvent {
  * イベントをトラッキングする関数
  * 実際の環境では、Google Analytics、Mixpanel、Amplitudeなどに送信
  */
-export function trackEvent(event: MetricsEvent): void {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function trackEvent(_event: MetricsEvent): void {
   // 開発環境でのデバッグ用処理
   if (process.env.NODE_ENV === 'development') {
     // Metrics tracking would go here in development

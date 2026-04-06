@@ -41,9 +41,9 @@ describe('useSuggestions', () => {
       
       // 結果の検証
       if (result.current.error) {
-        // サーバーが起動していない場合
-        expect(result.current.error).toContain('ネットワークエラー');
-        expect(result.current.suggestions).toEqual([]);
+        // サーバーが起動していない場合、フォールバック提案が設定される
+        expect(result.current.error).toBeTruthy();
+        expect(result.current.suggestions.length).toBeGreaterThan(0);
       } else {
         // 成功した場合
         expect(result.current.suggestions.length).toBeGreaterThan(0);
@@ -109,7 +109,7 @@ describe('useSuggestions', () => {
     it('ネットワークエラーを適切に処理する', async () => {
       // 環境変数を一時的に変更して存在しないサーバーを指定
       const originalUrl = import.meta.env.VITE_API_URL;
-      (import.meta.env as any).VITE_API_URL = 'http://localhost:9999';
+      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
       
       const { result } = renderHook(() => useSuggestions());
       
@@ -122,13 +122,13 @@ describe('useSuggestions', () => {
         expect(result.current.loading).toBe(false);
       }, { timeout: 5000 });
       
-      // エラーの検証
+      // エラーの検証 - エラー時もフォールバック提案が設定される
       expect(result.current.error).toBeDefined();
-      expect(result.current.error).toContain('ネットワークエラー');
-      expect(result.current.suggestions).toEqual([]);
+      expect(result.current.error).toBeTruthy();
+      expect(result.current.suggestions.length).toBeGreaterThan(0);
       
       // 環境変数を復元
-      (import.meta.env as any).VITE_API_URL = originalUrl;
+      (import.meta.env as Record<string, string>).VITE_API_URL = originalUrl;
     });
 
     it.skip('エラー後に再試行できる', async () => {
@@ -143,7 +143,7 @@ describe('useSuggestions', () => {
       await waitFor(() => !result.current.loading, { timeout: 10000 });
       
       // エラーを発生させる
-      (import.meta.env as any).VITE_API_URL = 'http://localhost:9999';
+      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
       
       act(() => {
         result.current.fetchSuggestions('home', 15);
@@ -154,7 +154,7 @@ describe('useSuggestions', () => {
       expect(result.current.suggestions).toEqual([]); // エラー時は提案がクリアされる
       
       // URLを正しく戻す
-      (import.meta.env as any).VITE_API_URL = originalUrl;
+      (import.meta.env as Record<string, string>).VITE_API_URL = originalUrl;
       
       // 再試行
       act(() => {

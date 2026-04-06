@@ -24,24 +24,24 @@ global.Audio = class Audio {
   pause() {}
   addEventListener() {}
   removeEventListener() {}
-} as any;
+} as unknown as typeof globalThis.Audio;
 
 // Speech Synthesis APIの実装
 // モックを使用せず、実際の動作をシミュレート
 global.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
   text: string;
   lang: string = 'ja-JP';
-  voice: any = null;
+  voice: SpeechSynthesisVoice | null = null;
   volume: number = 1;
   rate: number = 1;
   pitch: number = 1;
-  onstart: any = null;
-  onend: any = null;
-  onerror: any = null;
-  onpause: any = null;
-  onresume: any = null;
-  onmark: any = null;
-  onboundary: any = null;
+  onstart: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => unknown) | null = null;
+  onend: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => unknown) | null = null;
+  onerror: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisErrorEvent) => unknown) | null = null;
+  onpause: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => unknown) | null = null;
+  onresume: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => unknown) | null = null;
+  onmark: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => unknown) | null = null;
+  onboundary: ((this: SpeechSynthesisUtterance, ev: SpeechSynthesisEvent) => unknown) | null = null;
 
   constructor(text?: string) {
     this.text = text || '';
@@ -50,25 +50,25 @@ global.SpeechSynthesisUtterance = class SpeechSynthesisUtterance {
   addEventListener() {}
   removeEventListener() {}
   dispatchEvent() { return true; }
-} as any;
+} as unknown as typeof globalThis.SpeechSynthesisUtterance;
 
 global.SpeechSynthesisErrorEvent = class SpeechSynthesisErrorEvent extends Event {
   error: string;
-  
+
   constructor(type: string, init?: { error?: string }) {
     super(type);
     this.error = init?.error || 'unknown';
   }
-} as any;
+} as unknown as typeof globalThis.SpeechSynthesisErrorEvent;
 
 global.speechSynthesis = {
-  speak: function(utterance: any) {
+  speak: function(utterance: SpeechSynthesisUtterance) {
     // 音声合成をシミュレート
     if (utterance.onstart) {
-      setTimeout(() => utterance.onstart(new Event('start')), 0);
+      setTimeout(() => utterance.onstart!(new Event('start') as SpeechSynthesisEvent), 0);
     }
     if (utterance.onend) {
-      setTimeout(() => utterance.onend(new Event('end')), 100);
+      setTimeout(() => utterance.onend!(new Event('end') as SpeechSynthesisEvent), 100);
     }
   },
   cancel: function() {
@@ -90,29 +90,31 @@ global.speechSynthesis = {
   paused: false,
   pending: false,
   onvoiceschanged: null,
-} as any;
+} as unknown as SpeechSynthesis;
 
 // Vibration APIの実装
-navigator.vibrate = function(_pattern?: number | number[]) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+navigator.vibrate = function(_pattern: VibratePattern) {
   // 振動をシミュレート（実際には何もしない）
   return true;
 };
 
 // IntersectionObserverのモック
 global.IntersectionObserver = class IntersectionObserver {
-  constructor() {}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  constructor(_callback: IntersectionObserverCallback, _options?: IntersectionObserverInit) {}
   observe() {}
   unobserve() {}
   disconnect() {}
-} as any;
+} as unknown as typeof globalThis.IntersectionObserver;
 
 // matchMediaの実装
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: function(query: string) {
+  value: function(_query: string) {
     return {
       matches: false,
-      media: query,
+      media: _query,
       onchange: null,
       addListener: function() {}, // Deprecated
       removeListener: function() {}, // Deprecated

@@ -106,6 +106,7 @@ cache/
 !tsconfig.json
 !manifest.json
 !vercel.json
+!backend/src/data/*.json
 gcp-credentials/
 
 # Firebase

@@ -89,36 +89,76 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
   const audioPlayerRef = useRef<AudioPlayer | null>(null);
   // TODO: プログレスバーの実装時に使用
   // const progressIntervalRef = useRef<number | null>(null);
-  
+
   // プレイヤーID
   const playerId = `voice-guide-${suggestionId}`;
-  
+
   // アクティブ状態
   const isActive = activePlayerId === playerId;
-  
+
   // 現在のセグメント
   const currentSegment = voiceGuideScript.segments[currentSegmentIndex];
-  
-  // 音声ガイドが無効な場合は何も表示しない
-  if (!isVoiceEnabled || !voiceGuideScript.segments.length) {
-    return null;
-  }
-  
+
+  // 有効フラグ（フック内で条件分岐に使用）
+  const isEnabled = isVoiceEnabled && voiceGuideScript.segments.length > 0;
+
+  /**
+   * セグメント終了時の処理
+   */
+  const handleSegmentEnd = useCallback(() => {
+    if (!isEnabled) return;
+    // 次のセグメントがある場合
+    if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
+      const pauseDuration = voiceGuideScript.settings.pauseBetweenSegments * 1000;
+
+      setTimeout(() => {
+        setCurrentSegmentIndex(prev => prev + 1);
+      }, pauseDuration);
+    }
+  }, [isEnabled, currentSegmentIndex, voiceGuideScript]);
+
+  /**
+   * エラーハンドリング
+   */
+  const handleError = useCallback((error: Error) => {
+    if (!isEnabled) return;
+    console.error('Voice guide playback error:', error);
+    onError?.(error);
+
+    // エラー時は静かに失敗（UIには表示しない）
+    // 次のセグメントに進む
+    if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
+      setCurrentSegmentIndex(prev => prev + 1);
+    }
+  }, [isEnabled, currentSegmentIndex, voiceGuideScript, onError]);
+
+  /**
+   * 完了時の処理
+   */
+  const handleComplete = useCallback(() => {
+    if (!isEnabled) return;
+    setCurrentSubtitle('');
+    onComplete?.();
+  }, [isEnabled, onComplete]);
+
   /**
    * プレイヤー登録
    */
   useEffect(() => {
+    if (!isEnabled) return;
     registerPlayer(playerId, suggestionId);
-    
+
     return () => {
       unregisterPlayer(playerId);
     };
-  }, [playerId, suggestionId, registerPlayer, unregisterPlayer]);
+  }, [isEnabled, playerId, suggestionId, registerPlayer, unregisterPlayer]);
 
   /**
    * グローバル音声イベントリスナー
    */
   useEffect(() => {
+    if (!isEnabled) return;
+
     const handleStopRequest = (event: CustomEvent) => {
       if (event.detail.playerId === playerId) {
         audioPlayerRef.current?.pause();
@@ -138,12 +178,14 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
       window.removeEventListener('audio-stop-request', handleStopRequest as EventListener);
       window.removeEventListener('audio-pause-all', handlePauseAll);
     };
-  }, [playerId]);
+  }, [isEnabled, playerId]);
 
   /**
    * 音声プレイヤーの初期化
    */
   useEffect(() => {
+    if (!isEnabled) return;
+
     audioPlayerRef.current = new AudioPlayer({
       onStateChange: setPlayerState,
       onProgress: (current, total) => {
@@ -155,32 +197,33 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
       onError: handleError,
       onComplete: handleComplete
     });
-    
+
     return () => {
       audioPlayerRef.current?.destroy();
     };
-  }, []);
-  
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- AudioPlayer初期化は isEnabled 変更時のみ再実行（handler関数は安定参照）
+  }, [isEnabled]);
+
   /**
    * セグメントの読み込みと再生
    */
   const loadAndPlaySegment = useCallback(async (segment: VoiceSegment) => {
-    if (!audioPlayerRef.current) return;
-    
+    if (!isEnabled || !audioPlayerRef.current) return;
+
     try {
       // TODO: 実際の音声データ取得処理
       // 現在はモックデータを使用
       const audioUrl = `/api/v1/tts?text=${encodeURIComponent(segment.text)}`;
-      
+
       await audioPlayerRef.current.load(audioUrl, segment);
       audioPlayerRef.current.setVolume(volume);
       audioPlayerRef.current.setPlaybackRate(playbackRate);
-      
+
       // 字幕の更新
       if (hasSubtitles) {
         setCurrentSubtitle(segment.text);
       }
-      
+
       // 自動再生が有効な場合
       if (segment.autoPlay) {
         await audioPlayerRef.current.fadeIn(500);
@@ -188,14 +231,14 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
     } catch (error) {
       handleError(error as Error);
     }
-  }, [volume, playbackRate, hasSubtitles]);
-  
+  }, [isEnabled, volume, playbackRate, hasSubtitles, handleError]);
+
   /**
    * 再生/一時停止の切り替え
    */
   const togglePlayPause = useCallback(async () => {
-    if (!audioPlayerRef.current) return;
-    
+    if (!isEnabled || !audioPlayerRef.current) return;
+
     if (playerState === 'playing') {
       audioPlayerRef.current.pause();
     } else if (playerState === 'paused') {
@@ -211,53 +254,19 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
         await loadAndPlaySegment(currentSegment);
       }
     }
-  }, [playerState, currentSegment, loadAndPlaySegment, requestPlayback, playerId]);
-  
-  /**
-   * セグメント終了時の処理
-   */
-  const handleSegmentEnd = useCallback(() => {
-    // 次のセグメントがある場合
-    if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
-      const pauseDuration = voiceGuideScript.settings.pauseBetweenSegments * 1000;
-      
-      setTimeout(() => {
-        setCurrentSegmentIndex(prev => prev + 1);
-      }, pauseDuration);
-    }
-  }, [currentSegmentIndex, voiceGuideScript]);
-  
-  /**
-   * エラーハンドリング
-   */
-  const handleError = useCallback((error: Error) => {
-    console.error('Voice guide playback error:', error);
-    onError?.(error);
-    
-    // エラー時は静かに失敗（UIには表示しない）
-    // 次のセグメントに進む
-    if (currentSegmentIndex < voiceGuideScript.segments.length - 1) {
-      setCurrentSegmentIndex(prev => prev + 1);
-    }
-  }, [currentSegmentIndex, voiceGuideScript, onError]);
-  
-  /**
-   * 完了時の処理
-   */
-  const handleComplete = useCallback(() => {
-    setCurrentSubtitle('');
-    onComplete?.();
-  }, [onComplete]);
-  
+  }, [isEnabled, playerState, currentSegment, loadAndPlaySegment, requestPlayback, playerId]);
+
   /**
    * セグメント変更時の自動再生
    */
   useEffect(() => {
+    if (!isEnabled) return;
     if (currentSegmentIndex > 0 && playerState !== 'idle') {
       loadAndPlaySegment(voiceGuideScript.segments[currentSegmentIndex]);
     }
-  }, [currentSegmentIndex]);
-  
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- セグメント変更時のみ発火（loadAndPlaySegment等は安定参照）
+  }, [isEnabled, currentSegmentIndex]);
+
   /**
    * 音量変更
    */
@@ -266,7 +275,7 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
     setVolume(newVolume);
     audioPlayerRef.current?.setVolume(newVolume);
   }, []);
-  
+
   /**
    * 再生速度変更
    */
@@ -274,7 +283,7 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
     setPlaybackRate(rate);
     audioPlayerRef.current?.setPlaybackRate(rate);
   }, []);
-  
+
   /**
    * プログレスバーのクリック
    */
@@ -285,7 +294,12 @@ export const VoiceGuidePlayer: React.FC<VoiceGuidePlayerProps> = ({
     const newTime = (audioPlayerRef.current?.getPlaybackInfo()?.duration || 0) * percentage;
     audioPlayerRef.current?.seek(newTime);
   }, []);
-  
+
+  // 音声ガイドが無効な場合は何も表示しない
+  if (!isEnabled) {
+    return null;
+  }
+
   return (
     <div className={`bg-white rounded-lg shadow-md p-4 transition-all duration-200 ${isActive ? 'ring-2 ring-blue-500 shadow-lg' : ''} ${className}`}>
       {/* メインコントロール */}

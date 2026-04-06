@@ -1,99 +1,91 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { apiClient } from './client';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 /**
  * APIクライアントのテスト
- * 
+ *
  * 設計思想：
- * - モックを使用せず、実際のHTTPリクエストを送信
- * - テスト用のサーバーまたは実際のバックエンドを使用
- * - ネットワークエラーの実際の挙動を確認
+ * - fetchをモックして、実際のHTTPリクエストを送信せずにテスト
+ * - エラーハンドリングの挙動を確認
+ * - タイムアウト処理のテスト
  */
-describe('apiClient', () => {
-  const baseURL = 'http://localhost:8081'; // テスト用ポート
-  let originalEnv: string | undefined;
 
+// fetchをモック化（client.tsがモジュールトップレベルでAPIクライアントを初期化するため、
+// テスト対象のimportより前にモックを設定する必要がある）
+const mockFetch = vi.fn();
+vi.stubGlobal('fetch', mockFetch);
+
+// client.tsを動的インポート
+const { apiClient } = await import('./client');
+
+describe('apiClient', () => {
   beforeEach(() => {
-    // 環境変数を保存
-    originalEnv = import.meta.env.VITE_API_URL;
-    // テスト用URLを設定
-    (import.meta.env as any).VITE_API_URL = baseURL;
+    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    // 環境変数を復元
-    if (originalEnv !== undefined) {
-      (import.meta.env as any).VITE_API_URL = originalEnv;
-    }
+    vi.restoreAllMocks();
   });
 
   describe('HTTPメソッドのテスト', () => {
     it('GETリクエストを送信できる', async () => {
-      // 実際のヘルスチェックエンドポイントを使用
-      try {
-        const response = await apiClient.get('/health');
-        
-        expect(response).toBeDefined();
-        expect(response.status).toBe('ok');
-        expect(response.timestamp).toBeDefined();
-      } catch (error) {
-        // サーバーが起動していない場合のエラーメッセージを確認
-        expect(error.message).toContain('ネットワークエラー');
-        expect(error.message).toContain('インターネット接続を確認');
-      }
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ status: 'ok', timestamp: '2024-01-01T00:00:00Z' }),
+      });
+
+      const response = await apiClient.get('/health');
+
+      expect(response).toBeDefined();
+      expect(response.status).toBe('ok');
+      expect(response.timestamp).toBeDefined();
     });
 
     it('POSTリクエストでデータを送信できる', async () => {
       const testData = {
         text: 'テスト音声',
-        voiceSettings: {
-          speed: 1.0
-        }
+        voiceSettings: { speed: 1.0 }
       };
 
-      try {
-        // 実際のAPIエンドポイントにPOSTリクエスト
-        const response = await apiClient.post('/api/v1/tts', testData);
-        
-        // レスポンスの検証（サーバーが起動している場合）
-        expect(response).toBeDefined();
-      } catch (error) {
-        // エラーレスポンスの検証
-        if (error.message.includes('ネットワークエラー')) {
-          // サーバーが起動していない場合
-          expect(error.message).toContain('サーバーに接続できません');
-        } else {
-          // その他のエラー（認証エラー等）
-          expect(error.message).toBeDefined();
-        }
-      }
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true }),
+      });
+
+      const response = await apiClient.post('/api/v1/tts', testData);
+      expect(response).toBeDefined();
+
+      // fetchが正しいbodyで呼ばれたことを確認
+      const callArgs = mockFetch.mock.calls[0];
+      expect(callArgs[1].method).toBe('POST');
+      expect(callArgs[1].body).toBe(JSON.stringify(testData));
     });
   });
 
   describe('エラーハンドリングのテスト', () => {
     it('存在しないエンドポイントで404エラーを適切に処理する', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: async () => ({ error: { message: 'Not Found' } }),
+      });
+
       try {
         await apiClient.get('/api/v1/nonexistent');
-        // エラーが発生しない場合はテスト失敗
         expect.fail('エラーが発生するはずです');
       } catch (error) {
-        // エラーメッセージの検証
         const errorMessage = (error as Error).message;
         expect(errorMessage).toBeDefined();
-        
-        // サーバーが起動している場合は404エラー
-        // 起動していない場合はネットワークエラー
-        const isNetworkError = errorMessage.includes('ネットワークエラー');
-        const is404Error = errorMessage.includes('見つかりません');
-        
-        expect(isNetworkError || is404Error).toBe(true);
+        // 404エラー時のメッセージを検証
+        expect(errorMessage).toContain('見つかりません');
       }
     });
 
     it('ネットワークエラーを適切に処理する', async () => {
-      // 存在しないホストへのリクエスト
-      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
-      
+      const fetchError = new Error('fetch failed');
+      mockFetch.mockRejectedValueOnce(fetchError);
+
       try {
         await apiClient.get('/health');
         expect.fail('ネットワークエラーが発生するはずです');
@@ -107,72 +99,58 @@ describe('apiClient', () => {
   });
 
   describe('タイムアウト処理のテスト', () => {
-    it('タイムアウト時間を超えるとエラーになる', async () => {
-      // 短いタイムアウトを設定
-      const originalTimeout = import.meta.env.VITE_API_TIMEOUT;
-      (import.meta.env as any).VITE_API_TIMEOUT = '100'; // 100ms
-      
+    it('AbortErrorはタイムアウトとして処理される', async () => {
+      const abortError = new Error('The operation was aborted');
+      abortError.name = 'AbortError';
+      mockFetch.mockRejectedValueOnce(abortError);
+
       try {
-        // 実際のAPIリクエスト（タイムアウトする可能性がある）
         await apiClient.get('/api/v1/suggestions?situation=workplace&duration=5');
-        
-        // タイムアウトしなかった場合はスキップ
-        console.log('API応答が高速なためタイムアウトテストをスキップ');
       } catch (error) {
-        // タイムアウトエラーの検証
-        if (error.message.includes('タイムアウト')) {
-          expect(error.message).toContain('リクエストがタイムアウトしました');
-          expect(error.message).toContain('時間がかかりすぎています');
-        }
-      } finally {
-        // タイムアウト設定を復元
-        if (originalTimeout !== undefined) {
-          (import.meta.env as any).VITE_API_TIMEOUT = originalTimeout;
-        }
+        const errorMessage = (error as Error).message;
+        expect(errorMessage).toContain('タイムアウト');
       }
     });
   });
 
   describe('ヘッダーとオプションのテスト', () => {
     it('Content-Typeヘッダーが正しく設定される', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ success: true }),
+      });
+
       const testData = { test: 'data' };
-      
-      try {
-        // 実際のAPIにリクエストを送信
-        await apiClient.post('/api/v1/test', testData);
-      } catch (error) {
-        // エラーでもヘッダーは設定されているはず
-        // （実際のリクエストが送信されていることを確認）
-        expect(error).toBeDefined();
-      }
+      await apiClient.post('/api/v1/test', testData);
+
+      const callArgs = mockFetch.mock.calls[0];
+      expect(callArgs[1].headers['Content-Type']).toBe('application/json');
     });
   });
 
   describe('レスポンス処理のテスト', () => {
     it('JSONレスポンスを正しくパースする', async () => {
-      try {
-        const response = await apiClient.get('/health');
-        
-        // JSONとしてパースされていることを確認
-        expect(typeof response).toBe('object');
-        expect(response).not.toBe(null);
-      } catch (error) {
-        // サーバーが起動していない場合はスキップ
-        console.log('サーバーが起動していないためスキップ:', error.message);
-      }
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ status: 'ok', version: '1.0' }),
+      });
+
+      const response = await apiClient.get('/health');
+      expect(typeof response).toBe('object');
+      expect(response).not.toBe(null);
     });
 
-    it('空のレスポンスも適切に処理する', async () => {
-      try {
-        // OPTIONSリクエストは通常空のレスポンスを返す
-        const response = await apiClient.request('OPTIONS', '/health');
-        
-        // 空のレスポンスまたはエラー
-        expect(response === null || response === undefined || typeof response === 'object').toBe(true);
-      } catch (error) {
-        // エラーも正常な動作
-        expect(error).toBeDefined();
-      }
+    it('304レスポンスはnullを返す', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 304,
+        json: async () => null,
+      });
+
+      const response = await apiClient.get('/health');
+      expect(response).toBe(null);
     });
   });
 });

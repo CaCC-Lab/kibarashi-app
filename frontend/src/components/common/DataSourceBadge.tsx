@@ -64,8 +64,14 @@ export const DataSourceBadge: React.FC<DataSourceBadgeProps> = ({
   responseTime,
   className = ''
 }) => {
-  const config = sourceConfig[source];
-  
+  const config = sourceConfig[source] || {
+    icon: '❓',
+    label: '不明',
+    color: 'text-gray-600 bg-gray-50 border-gray-200',
+    darkColor: 'dark:text-gray-400 dark:bg-gray-900/20 dark:border-gray-800',
+    ariaLabel: 'データソースが不明です'
+  };
+
   return (
     <div className="group relative inline-block">
       {/* メインバッジ */}

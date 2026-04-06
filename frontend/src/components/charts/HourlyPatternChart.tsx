@@ -69,7 +69,7 @@ const HourlyPatternChart: React.FC<HourlyPatternChartProps> = ({ hourlyPattern }
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => `${context.parsed.y}回`,
+          label: (context: { parsed: { y: number } }) => `${context.parsed.y}回`,
         },
       },
     },

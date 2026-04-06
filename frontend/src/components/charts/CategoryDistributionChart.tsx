@@ -97,7 +97,7 @@ const CategoryDistributionChart: React.FC<CategoryDistributionChartProps> = ({
       },
       tooltip: {
         callbacks: {
-          label: (context: any) => {
+          label: (context: { dataset: { data: number[] }; parsed: number; label: string }) => {
             const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
             if (total === 0 || context.label === 'データなし') {
               return 'まだデータがありません';

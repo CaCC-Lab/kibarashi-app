@@ -216,17 +216,17 @@ describe('BrowserTTS', () => {
   describe('エラーハンドリングのテスト', () => {
     it('SpeechSynthesis APIが利用できない場合のエラー', () => {
       // speechSynthesisを一時的に削除
-      const originalSpeechSynthesis = window.speechSynthesis;
+      // isAvailable() checks 'speechSynthesis' in window, so we need to
+      // temporarily remove the property entirely, not just set it to undefined
       const originalDescriptor = Object.getOwnPropertyDescriptor(window, 'speechSynthesis');
-      delete (window as any).speechSynthesis;
-      
+      // @ts-expect-error - deliberately deleting for test
+      delete (window as Record<string, unknown>).speechSynthesis;
+
       expect(browserTTS.isAvailable()).toBe(false);
-      
+
       // 復元
       if (originalDescriptor) {
         Object.defineProperty(window, 'speechSynthesis', originalDescriptor);
-      } else {
-        (window as any).speechSynthesis = originalSpeechSynthesis;
       }
     });
 

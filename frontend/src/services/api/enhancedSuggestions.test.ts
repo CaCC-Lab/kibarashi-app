@@ -27,45 +27,43 @@ describe('Enhanced Suggestions API', () => {
 
   describe('getEnhancedSuggestions', () => {
     const mockResponse = {
-      data: {
-        suggestions: [
-          {
-            id: 'test-1',
-            title: 'テスト提案',
-            description: 'テスト説明',
-            duration: 5,
-            category: '認知的',
-            displaySteps: ['ステップ1', 'ステップ2'],
-            displayGuide: 'ガイド',
-            voiceGuideScript: {
-              totalDuration: 300,
-              segments: [],
-              settings: {
-                pauseBetweenSegments: 1,
-                detailLevel: 'standard',
-                includeEncouragement: true,
-                breathingCues: false
-              }
-            },
-            accessibility: {
-              hasSubtitles: true,
-              keyboardNavigable: true,
-              screenReaderOptimized: true
-            }
-          }
-        ],
-        metadata: {
-          situation: 'workplace',
+      suggestions: [
+        {
+          id: 'test-1',
+          title: 'テスト提案',
+          description: 'テスト説明',
           duration: 5,
-          ageGroup: 'office_worker',
-          detailLevel: 'standard',
-          includeVoiceGuide: true,
-          timestamp: new Date().toISOString(),
-          voiceGuideInfo: {
-            available: true,
-            totalSegments: 3,
-            totalDuration: 300
+          category: '認知的',
+          displaySteps: ['ステップ1', 'ステップ2'],
+          displayGuide: 'ガイド',
+          voiceGuideScript: {
+            totalDuration: 300,
+            segments: [],
+            settings: {
+              pauseBetweenSegments: 1,
+              detailLevel: 'standard',
+              includeEncouragement: true,
+              breathingCues: false
+            }
+          },
+          accessibility: {
+            hasSubtitles: true,
+            keyboardNavigable: true,
+            screenReaderOptimized: true
           }
+        }
+      ],
+      metadata: {
+        situation: 'workplace',
+        duration: 5,
+        ageGroup: 'office_worker',
+        detailLevel: 'standard',
+        includeVoiceGuide: true,
+        timestamp: new Date().toISOString(),
+        voiceGuideInfo: {
+          available: true,
+          totalSegments: 3,
+          totalDuration: 300
         }
       }
     };
@@ -81,7 +79,7 @@ describe('Enhanced Suggestions API', () => {
       expect(apiClient.get).toHaveBeenCalledWith(
         expect.stringContaining('/enhanced-suggestions?')
       );
-      expect(result).toEqual(mockResponse.data);
+      expect(result).toEqual(mockResponse);
     });
 
     it('すべてのパラメータを正しく送信する', async () => {

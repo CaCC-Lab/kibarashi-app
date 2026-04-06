@@ -22,7 +22,7 @@ describe('SuggestionList', () => {
   afterEach(() => {
     // 環境変数を復元
     if (originalApiUrl !== undefined) {
-      (import.meta.env as any).VITE_API_URL = originalApiUrl;
+      (import.meta.env as Record<string, string>).VITE_API_URL = originalApiUrl;
     }
   });
 
@@ -78,7 +78,7 @@ describe('SuggestionList', () => {
   describe('エラーハンドリングのテスト', () => {
     it('ネットワークエラー時にエラーメッセージと再試行ボタンを表示する', async () => {
       // 存在しないサーバーを指定してエラーを発生させる
-      (import.meta.env as any).VITE_API_URL = 'http://localhost:9999';
+      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
       
       render(<SuggestionList situation="workplace" duration={5} />);
       
@@ -93,7 +93,7 @@ describe('SuggestionList', () => {
 
     it('再試行ボタンをクリックすると再取得を試みる', async () => {
       // エラーを発生させる
-      (import.meta.env as any).VITE_API_URL = 'http://localhost:9999';
+      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
       
       render(<SuggestionList situation="workplace" duration={5} />);
       
@@ -102,7 +102,7 @@ describe('SuggestionList', () => {
       }, { timeout: 10000 });
       
       // URLを正しく戻す
-      (import.meta.env as any).VITE_API_URL = originalApiUrl;
+      (import.meta.env as Record<string, string>).VITE_API_URL = originalApiUrl;
       
       // 再試行ボタンをクリック
       fireEvent.click(screen.getByText('もう一度試す'));

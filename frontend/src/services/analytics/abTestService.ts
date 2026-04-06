@@ -42,7 +42,7 @@ export interface MetricEvent {
   sessionId: string;
   ageGroup?: AgeGroup;
   abTestVariant?: ABTestVariant;
-  properties?: Record<string, any>;
+  properties?: Record<string, unknown>;
 }
 
 /**

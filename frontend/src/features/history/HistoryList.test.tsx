@@ -11,7 +11,8 @@ vi.mock('../../hooks/useHistory');
 
 // 子コンポーネントをモック
 vi.mock('./HistoryItem', () => ({
-  default: ({ item, onDelete: _onDelete, onUpdateRating: _onUpdateRating, onUpdateNote: _onUpdateNote }: any) => (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  default: ({ item, onDelete: _onDelete, onUpdateRating: _onUpdateRating, onUpdateNote: _onUpdateNote }: { item: HistoryItem; onDelete: unknown; onUpdateRating: unknown; onUpdateNote: unknown }) => (
     <div data-testid="history-item">
       <div>{item.title}</div>
       <div>{item.description}</div>
@@ -20,7 +21,7 @@ vi.mock('./HistoryItem', () => ({
 }));
 
 vi.mock('./HistoryStats', () => ({
-  default: ({ stats }: any) => (
+  default: ({ stats }: { stats: { totalCount: number } }) => (
     <div data-testid="history-stats">
       <div>統計情報</div>
       <div>総実行回数: {stats.totalCount}</div>
@@ -29,7 +30,7 @@ vi.mock('./HistoryStats', () => ({
 }));
 
 vi.mock('./HistoryFilter', () => ({
-  default: ({ filterType, onFilterTypeChange, onFilterValueChange }: any) => (
+  default: ({ filterType, onFilterTypeChange, onFilterValueChange }: { filterType: string; onFilterTypeChange: (type: string) => void; onFilterValueChange: (value: string) => void }) => (
     <div data-testid="history-filter">
       <div>フィルター:</div>
       <button onClick={() => onFilterTypeChange('all')}>すべて</button>
@@ -50,7 +51,7 @@ vi.mock('../../components/common/Loading', () => ({
 }));
 
 vi.mock('../../components/common/ErrorMessage', () => ({
-  default: ({ message, onRetry }: any) => (
+  default: ({ message, onRetry }: { message: string; onRetry?: () => void }) => (
     <div>
       <div>{message}</div>
       {onRetry && <button onClick={onRetry}>再試行</button>}
@@ -137,12 +138,12 @@ describe('HistoryList', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useHistory as any).mockReturnValue(mockHooks);
+    (vi.mocked(useHistory)).mockReturnValue(mockHooks);
   });
 
   describe('空状態の表示', () => {
     it('履歴がない場合、空状態メッセージが表示される', () => {
-      (useHistory as any).mockReturnValue({
+      (vi.mocked(useHistory)).mockReturnValue({
         ...mockHooks,
         history: [],
         stats: {
@@ -223,7 +224,7 @@ describe('HistoryList', () => {
     });
 
     it('フィルターで一致する項目がない場合メッセージが表示される', () => {
-      (useHistory as any).mockReturnValue({
+      (vi.mocked(useHistory)).mockReturnValue({
         ...mockHooks,
         getHistoryBySituation: vi.fn().mockReturnValue([])
       });
@@ -302,7 +303,7 @@ describe('HistoryList', () => {
     it.skip('インポートに失敗した場合エラーが表示される', async () => {
       // このテストはモックを使用しているため、実際の実装では
       // ナビゲーションエラーが発生するためスキップ
-      (useHistory as any).mockReturnValue({
+      (vi.mocked(useHistory)).mockReturnValue({
         ...mockHooks,
         importHistory: vi.fn().mockReturnValue(false)
       });
@@ -360,7 +361,7 @@ describe('HistoryList', () => {
     });
 
     it('履歴がない場合クリアボタンは表示されない', () => {
-      (useHistory as any).mockReturnValue({
+      (vi.mocked(useHistory)).mockReturnValue({
         ...mockHooks,
         history: []
       });
