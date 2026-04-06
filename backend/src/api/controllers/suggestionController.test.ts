@@ -14,9 +14,9 @@ describe('suggestionController', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
-  let responseJson: any;
+  let responseJson: Record<string, unknown> | undefined;
   let nextCallCount: number;
-  let nextCalledWith: any;
+  let nextCalledWith: unknown;
 
   beforeEach(() => {
     // リクエストオブジェクトの準備
@@ -27,14 +27,14 @@ describe('suggestionController', () => {
     // レスポンスオブジェクトの準備
     responseJson = undefined;
     mockResponse = {
-      json: (data: any) => {
+      json: (data: Record<string, unknown>) => {
         responseJson = data;
         return mockResponse as Response;
       },
       status: (_code: number) => {
         return mockResponse as Response;
       },
-      set: (_headers: any) => {
+      set: (_headers: Record<string, string>) => {
         // HTTPヘッダーの設定をモック
         return mockResponse as Response;
       }
@@ -43,7 +43,7 @@ describe('suggestionController', () => {
     // NextFunctionの準備
     nextCallCount = 0;
     nextCalledWith = undefined;
-    mockNext = (error?: any) => {
+    mockNext = (error?: unknown) => {
       nextCallCount++;
       nextCalledWith = error;
       if (error) {
@@ -435,7 +435,7 @@ describe('suggestionController', () => {
       expect(responseJson.suggestions.length).toBeGreaterThan(0);
       
       // すべての提案が適切な構造を持つことを確認
-      responseJson.suggestions.forEach((suggestion: any) => {
+      responseJson.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('id');
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');

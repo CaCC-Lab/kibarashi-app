@@ -1,0 +1,259 @@
+{
+  "suggestions": [
+    {
+      "id": "qr001",
+      "category": "behavioral",
+      "subcategory": "instant",
+      "title": "3-2-1完全リセット",
+      "description": "3つ見る、2つ聞く、1つ触る。瞬時に「今」に戻る技法",
+      "situations": ["workplace", "home", "outside", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["即効性", "グラウンディング"],
+      "scientificBasis": "接地法（グラウンディング）は解離症状とパニック発作の軽減に効果的（Najavits, 2002）",
+      "tags": ["即効性", "グラウンディング", "3-2-1"],
+      "guide": {
+        "5": "まず周りを見回して3つのものを意識的に見つめ、名前を心の中で言います。次に2つの音（エアコンの音、鳥の声など）を特定して聞きます。最後に1つのもの（机、椅子、自分の手など）を触って感触を確認します。これで脳が「今この瞬間」にしっかりと着地します。"
+      }
+    },
+    {
+      "id": "qr002",
+      "category": "behavioral",
+      "subcategory": "breathing",
+      "title": "7秒吐き出し呼吸",
+      "description": "吸うより吐くことに集中した緊急リラックス法",
+      "situations": ["workplace", "home", "outside", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["即効リラックス", "自律神経調整"],
+      "scientificBasis": "長い呼気は副交感神経を活性化し即座にリラックス反応を誘発（Zaccaro et al., 2018）",
+      "tags": ["呼吸", "副交感神経", "7秒"],
+      "guide": {
+        "5": "4秒で鼻から息を吸い、7秒かけて口からゆっくりと息を吐きます。吐くときは「ふぅ〜」と音を立てても構いません。この1:1.75の比率で5回繰り返すと、自律神経が自動的にリラックスモードに切り替わります。緊張した会議の前や電車の中でも効果的です。"
+      }
+    },
+    {
+      "id": "qr003",
+      "category": "cognitive",
+      "subcategory": "instant_positive",
+      "title": "感謝3秒スプリント",
+      "description": "3つの感謝を3秒で見つけて気分を即座に変える",
+      "situations": ["workplace", "home", "outside", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["気分転換", "ポジティブ感情"],
+      "scientificBasis": "感謝の実践は即座に神経伝達物質を変化させ気分を向上（Emmons & Stern, 2013）",
+      "tags": ["感謝", "3秒", "即効性"],
+      "guide": {
+        "5": "今この瞬間にある3つの「当たり前」に感謝してみましょう。①呼吸ができること②座れる場所があること③温度が快適なこと、など。どんなに小さなことでもOK。「ありがたい」と心の中で3回唱えるだけで、脳内の幸福物質が分泌され始めます。"
+      }
+    },
+    {
+      "id": "qr004",
+      "category": "behavioral",
+      "subcategory": "movement",
+      "title": "肩ストン・リリース",
+      "description": "肩の力を一気に抜いて緊張をリセット",
+      "situations": ["workplace", "home", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["筋緊張緩和", "即効性"],
+      "scientificBasis": "進行性筋弛緩法の原理で筋緊張をリセット（Jacobson, 1938）",
+      "tags": ["筋弛緩", "肩", "リリース"],
+      "guide": {
+        "5": "①両肩を思いっきり上に持ち上げて5秒キープ②「ストン！」と一気に力を抜いて肩を下ろす③この瞬間の「ほぐれた感覚」を味わう④3回繰り返す⑤最後に首を左右にゆっくり回す。デスクワーク中でも目立たずにできる緊張リセット法です。"
+      }
+    },
+    {
+      "id": "qr005",
+      "category": "cognitive",
+      "subcategory": "reset",
+      "title": "「リセット」魔法の言葉",
+      "description": "「リセット」と唱えるだけで思考パターンを切り替える",
+      "situations": ["workplace", "home", "outside", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["思考切替", "パターン破壊"],
+      "scientificBasis": "言葉による認知的再構築は思考パターンを即座に変更（Beck & Beck, 2011）",
+      "tags": ["リセット", "思考切替", "魔法の言葉"],
+      "guide": {
+        "5": "ネガティブ思考や心配事が頭をぐるぐるしているとき、「リセット！」と心の中で（または小声で）3回唱えてください。パソコンを再起動するように、脳の思考回路を一度クリアにするイメージです。「今から新しい気持ちでスタート」と続けると効果が高まります。"
+      }
+    },
+    {
+      "id": "qr006",
+      "category": "behavioral",
+      "subcategory": "sensory",
+      "title": "冷水手首クール",
+      "description": "手首の冷却で自律神経を即座にリセット",
+      "situations": ["workplace", "home"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["覚醒", "リフレッシュ"],
+      "scientificBasis": "手首冷却は体温調節中枢を刺激し覚醒度を向上（Grahn et al., 2005）",
+      "tags": ["冷却", "手首", "覚醒"],
+      "guide": {
+        "5": "洗面所で冷たい水を手首（脈を取る部分）に20秒当てます。両手首を交互に冷やし、冷たい感覚が腕を伝って体全体に広がるのを感じてください。瞬時に頭がスッキリし、集中力が戻ります。会議中の眠気や午後のだるさに特に効果的です。"
+      }
+    },
+    {
+      "id": "qr007",
+      "category": "cognitive",
+      "subcategory": "perspective",
+      "title": "10年後視点",
+      "description": "10年後の自分から見た今の問題の捉え方",
+      "situations": ["workplace", "home", "outside", "studying"],
+      "durations": [5],
+      "difficulty": "medium",
+      "effectiveness": ["視点転換", "重要度調整"],
+      "scientificBasis": "心理的距離理論により問題の主観的重要度が調整される（Trope & Liberman, 2010）",
+      "tags": ["未来視点", "相対化", "10年後"],
+      "guide": {
+        "5": "今悩んでいることを、10年後の自分の立場から見てみましょう。「10年後の私から見て、この問題はどのくらい重要だろう？」「その時の私なら、今の私にどんなアドバイスをするだろう？」この視点の変化で、問題の大きさが適正に調整されます。"
+      }
+    },
+    {
+      "id": "qr008",
+      "category": "behavioral",
+      "subcategory": "micro_action",
+      "title": "1分片付け",
+      "description": "手の届く範囲の1分間整理で達成感と清涼感を得る",
+      "situations": ["workplace", "home"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["達成感", "環境改善"],
+      "scientificBasis": "小さな達成は自己効力感を向上させストレスを軽減（Bandura, 1977）",
+      "tags": ["片付け", "達成感", "1分"],
+      "guide": {
+        "5": "デスクの上、カバンの中、本棚の一段など、手の届く小さな範囲を選んで1分間で集中整理します。不要なものは捨て、必要なものは整列させてください。完了後の「スッキリ感」と「やり遂げた感」が、心のモヤモヤもクリアにしてくれます。"
+      }
+    },
+    {
+      "id": "qr009",
+      "category": "cognitive",
+      "subcategory": "mantra",
+      "title": "「大丈夫」マントラ",
+      "description": "「大丈夫」を繰り返して安心感を作る",
+      "situations": ["workplace", "home", "outside", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["安心感", "不安軽減"],
+      "scientificBasis": "自己暗示は不安軽減と自己効力感向上に効果的（Coué, 1922）",
+      "tags": ["マントラ", "大丈夫", "安心感"],
+      "guide": {
+        "5": "「大丈夫、大丈夫、大丈夫」と心の中で、またはささやくように繰り返します。呼吸に合わせて「息を吸って→大丈夫、息を吐いて→大丈夫」でも効果的です。この言葉の繰り返しが脳に安心のシグナルを送り、不安や心配を和らげてくれます。"
+      }
+    },
+    {
+      "id": "qr010",
+      "category": "behavioral",
+      "subcategory": "posture",
+      "title": "パワーポーズ2分",
+      "description": "自信を高める姿勢で内側からエネルギーチャージ",
+      "situations": ["home", "outside"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["自信向上", "エネルギー増加"],
+      "scientificBasis": "身体姿勢は自信とテストステロンレベルに影響（Cuddy et al., 2012）",
+      "tags": ["パワーポーズ", "自信", "姿勢"],
+      "guide": {
+        "5": "一人になれる場所で、両手を腰に当てて胸を張り、足を肩幅に開いて立ちます（スーパーマンポーズでもOK）。この姿勢を2分間キープし、「私は強い」「私にはできる」と心の中で唱えてください。姿勢が心の状態を変え、自信とエネルギーが湧いてきます。"
+      }
+    },
+    {
+      "id": "qr011",
+      "category": "cognitive",
+      "subcategory": "anchor",
+      "title": "安心の場所イメージ",
+      "description": "安心できる場所を瞬時に思い出してそこにいる感覚を味わう",
+      "situations": ["workplace", "home", "outside", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["安心感", "心理的避難"],
+      "scientificBasis": "心的イメージは実際の体験と同じ神経回路を活性化（Kosslyn et al., 2001）",
+      "tags": ["安心の場所", "イメージ", "心理的避難"],
+      "guide": {
+        "5": "目を閉じて、最も安心できる場所（実家、好きなカフェ、海辺、森など）を思い浮かべます。そこにいる時の感覚（温度、音、匂い、安心感）を鮮明に再現してください。「いつでもここに帰ることができる」「私は安全だ」と感じながら、心の避難場所でほっと一息ついてください。"
+      }
+    },
+    {
+      "id": "qr012",
+      "category": "behavioral",
+      "subcategory": "micro_stretching",
+      "title": "30秒全身伸び",
+      "description": "座ったままできる最短全身ストレッチ",
+      "situations": ["workplace", "home", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["血行促進", "筋緊張緩和"],
+      "scientificBasis": "短時間ストレッチは筋緊張と疲労を効果的に軽減（Page, 2012）",
+      "tags": ["ストレッチ", "30秒", "座位"],
+      "guide": {
+        "5": "座ったまま以下を30秒で実行：①両手を頭上に伸ばして背伸び（10秒）②体を左右に傾けて脇腹伸ばし（各5秒）③肩を前後に大きく回す（10秒）。短時間でも筋肉がほぐれ、血流が改善して頭も体もスッキリします。"
+      }
+    },
+    {
+      "id": "qr013",
+      "category": "cognitive",
+      "subcategory": "completion",
+      "title": "「終わった」宣言",
+      "description": "心配事やタスクに区切りをつける心理的完了法",
+      "situations": ["workplace", "home", "studying"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["心理的区切り", "切り替え"],
+      "scientificBasis": "心理的完了は反復思考を軽減し注意資源を解放（Zeigarnik, 1927）",
+      "tags": ["完了", "区切り", "切り替え"],
+      "guide": {
+        "5": "今考えている心配事やタスクについて「今はここまで。終わり！」と心の中で明確に宣言します。深呼吸を一回して「次の時間は〇〇に集中する」と新しいモードを設定してください。脳に明確な区切りを与えることで、注意の切り替えがスムーズになります。"
+      }
+    },
+    {
+      "id": "qr014",
+      "category": "behavioral",
+      "subcategory": "smile",
+      "title": "作り笑顔30秒",
+      "description": "意図的な笑顔で脳を騙して気分を向上させる",
+      "situations": ["workplace", "home", "outside"],
+      "durations": [5],
+      "difficulty": "easy",
+      "effectiveness": ["気分向上", "ストレス軽減"],
+      "scientificBasis": "表情フィードバック仮説：笑顔は実際に気分を改善（Strack et al., 1988）",
+      "tags": ["笑顔", "表情", "気分向上"],
+      "guide": {
+        "5": "鏡を見るか、人がいない場所で意図的に笑顔を作ります。口角を上げ、頬を高く上げて、目も細める本格的な笑顔を30秒キープ。最初は違和感があっても続けてください。脳が「楽しい」と錯覚し始め、実際に気分が明るくなってきます。"
+      }
+    },
+    {
+      "id": "qr015",
+      "category": "cognitive",
+      "subcategory": "priority",
+      "title": "「今一番大切なこと」質問",
+      "description": "優先順位を瞬時に明確にして迷いを解消",
+      "situations": ["workplace", "home", "studying"],
+      "durations": [5],
+      "difficulty": "medium",
+      "effectiveness": ["優先順位明確化", "迷い解消"],
+      "scientificBasis": "価値明確化は意思決定効率とストレス軽減に効果的（Schwartz et al., 2002）",
+      "tags": ["優先順位", "価値", "意思決定"],
+      "guide": {
+        "5": "「今この瞬間、私にとって一番大切なことは何？」と自分に問いかけ、3秒以内に答えを見つけてください。それが今日すべき最優先事項です。他のことは一旦脇に置き、その一番大切なことに集中しましょう。シンプルな問いが混乱した思考を整理してくれます。"
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0.0",
+    "created": "2025-08-27",
+    "focus": "即効性ストレス対処法",
+    "aiCollaboration": {
+      "pattern": "緊急対応特化パターン",
+      "characteristics": [
+        "5分以内で完了",
+        "どこでも実行可能",
+        "即効性重視",
+        "科学的根拠あり"
+      ],
+      "situations": "緊急時・会議前・電車内・短い休憩時間"
+    }
+  }
+}

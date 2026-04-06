@@ -25,8 +25,8 @@ class ContextualPromptEnhancer {
 
       // 並列でデータを取得
       const [weather, seasonal] = await Promise.all([
-        weatherClient.getCurrentWeatherByCity('Tokyo').catch((error: any) => {
-          logger.warn('Weather data unavailable', { error: error.message });
+        weatherClient.getCurrentWeatherByCity('Tokyo').catch((error: unknown) => {
+          logger.warn('Weather data unavailable', { error: error instanceof Error ? error.message : String(error) });
           return null;
         }),
         Promise.resolve(seasonalClient.getCurrentSeasonalData())
@@ -208,7 +208,7 @@ ${userHistory.slice(-5).map((item, index) => `${index + 1}. ${item}`).join('\n')
   /**
    * 天候に基づくヒントを生成
    */
-  private generateWeatherTips(weather: any): string[] {
+  private generateWeatherTips(weather: WeatherData): string[] {
     const tips: string[] = [];
     
     if (!weather) return tips;

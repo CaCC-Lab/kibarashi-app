@@ -42,5 +42,6 @@ export const checkEnvironmentVariables = () => {
 // 開発環境での確認用
 if (process.env.NODE_ENV === 'development') {
   const check = checkEnvironmentVariables();
+  // eslint-disable-next-line no-console
   console.log('🔍 Environment Variables Check:', check);
 }

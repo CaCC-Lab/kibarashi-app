@@ -16,6 +16,7 @@ describe('generateSuggestions', () => {
   beforeEach(() => {
     // テスト間の影響を避けるため、必要に応じて初期化
     if (!hasApiKey) {
+      // eslint-disable-next-line no-console
       console.log('注意: GEMINI_API_KEYが設定されていないため、フォールバックデータを使用します');
     }
   });
@@ -201,7 +202,7 @@ describe('generateSuggestions', () => {
   describe('エラーハンドリングのテスト', () => {
     it('無効な状況パラメータでもエラーにならない', async () => {
       // TypeScriptの型チェックを回避してテスト
-      const suggestions = await generateSuggestions('invalid' as any, 5);
+      const suggestions = await generateSuggestions('invalid' as 'workplace', 5);
       
       // エラーにならず、配列が返されることを確認
       expect(suggestions).toBeDefined();

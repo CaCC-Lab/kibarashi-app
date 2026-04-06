@@ -233,7 +233,7 @@ describe('fallbackData', () => {
       });
       
       it('存在しない状況でも空配列を返す', () => {
-        const suggestions = getFallbackSuggestions('nonexistent_situation' as any, 15);
+        const suggestions = getFallbackSuggestions('nonexistent_situation' as 'workplace', 15);
         
         expect(suggestions).toBeDefined();
         expect(Array.isArray(suggestions)).toBe(true);

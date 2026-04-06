@@ -113,14 +113,14 @@ export const getSuggestions = async (
       });
 
       logger.warn('Invalid request parameters:', {
-        requestId: (req as any).id,
+        requestId: (req as unknown as Record<string, unknown>).id,
         query: req.query,
         errors: errorDetails
       });
 
       const appError = new Error('Invalid request parameters');
-      (appError as any).statusCode = 400;
-      (appError as any).details = {
+      (appError as unknown as Record<string, unknown>).statusCode = 400;
+      (appError as unknown as Record<string, unknown>).details = {
         errors: errorDetails,
         validationErrorsCount: errorDetails.length
       };

@@ -142,7 +142,7 @@ describe('Suggestion API Integration Tests', () => {
         })
         .expect(200);
 
-      const ids = response.body.suggestions.map((s: any) => s.id);
+      const ids = response.body.suggestions.map((s: Record<string, unknown>) => s.id);
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(ids.length);
     });
@@ -157,7 +157,7 @@ describe('Suggestion API Integration Tests', () => {
         })
         .expect(200);
 
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('id');
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');
@@ -182,7 +182,7 @@ describe('Suggestion API Integration Tests', () => {
         })
         .expect(200);
 
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion.duration).toBeLessThanOrEqual(duration);
       });
     });

@@ -40,16 +40,16 @@ export function getFallbackSuggestions(
   
   // Filter suggestions based on situation and duration
   let filteredSuggestions = suggestionSource.suggestions.filter(
-    (suggestion: any) =>
-      suggestion.situations.includes(situation) &&
-      suggestion.durations.includes(duration)
+    (suggestion: Record<string, unknown>) =>
+      (suggestion.situations as string[]).includes(situation) &&
+      (suggestion.durations as number[]).includes(duration)
   );
-  
+
   // 就活・転職活動者の場合、年齢層でさらにフィルタリング
   if (isJobHunting && ageGroup) {
     filteredSuggestions = filteredSuggestions.filter(
-      (suggestion: any) => 
-        !suggestion.ageGroups || suggestion.ageGroups.includes(ageGroup)
+      (suggestion: Record<string, unknown>) =>
+        !suggestion.ageGroups || (suggestion.ageGroups as string[]).includes(ageGroup)
     );
   }
 
@@ -65,13 +65,13 @@ export function getFallbackSuggestions(
   const selected = shuffled.slice(0, Math.min(3, shuffled.length));
 
   // Map to the expected format
-  return selected.map((suggestion: any) => ({
+  return selected.map((suggestion: Record<string, unknown>) => ({
     id: `${suggestion.id}-${Date.now()}-${Math.random()}`, // より一意性の高いIDを生成
-    title: suggestion.title,
-    description: suggestion.description,
+    title: suggestion.title as string,
+    description: suggestion.description as string,
     duration: duration,
     category: suggestion.category === 'cognitive' ? '認知的' : '行動的' as '認知的' | '行動的',
-    steps: suggestion.guide[duration.toString()]?.split('。').filter((s: string) => s.trim()).map((s: string) => s.trim() + '。') || [],
-    guide: suggestion.guide[duration.toString()] || '', // Add guide field
+    steps: ((suggestion.guide as Record<string, string>)?.[duration.toString()])?.split('。').filter((s: string) => s.trim()).map((s: string) => s.trim() + '。') || [],
+    guide: (suggestion.guide as Record<string, string>)?.[duration.toString()] || '', // Add guide field
   }));
 }

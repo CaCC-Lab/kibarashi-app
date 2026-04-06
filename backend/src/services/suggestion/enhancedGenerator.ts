@@ -224,7 +224,7 @@ async function generateEnhancedFallback(
  * 提案の詳細度を調整
  */
 function adjustDetailLevel(
-  suggestion: any, 
+  suggestion: EnhancedSuggestion,
   detailLevel: 'simple' | 'standard' | 'detailed'
 ): EnhancedSuggestion {
   // 詳細度に応じて音声ガイドの設定を調整
@@ -236,7 +236,7 @@ function adjustDetailLevel(
     // シンプルモードでは励ましセグメントを除去
     if (detailLevel === 'simple') {
       suggestion.voiceGuideScript.segments = suggestion.voiceGuideScript.segments.filter(
-        (segment: any) => segment.type !== 'encouragement'
+        (segment: EnhancedSuggestion['voiceGuideScript']['segments'][number]) => segment.type !== 'encouragement'
       );
     }
   }
@@ -247,7 +247,7 @@ function adjustDetailLevel(
 /**
  * 拡張提案から従来の提案形式に変換（後方互換性）
  */
-export function toLegacySuggestion(enhancedSuggestion: EnhancedSuggestion): any {
+export function toLegacySuggestion(enhancedSuggestion: EnhancedSuggestion): Record<string, unknown> {
   return {
     id: enhancedSuggestion.id,
     title: enhancedSuggestion.title,

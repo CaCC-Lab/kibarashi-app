@@ -45,7 +45,7 @@ describe('Suggestions Routes', () => {
       expect(response.body.suggestions.length).toBeLessThanOrEqual(3);
       
       // 各提案の構造を検証
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('id');
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');
@@ -68,8 +68,8 @@ describe('Suggestions Routes', () => {
       expect(homeResponse.status).toBe(200);
       
       // 提案内容が異なることを確認（APIキーがない場合でも異なるはず）
-      const workplaceTitles = workplaceResponse.body.suggestions.map((s: any) => s.title);
-      const homeTitles = homeResponse.body.suggestions.map((s: any) => s.title);
+      const workplaceTitles = workplaceResponse.body.suggestions.map((s: Record<string, unknown>) => s.title);
+      const homeTitles = homeResponse.body.suggestions.map((s: Record<string, unknown>) => s.title);
       
       // 少なくとも一つは異なるタイトルがあるはず
       const hasDifferentTitles = workplaceTitles.some((title: string) => 
@@ -93,7 +93,7 @@ describe('Suggestions Routes', () => {
         expect(response.body.suggestions).toBeDefined();
         
         // 時間制限が守られていることを確認
-        response.body.suggestions.forEach((suggestion: any) => {
+        response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
           expect(suggestion.duration).toBeLessThanOrEqual(duration);
         });
       }
@@ -172,7 +172,7 @@ describe('Suggestions Routes', () => {
       expect(response.body.suggestions.length).toBeGreaterThan(0);
       
       // フォールバックデータも適切な構造を持つ
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('id');
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');
@@ -236,8 +236,8 @@ describe('Suggestions Routes', () => {
       
       // フォールバックデータを使用している場合でも、
       // 年齢層によって異なる選択がされる可能性がある
-      const controlTitles = controlResponse.body.suggestions.map((s: any) => s.title);
-      const studentTitles = studentResponse.body.suggestions.map((s: any) => s.title);
+      const controlTitles = controlResponse.body.suggestions.map((s: Record<string, unknown>) => s.title);
+      const studentTitles = studentResponse.body.suggestions.map((s: Record<string, unknown>) => s.title);
       
       // 両方とも提案が返されることを確認
       expect(controlTitles.length).toBeGreaterThan(0);

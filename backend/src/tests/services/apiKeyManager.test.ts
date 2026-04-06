@@ -1,8 +1,8 @@
 // APIKeyManagerクラスを直接インポートしてテスト用にモック
 class APIKeyManager {
-  private apiKeys: any[] = [];
+  private apiKeys: Array<Record<string, unknown>> = [];
   private currentKeyIndex: number = 0;
-  private config: any;
+  private config: Record<string, unknown>;
   private stats = {
     totalRequests: 0,
     successfulRequests: 0,
@@ -130,7 +130,7 @@ class APIKeyManager {
     }
   }
 
-  private setCooldown(keyInfo: any): void {
+  private setCooldown(keyInfo: Record<string, unknown>): void {
     keyInfo.isOnCooldown = true;
     keyInfo.cooldownUntil = new Date(Date.now() + this.config.cooldownMinutes * 60 * 1000);
     

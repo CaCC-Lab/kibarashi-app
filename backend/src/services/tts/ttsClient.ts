@@ -76,7 +76,7 @@ class TTSClient {
     }
   }
 
-  private generateCacheKey(text: string, voiceConfig?: any): string {
+  private generateCacheKey(text: string, voiceConfig?: Record<string, unknown>): string {
     const config = JSON.stringify(voiceConfig || {});
     const hash = crypto.createHash('md5').update(text + config).digest('hex');
     return hash;
@@ -144,7 +144,11 @@ class TTSClient {
 let instance: TTSClient | null = null;
 
 export const ttsClient = {
-  synthesizeSpeech: async (text: string, voiceConfig?: any) => {
+  synthesizeSpeech: async (text: string, voiceConfig?: {
+    languageCode?: string;
+    name?: string;
+    ssmlGender?: 'MALE' | 'FEMALE' | 'NEUTRAL';
+  }) => {
     if (!instance) {
       instance = new TTSClient();
     }

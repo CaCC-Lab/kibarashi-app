@@ -14,7 +14,7 @@ describe('errorHandler', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
-  let responseJson: any;
+  let responseJson: Record<string, unknown> | undefined;
   let responseStatus: number;
 
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('errorHandler', () => {
         responseStatus = code;
         return this;
       },
-      json: function(data: any) {
+      json: function(data: Record<string, unknown>) {
         responseJson = data;
         return this;
       }
@@ -85,7 +85,7 @@ describe('errorHandler', () => {
 
   describe('HTTPステータスコード付きエラー', () => {
     it('400エラー（Bad Request）を適切に処理する', () => {
-      const error: any = new Error('Invalid parameters');
+      const error = new Error('Invalid parameters') as Error & { statusCode: number };
       error.statusCode = 400;
       
       errorHandler(
@@ -103,7 +103,7 @@ describe('errorHandler', () => {
     });
 
     it('404エラー（Not Found）を適切に処理する', () => {
-      const error: any = new Error('Resource not found');
+      const error = new Error('Resource not found') as Error & { statusCode: number };
       error.statusCode = 404;
       
       errorHandler(
@@ -120,7 +120,7 @@ describe('errorHandler', () => {
     });
 
     it('429エラー（Rate Limit）を適切に処理する', () => {
-      const error: any = new Error('Too many requests');
+      const error = new Error('Too many requests') as Error & { statusCode: number };
       error.statusCode = 429;
       
       errorHandler(
@@ -137,7 +137,7 @@ describe('errorHandler', () => {
     });
 
     it('503エラー（Service Unavailable）を適切に処理する', () => {
-      const error: any = new Error('Service temporarily unavailable');
+      const error = new Error('Service temporarily unavailable') as Error & { statusCode: number };
       error.statusCode = 503;
       
       errorHandler(
@@ -200,7 +200,7 @@ describe('errorHandler', () => {
   describe('特殊なエラーケース', () => {
     it('エラーオブジェクトがない場合でも処理できる', () => {
       errorHandler(
-        null as any,
+        null as unknown as Error,
         mockRequest as Request,
         mockResponse as Response,
         mockNext
@@ -228,7 +228,7 @@ describe('errorHandler', () => {
       const error = 'String error';
       
       errorHandler(
-        error as any,
+        error as unknown as Error,
         mockRequest as Request,
         mockResponse as Response,
         mockNext
@@ -241,7 +241,7 @@ describe('errorHandler', () => {
 
   describe('エラーメッセージのパターンマッチング', () => {
     it('タイムアウトエラーを適切に処理する（未定義のステータスコード）', () => {
-      const error: any = new Error('Request timeout occurred');
+      const error = new Error('Request timeout occurred') as Error & { statusCode: number };
       error.statusCode = 599; // 定義されていないステータスコード
       
       errorHandler(
@@ -257,7 +257,7 @@ describe('errorHandler', () => {
     });
 
     it('接続エラーを適切に処理する（未定義のステータスコード）', () => {
-      const error: any = new Error('Connection failed');
+      const error = new Error('Connection failed') as Error & { statusCode: number };
       error.statusCode = 599; // 定義されていないステータスコード
       
       errorHandler(
@@ -275,7 +275,7 @@ describe('errorHandler', () => {
 
   describe('その他のステータスコード', () => {
     it('401エラー（Unauthorized）を適切に処理する', () => {
-      const error: any = new Error('Unauthorized');
+      const error = new Error('Unauthorized') as Error & { statusCode: number };
       error.statusCode = 401;
       
       errorHandler(
@@ -292,7 +292,7 @@ describe('errorHandler', () => {
     });
 
     it('403エラー（Forbidden）を適切に処理する', () => {
-      const error: any = new Error('Forbidden');
+      const error = new Error('Forbidden') as Error & { statusCode: number };
       error.statusCode = 403;
       
       errorHandler(
@@ -309,7 +309,7 @@ describe('errorHandler', () => {
     });
 
     it('504エラー（Gateway Timeout）を適切に処理する', () => {
-      const error: any = new Error('Gateway timeout');
+      const error = new Error('Gateway timeout') as Error & { statusCode: number };
       error.statusCode = 504;
       
       errorHandler(
@@ -326,7 +326,7 @@ describe('errorHandler', () => {
     });
 
     it('502エラー（Bad Gateway）を適切に処理する', () => {
-      const error: any = new Error('Bad gateway');
+      const error = new Error('Bad gateway') as Error & { statusCode: number };
       error.statusCode = 502;
       
       errorHandler(
@@ -345,7 +345,7 @@ describe('errorHandler', () => {
 
   describe('エラーオブジェクトの構造', () => {
     it('すべての必須フィールドが含まれる', () => {
-      const error: any = new Error('Test error');
+      const error = new Error('Test error') as Error & { statusCode: number };
       error.statusCode = 400;
       
       errorHandler(

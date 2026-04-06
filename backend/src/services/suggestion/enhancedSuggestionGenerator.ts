@@ -128,7 +128,7 @@ ${ageGroup === 'student' ? '高校生・大学生' : '社会人'}向けの${situ
     const mainDuration = (data.duration * 60) - 60; // 全体時間 - イントロ30秒 - 締め30秒
     const stepDuration = Math.floor(mainDuration / data.detailedSteps.length);
 
-    data.detailedSteps.forEach((step: any, index: number) => {
+    data.detailedSteps.forEach((step: string | Record<string, unknown>, index: number) => {
       // stepがオブジェクトの場合はinstructionプロパティを使用、文字列の場合はそのまま使用
       const stepText = typeof step === 'object' && step !== null && 'instruction' in step 
         ? step.instruction 
@@ -195,7 +195,7 @@ ${ageGroup === 'student' ? '高校生・大学生' : '社会人'}向けの${situ
     geminiResponse: string,
     id: string,
     duration: number
-  ): any {
+  ): Record<string, unknown> {
     try {
       // JSONの抽出（マークダウンコードブロックを削除）
       const jsonMatch = geminiResponse.match(/```json\n([\s\S]*?)\n```/) || 
@@ -250,7 +250,7 @@ ${ageGroup === 'student' ? '高校生・大学生' : '社会人'}向けの${situ
   /**
    * フォールバック用の拡張提案を作成
    */
-  private createFallbackEnhancedSuggestion(id: string, duration: number): any {
+  private createFallbackEnhancedSuggestion(id: string, duration: number): Record<string, unknown> {
     const fallbackData: EnhancedSuggestionData = {
       id,
       title: `${duration}分間のリラックス`,
