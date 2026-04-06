@@ -1,9 +1,6 @@
 import { logger } from '../../utils/logger';
 import {
-  generateImprovedPrompt,
-  createStudentPrompt,
-  createJobSeekerPrompt,
-  createCareerChangerPrompt,
+  createPrompt,
   StudentPromptInput,
   JobHuntingPromptInput,
 } from 'core-logic';
@@ -120,58 +117,7 @@ function parseResponse(text: string, duration: number): OllamaSuggestion[] {
   }));
 }
 
-/**
- * プロンプトを生成する（geminiClientのcreatePromptと同じロジック）
- */
-function createPrompt(
-  situation: string,
-  duration: number,
-  ageGroup: string = 'office_worker',
-  studentContext?: Partial<StudentPromptInput>,
-  jobHuntingContext?: Partial<JobHuntingPromptInput>,
-): string {
-  if (ageGroup === 'student' && studentContext) {
-    const studentInput: StudentPromptInput = {
-      concern: studentContext.concern || '',
-      subject: studentContext.subject || '',
-      time: duration,
-      situation: (studentContext.situation || 'studying') as 'studying' | 'school' | 'commuting' | 'beforeExam',
-      stressFactor: studentContext.stressFactor,
-    };
-    const situationMap: Record<string, 'studying' | 'school' | 'commuting' | 'beforeExam'> = {
-      studying: 'studying', school: 'school', commuting: 'commuting', beforeExam: 'beforeExam',
-      workplace: 'studying', home: 'studying', outside: 'school',
-    };
-    studentInput.situation = situationMap[situation] || 'studying';
-    return createStudentPrompt(studentInput);
-  }
-
-  if (ageGroup === 'job_seeker' && jobHuntingContext) {
-    return createJobSeekerPrompt({
-      activityType: 'job_seeking',
-      currentPhase: jobHuntingContext.currentPhase,
-      concern: jobHuntingContext.concern || '',
-      time: duration,
-      situation: situation as 'workplace' | 'home' | 'outside',
-      stressFactor: jobHuntingContext.stressFactor,
-      activityDuration: jobHuntingContext.activityDuration,
-    });
-  }
-
-  if (ageGroup === 'career_changer' && jobHuntingContext) {
-    return createCareerChangerPrompt({
-      activityType: 'career_change',
-      currentPhase: jobHuntingContext.currentPhase,
-      concern: jobHuntingContext.concern || '',
-      time: duration,
-      situation: situation as 'workplace' | 'home' | 'outside',
-      stressFactor: jobHuntingContext.stressFactor,
-      activityDuration: jobHuntingContext.activityDuration,
-    });
-  }
-
-  return generateImprovedPrompt(situation, duration, ageGroup, []);
-}
+// core-logicの共通関数を使用
 
 export const ollamaClient = {
   async generateSuggestions(

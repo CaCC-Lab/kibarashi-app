@@ -1,11 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../../utils/logger';
 import { EnhancedSuggestionGenerator } from '../suggestion/enhancedSuggestionGenerator';
-import { createStudentPrompt, StudentPromptInput } from '../suggestion/studentPromptTemplates';
-import { createJobSeekerPrompt, createCareerChangerPrompt, JobHuntingPromptInput } from '../suggestion/jobHuntingPromptTemplates';
-import { generateImprovedPrompt } from './improvedPromptTemplate';
+import { StudentPromptInput } from '../suggestion/studentPromptTemplates';
+import { JobHuntingPromptInput } from '../suggestion/jobHuntingPromptTemplates';
 import { contextualPromptEnhancer } from '../context/contextualPromptEnhancer';
 import { apiKeyManager } from './apiKeyManager';
+import { createPrompt } from '../prompt/createPrompt';
 
 class GeminiClient {
   private genAI: GoogleGenerativeAI | null = null;
@@ -305,74 +305,11 @@ class GeminiClient {
   }
 
   private createPrompt(situation: string, duration: number, ageGroup: string = 'office_worker', studentContext?: Partial<StudentPromptInput>, jobHuntingContext?: Partial<JobHuntingPromptInput>): string {
-    // 学生の場合、詳細なプロンプト生成を使用
-    if (ageGroup === 'student' && studentContext) {
-      const studentInput: StudentPromptInput = {
-        concern: studentContext.concern || '',
-        subject: studentContext.subject || '',
-        time: duration,
-        situation: situation as any,
-        stressFactor: studentContext.stressFactor
-      };
-      
-      // 学生向けシナリオのマッピング
-      const studentSituationMap: Record<string, 'studying' | 'school' | 'commuting' | 'beforeExam'> = {
-        studying: 'studying',
-        school: 'school',
-        commuting: 'commuting',
-        beforeExam: 'beforeExam',
-        // 既存の状況を学生向けにマッピング
-        workplace: 'studying',
-        home: 'studying',
-        outside: 'school'
-      };
-      
-      studentInput.situation = studentSituationMap[situation] || 'studying';
-      
-      return createStudentPrompt(studentInput);
-    }
-    
-    // 就活生の場合、専用のプロンプト生成を使用
-    if (ageGroup === 'job_seeker' && jobHuntingContext) {
-      const jobSeekerInput: JobHuntingPromptInput = {
-        activityType: 'job_seeking',
-        currentPhase: jobHuntingContext.currentPhase,
-        concern: jobHuntingContext.concern || '',
-        time: duration,
-        situation: situation as any,
-        stressFactor: jobHuntingContext.stressFactor,
-        activityDuration: jobHuntingContext.activityDuration
-      };
-      
-      return createJobSeekerPrompt(jobSeekerInput);
-    }
-    
-    // 転職活動者の場合、専用のプロンプト生成を使用
-    if (ageGroup === 'career_changer' && jobHuntingContext) {
-      const careerChangerInput: JobHuntingPromptInput = {
-        activityType: 'career_change',
-        currentPhase: jobHuntingContext.currentPhase,
-        concern: jobHuntingContext.concern || '',
-        time: duration,
-        situation: situation as any,
-        stressFactor: jobHuntingContext.stressFactor,
-        activityDuration: jobHuntingContext.activityDuration
-      };
-      
-      return createCareerChangerPrompt(careerChangerInput);
-    }
-    
-    // バリエーション豊かな提案のために改善されたプロンプトを使用
     const key = `${situation}-${duration}-${ageGroup}`;
     const previousSuggestions = this.previousSuggestions.get(key) || [];
     
-    // 改善されたプロンプト生成機能を使用（ランダム要素付き）
-    const improvedPrompt = generateImprovedPrompt(
-      situation,
-      duration,
-      ageGroup,
-      previousSuggestions
-    );
+    // 共通のcreatePrompt関数を使用
+    const basePrompt = createPrompt(situation, duration, ageGroup, studentContext, jobHuntingContext, previousSuggestions);
     
     // 追加のランダム要素をプロンプトに注入
     const randomInstructions = `
@@ -382,7 +319,7 @@ class GeminiClient {
 - 同じパターンや似た内容を避けて、創造的な提案をしてください
 `;
     
-    return improvedPrompt + randomInstructions;
+    return basePrompt + randomInstructions;
   }
 
 

@@ -7,6 +7,9 @@ export { APIKeyManager, apiKeyManager } from './services/gemini/apiKeyManager.js
 export { geminiTTS } from './services/gemini/geminiTTS.js';
 export { generateImprovedPrompt } from './services/gemini/improvedPromptTemplate.js';
 
+// Services - Prompt
+export { createPrompt } from './services/prompt/createPrompt.js';
+
 // Services - Suggestion
 export { EnhancedSuggestionGenerator } from './services/suggestion/enhancedSuggestionGenerator.js';
 export { generateEnhancedSuggestions, EnhancedSuggestion, toLegacySuggestion } from './services/suggestion/enhancedGenerator.js';
