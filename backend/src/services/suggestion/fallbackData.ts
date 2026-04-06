@@ -3,17 +3,32 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { Suggestion } from './generator';
 
+interface SuggestionDataEntry {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  situations: string[];
+  durations: number[];
+  guide: Record<string, string>;
+  ageGroups?: string[];
+}
+
+interface SuggestionDataFile {
+  suggestions: SuggestionDataEntry[];
+}
+
 // Get current directory in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Load suggestions data
-const suggestionsData = JSON.parse(
+const suggestionsData: SuggestionDataFile = JSON.parse(
   readFileSync(join(__dirname, '../../data/suggestions.json'), 'utf-8')
 );
 
 // Load job hunting suggestions data
-const jobHuntingSuggestionsData = JSON.parse(
+const jobHuntingSuggestionsData: SuggestionDataFile = JSON.parse(
   readFileSync(join(__dirname, '../../data/jobHuntingSuggestions.json'), 'utf-8')
 );
 
@@ -40,16 +55,16 @@ export function getFallbackSuggestions(
   
   // Filter suggestions based on situation and duration
   let filteredSuggestions = suggestionSource.suggestions.filter(
-    (suggestion: Record<string, unknown>) =>
-      (suggestion.situations as string[]).includes(situation) &&
-      (suggestion.durations as number[]).includes(duration)
+    (suggestion) =>
+      suggestion.situations.includes(situation) &&
+      suggestion.durations.includes(duration)
   );
 
   // 就活・転職活動者の場合、年齢層でさらにフィルタリング
   if (isJobHunting && ageGroup) {
     filteredSuggestions = filteredSuggestions.filter(
-      (suggestion: Record<string, unknown>) =>
-        !suggestion.ageGroups || (suggestion.ageGroups as string[]).includes(ageGroup)
+      (suggestion) =>
+        !suggestion.ageGroups || suggestion.ageGroups.includes(ageGroup)
     );
   }
 
@@ -65,13 +80,13 @@ export function getFallbackSuggestions(
   const selected = shuffled.slice(0, Math.min(3, shuffled.length));
 
   // Map to the expected format
-  return selected.map((suggestion: Record<string, unknown>) => ({
-    id: `${suggestion.id}-${Date.now()}-${Math.random()}`, // より一意性の高いIDを生成
-    title: suggestion.title as string,
-    description: suggestion.description as string,
+  return selected.map((suggestion) => ({
+    id: `${suggestion.id}-${Date.now()}-${Math.random()}`,
+    title: suggestion.title,
+    description: suggestion.description,
     duration: duration,
-    category: suggestion.category === 'cognitive' ? '認知的' : '行動的' as '認知的' | '行動的',
-    steps: ((suggestion.guide as Record<string, string>)?.[duration.toString()])?.split('。').filter((s: string) => s.trim()).map((s: string) => s.trim() + '。') || [],
-    guide: (suggestion.guide as Record<string, string>)?.[duration.toString()] || '', // Add guide field
+    category: (suggestion.category === 'cognitive' ? '認知的' : '行動的') as '認知的' | '行動的',
+    steps: suggestion.guide[duration.toString()]?.split('。').filter((s: string) => s.trim()).map((s: string) => s.trim() + '。') || [],
+    guide: suggestion.guide[duration.toString()] || '',
   }));
 }

@@ -130,10 +130,10 @@ ${ageGroup === 'student' ? '高校生・大学生' : '社会人'}向けの${situ
 
     data.detailedSteps.forEach((step: string | Record<string, unknown>, index: number) => {
       // stepがオブジェクトの場合はinstructionプロパティを使用、文字列の場合はそのまま使用
-      const stepText = typeof step === 'object' && step !== null && 'instruction' in step 
-        ? step.instruction 
-        : typeof step === 'string' 
-        ? step 
+      const stepText: string = typeof step === 'object' && step !== null && 'instruction' in step
+        ? String(step.instruction)
+        : typeof step === 'string'
+        ? step
         : String(step);
       
       const mainSSML = this.ssmlBuilder.createMainGuide([stepText]);

@@ -64,12 +64,15 @@ export async function generateSuggestions(
       const responseTime = Date.now() - startTime;
       
       // データソース情報を追加
-      const apiKeyIndex = geminiClient.getCurrentApiKeyIndex();
+      const apiKeyIndex = 'getCurrentApiKeyIndex' in geminiClient
+        ? (geminiClient as Record<string, unknown>).getCurrentApiKeyIndex as () => number
+        : () => -1;
+      const currentApiKeyIndex = typeof apiKeyIndex === 'function' ? apiKeyIndex() : -1;
       const suggestionsWithMetadata = suggestions.slice(0, 3).map(suggestion => ({
         ...suggestion,
         dataSource: 'ai' as const,
         responseTime,
-        apiKeyIndex: apiKeyIndex >= 0 ? apiKeyIndex : undefined
+        apiKeyIndex: currentApiKeyIndex >= 0 ? currentApiKeyIndex : undefined
       }));
       
       // ステップ3: 必ず3つの提案を返す
