@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from '../../hooks/useHistory';
 import HistoryItem from './HistoryItem';
 import HistoryStats from './HistoryStats';
-import HistoryFilter from './HistoryFilter';
+import HistoryFilter, { type FilterValue } from './HistoryFilter';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import type { HistoryItem as HistoryItemType } from '../../types/history';
 
@@ -31,7 +31,7 @@ const HistoryList: React.FC = () => {
   } = useHistory();
 
   const [filterType, setFilterType] = useState<'all' | 'date' | 'situation' | 'category'>('all');
-  const [filterValue, setFilterValue] = useState<any>(null);
+  const [filterValue, setFilterValue] = useState<FilterValue>(null);
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -43,18 +43,18 @@ const HistoryList: React.FC = () => {
   const getFilteredHistory = (): HistoryItemType[] => {
     switch (filterType) {
       case 'date':
-        if (filterValue?.startDate && filterValue?.endDate) {
+        if (filterValue && typeof filterValue === 'object' && 'startDate' in filterValue && 'endDate' in filterValue) {
           return getHistoryByDateRange(filterValue.startDate, filterValue.endDate);
         }
         return history;
       case 'situation':
-        if (filterValue) {
-          return getHistoryBySituation(filterValue);
+        if (filterValue && typeof filterValue === 'string') {
+          return getHistoryBySituation(filterValue as 'workplace' | 'home' | 'outside');
         }
         return history;
       case 'category':
-        if (filterValue) {
-          return getHistoryByCategory(filterValue);
+        if (filterValue && typeof filterValue === 'string') {
+          return getHistoryByCategory(filterValue as '認知的' | '行動的');
         }
         return history;
       default:

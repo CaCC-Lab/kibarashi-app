@@ -193,29 +193,37 @@ describe('DurationSelector', () => {
       
       // 実際の振動APIを一時的に置き換え
       const originalVibrate = navigator.vibrate;
-      (navigator as any).vibrate = (pattern: number | number[]) => {
-        vibrateCallCount++;
-        vibrateValue = pattern;
-        return true;
-      };
-      
+      Object.defineProperty(navigator, 'vibrate', {
+        value: (pattern: number | number[]) => {
+          vibrateCallCount++;
+          vibrateValue = pattern;
+          return true;
+        },
+        configurable: true,
+        writable: true,
+      });
+
       render(
-        <DurationSelector 
-          selected={null} 
-          onSelect={onSelect} 
-          onBack={onBack} 
+        <DurationSelector
+          selected={null}
+          onSelect={onSelect}
+          onBack={onBack}
         />
       );
-      
+
       const button = screen.getByText('5分');
       fireEvent.click(button);
-      
+
       // 振動が発生したことを確認
       expect(vibrateCallCount).toBe(1);
       expect(vibrateValue).toBe(30);
-      
+
       // 元の状態に戻す
-      (navigator as any).vibrate = originalVibrate;
+      Object.defineProperty(navigator, 'vibrate', {
+        value: originalVibrate,
+        configurable: true,
+        writable: true,
+      });
     });
 
     it('振動APIがサポートされていない場合でも正常に動作する', () => {
@@ -223,7 +231,11 @@ describe('DurationSelector', () => {
       const originalVibrate = navigator.vibrate;
       
       // vibrateを一時的にundefinedに設定
-      (navigator as any).vibrate = undefined;
+      Object.defineProperty(navigator, 'vibrate', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      });
       
       render(
         <DurationSelector 
@@ -241,7 +253,11 @@ describe('DurationSelector', () => {
       expect(selectedValue).toBe(5);
       
       // 元の状態に戻す
-      (navigator as any).vibrate = originalVibrate;
+      Object.defineProperty(navigator, 'vibrate', {
+        value: originalVibrate,
+        configurable: true,
+        writable: true,
+      });
     });
   });
 

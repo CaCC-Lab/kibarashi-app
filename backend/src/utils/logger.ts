@@ -1,7 +1,7 @@
 import winston from 'winston';
 
 // 循環参照を安全に処理するためのJSON.stringify代替関数
-const safeStringify = (obj: any): string => {
+const safeStringify = (obj: unknown): string => {
   const seen = new WeakSet();
   return JSON.stringify(obj, (_key, val) => {
     if (val != null && typeof val === "object") {
@@ -25,11 +25,13 @@ const logFormat = winston.format.combine(
 class ConsoleTransport extends winston.transports.Console {
   private logLevels = { error: 0, warn: 1, info: 2, debug: 3 };
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   log(info: any, callback: () => void) {
     try {
       // colorizeされていない元のレベルを取得
       const rawLevel = info[Symbol.for('level')] || info.level;
       // カラーエスケープコードを除去
+      // eslint-disable-next-line no-control-regex
       const level = rawLevel.replace(/\x1B\[\d+m/g, '');
       
       // ログレベルチェック：現在の環境での設定レベルより低い場合は出力しない
@@ -68,12 +70,15 @@ class ConsoleTransport extends winston.transports.Console {
             console.warn(jsonOutput);
             break;
           case 'info':
+            // eslint-disable-next-line no-console
             console.info(jsonOutput);
             break;
           case 'debug':
+            // eslint-disable-next-line no-console
             console.debug(jsonOutput);
             break;
           default:
+            // eslint-disable-next-line no-console
             console.log(jsonOutput);
         }
       } else {
@@ -85,15 +90,15 @@ class ConsoleTransport extends winston.transports.Console {
           timestamp: undefined,
           service: undefined,
         });
-        
+
         // 不要なSymbolプロパティを除去
         Object.getOwnPropertySymbols(meta).forEach(symbol => {
           delete meta[symbol];
         });
-        
+
         const hasMetadata = Object.keys(meta).length > 0;
         const formattedMessage = hasMetadata ? `${info.message} ${safeStringify(meta)}` : info.message;
-        
+
         switch (level) {
           case 'error':
             console.error(formattedMessage);
@@ -102,18 +107,22 @@ class ConsoleTransport extends winston.transports.Console {
             console.warn(formattedMessage);
             break;
           case 'info':
+            // eslint-disable-next-line no-console
             console.info(formattedMessage);
             break;
           case 'debug':
+            // eslint-disable-next-line no-console
             console.debug(formattedMessage);
             break;
           default:
+            // eslint-disable-next-line no-console
             console.log(formattedMessage);
         }
       }
     } catch (error) {
       // フォールバック: 循環参照エラーなどが発生した場合
       console.error('Logger error:', error);
+      // eslint-disable-next-line no-console
       console.log(info.message || 'Unknown log message');
     }
     

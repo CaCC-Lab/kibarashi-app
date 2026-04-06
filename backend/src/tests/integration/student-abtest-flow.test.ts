@@ -101,7 +101,7 @@ describe('学生向けA/Bテストシステム 統合テスト', () => {
       expect(response.body.suggestions).toBeDefined();
       
       // 提案の構造確認
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('id');
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');

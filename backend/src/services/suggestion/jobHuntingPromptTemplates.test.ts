@@ -353,7 +353,7 @@ describe('jobHuntingPromptTemplates', () => {
       const input: JobHuntingPromptInput = {
         activityType: 'career_change',
         time: 15,
-        situation: 'unknown_situation' as any
+        situation: 'unknown_situation' as 'workplace'
       };
       
       const prompt = createCareerChangerPrompt(input);

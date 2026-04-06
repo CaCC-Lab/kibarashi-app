@@ -169,6 +169,7 @@ class ContextAPI {
     return periods;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private getSeasonalTips(season: SeasonalData['season'], _month: number): string[] {
     const tips: string[] = [];
 

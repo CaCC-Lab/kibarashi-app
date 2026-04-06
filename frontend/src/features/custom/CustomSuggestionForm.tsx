@@ -60,7 +60,7 @@ const CustomSuggestionForm: React.FC<CustomSuggestionFormProps> = ({
     };
   }, [clearValidationErrors]);
 
-  const handleInputChange = (field: keyof CustomSuggestionFormData, value: any) => {
+  const handleInputChange = (field: keyof CustomSuggestionFormData, value: CustomSuggestionFormData[keyof CustomSuggestionFormData]) => {
     setFormData(prev => ({
       ...prev,
       [field]: value

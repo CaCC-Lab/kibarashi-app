@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /**
  * 音声コンテキスト
  * アプリ全体で音声状態を管理

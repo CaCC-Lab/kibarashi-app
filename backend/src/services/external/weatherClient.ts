@@ -52,6 +52,7 @@ class WeatherClient {
     // キャッシュチェック
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
+      // eslint-disable-next-line no-console
       console.log(`Weather data returned from cache for ${prefectureId}`);
       return cached.data;
     }
@@ -104,6 +105,7 @@ class WeatherClient {
     };
 
     try {
+      // eslint-disable-next-line no-console
       console.log(`Fetching weather data for ${locationName} (${lat}, ${lon})`);
       
       const response: AxiosResponse<OpenWeatherMapResponse> = await axios.get(url, {
@@ -151,6 +153,7 @@ class WeatherClient {
     };
 
     try {
+      // eslint-disable-next-line no-console
       console.log(`Fetching weather data for city: ${cityName}`);
       
       const response: AxiosResponse<OpenWeatherMapResponse> = await axios.get(url, {

@@ -8,13 +8,17 @@ import { errorHandler } from './api/middleware/errorHandler';
 import { rateLimiter } from './api/middleware/rateLimit';
 import { logger } from './utils/logger';
 import routes from './api/routes/index';
+import { isAIProviderConfigured, getAIProviderInfo } from './services/aiProvider';
 
 // 環境変数の読み込み
 dotenv.config();
 
-// Gemini APIキーの確認
-if (!process.env.GEMINI_API_KEY) {
-  logger.warn('GEMINI_API_KEY is not set. Using fallback suggestions.');
+// AI provider の確認
+const providerInfo = getAIProviderInfo();
+if (!isAIProviderConfigured()) {
+  logger.warn('No AI provider configured. Using fallback suggestions.');
+} else {
+  logger.info(`AI provider: ${providerInfo.provider}`, providerInfo);
 }
 
 const app = express();
@@ -84,13 +88,16 @@ app.use('*', (_req, res) => {
 // エラーハンドリング
 app.use(errorHandler);
 
-// サーバー起動
-const server = app.listen(PORT, () => {
-  logger.info(`Server is running on port ${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV}`);
-  logger.info(`Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured (using fallback)'}`);
-  logger.info(`TTS API: ${process.env.GCP_TTS_ENABLED === 'true' ? 'Enabled' : 'Disabled'}`);
-});
+// サーバー起動（テスト時はlistenしない）
+let server: ReturnType<typeof app.listen> | undefined;
+if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+  server = app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV}`);
+    logger.info(`AI Provider: ${providerInfo.provider}${providerInfo.model ? ` (${providerInfo.model})` : ''} - ${isAIProviderConfigured() ? 'Configured' : 'Not configured (using fallback)'}`);
+    logger.info(`TTS API: ${process.env.GCP_TTS_ENABLED === 'true' ? 'Enabled' : 'Disabled'}`);
+  });
+}
 
 // エクスポート（テスト用）
 export default server;

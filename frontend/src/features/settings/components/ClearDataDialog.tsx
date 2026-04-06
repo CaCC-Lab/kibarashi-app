@@ -15,7 +15,7 @@ export const ClearDataDialog: React.FC<ClearDataDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full animate-slideUp">
+      <div role="dialog" aria-modal="true" className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full animate-slideUp">
         <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
           {showClearConfirm === 'favorites' ? 'お気に入り' : 
            showClearConfirm === 'history' ? '履歴' : 

@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { AudioProvider } from '../../contexts/AudioContext';
 import GlobalAudioControls from './GlobalAudioControls';
 import React from 'react';

@@ -92,7 +92,8 @@ describe('Settings - 統合データ管理機能', () => {
 
     expect(await screen.findByText(/全データをインポートしました/)).toBeInTheDocument();
     expect(CustomStorage.getCustomSuggestions().customs[0].title).toBe(importData.title);
-    expect(FavoritesStorage.getFavorites().favorites).toHaveLength(0); // 既存データは消える
+    // 置換モードでもインポートファイルにfavoritesが含まれていなければ既存のfavoritesは残る
+    expect(FavoritesStorage.getFavorites().favorites).toHaveLength(1);
   });
 
   it('全データクリアボタンをクリックすると確認ダイアログが表示され、クリアが実行される', async () => {

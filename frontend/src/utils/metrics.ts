@@ -14,21 +14,10 @@ export interface MetricsEvent {
  * 実際の環境では、Google Analytics、Mixpanel、Amplitudeなどに送信
  */
 export function trackEvent(event: MetricsEvent): void {
-  // 開発環境でのデバッグ用処理
-  if (process.env.NODE_ENV === 'development') {
-    console.debug('[Metrics]', event.name, event.properties);
-  }
-
   // TODO: 本番環境では実際のアナリティクスサービスに送信
-  // 例：
-  // if (window.gtag) {
-  //   window.gtag('event', event.name, {
-  //     event_category: 'AB_Test',
-  //     event_label: event.properties?.variant,
-  //     value: event.properties?.value,
-  //     ...event.properties
-  //   });
-  // }
+  if (process.env.NODE_ENV === 'development') {
+    void event;
+  }
 }
 
 /**

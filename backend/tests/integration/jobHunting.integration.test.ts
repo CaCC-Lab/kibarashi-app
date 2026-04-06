@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import suggestionRouter from '../../src/api/routes/suggestions';
@@ -57,7 +57,7 @@ describe('Job Hunting Integration Tests', () => {
       expect(response.body.metadata.timestamp).toBeDefined();
 
       // 各提案の構造検証
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('id');
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');
@@ -82,7 +82,7 @@ describe('Job Hunting Integration Tests', () => {
       expect(response.body.metadata.duration).toBe(15);
 
       // 15分の提案が適切にフィルタリングされていることを確認
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion.duration).toBeLessThanOrEqual(15);
       });
     });
@@ -101,7 +101,7 @@ describe('Job Hunting Integration Tests', () => {
       expect(response.body.metadata.duration).toBe(30);
 
       // 30分の提案が適切にフィルタリングされていることを確認
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion.duration).toBeLessThanOrEqual(30);
       });
     });
@@ -170,7 +170,7 @@ describe('Job Hunting Integration Tests', () => {
       expect(response.body.metadata.duration).toBe(30);
 
       // 30分の長めの提案が適切に返されることを確認
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion.duration).toBeLessThanOrEqual(30);
       });
     });
@@ -192,7 +192,7 @@ describe('Job Hunting Integration Tests', () => {
       expect(response.body.metadata.ageGroup).toBe('job_seeker');
 
       // 職場での就活生向け提案が返されることを確認
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');
         expect(suggestion.duration).toBeLessThanOrEqual(5);
@@ -214,7 +214,7 @@ describe('Job Hunting Integration Tests', () => {
       expect(response.body.metadata.ageGroup).toBe('career_changer');
 
       // 家での転職活動者向け提案が返されることを確認
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');
         expect(suggestion.duration).toBeLessThanOrEqual(15);

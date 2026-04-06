@@ -208,7 +208,7 @@ describe('Suggestion Adapter', () => {
 
       const enhancedWithoutVoice: EnhancedSuggestion = {
         ...mockEnhancedSuggestion,
-        voiceGuideScript: undefined as any
+        voiceGuideScript: undefined as unknown as EnhancedSuggestion['voiceGuideScript']
       };
       expect(suggestionAdapter.getVoiceDuration(enhancedWithoutVoice)).toBe(5); // durationを返す
     });

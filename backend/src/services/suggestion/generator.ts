@@ -1,6 +1,6 @@
 import { logger } from '../../utils/logger';
 import { getFallbackSuggestions } from './fallbackData';
-import { geminiClient } from 'core-logic';
+import { generateAISuggestions, isAIProviderConfigured, getAIProviderInfo } from '../aiProvider';
 import { JobHuntingPromptInput } from './jobHuntingPromptTemplates';
 
 // 気晴らし提案のデータ構造
@@ -56,20 +56,19 @@ export async function generateSuggestions(
     // ステップ1: Gemini APIの有効性を確認
     // なぜAPIキーを確認するか：APIキーが設定されていない場合、
     // 無駄なAPI呼び出しを避け、即座にフォールバックを使用するため
-    if (process.env.GEMINI_API_KEY) {
-      logger.info('Generating suggestions with Gemini API', { situation, duration, ageGroup });
-      
+    if (isAIProviderConfigured()) {
+      const providerInfo = getAIProviderInfo();
+      logger.info('Generating suggestions with AI', { ...providerInfo, situation, duration, ageGroup });
+
       // ステップ2: AIを使ってパーソナライズされた提案を生成
-      const suggestions = await geminiClient.generateSuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
+      const suggestions = await generateAISuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
       const responseTime = Date.now() - startTime;
-      
+
       // データソース情報を追加
-      const apiKeyIndex = geminiClient.getCurrentApiKeyIndex();
-      const suggestionsWithMetadata = suggestions.slice(0, 3).map(suggestion => ({
+      const suggestionsWithMetadata = (suggestions as Record<string, unknown>[]).slice(0, 3).map(suggestion => ({
         ...suggestion,
         dataSource: 'ai' as const,
         responseTime,
-        apiKeyIndex: apiKeyIndex >= 0 ? apiKeyIndex : undefined
       }));
       
       // ステップ3: 必ず3つの提案を返す
@@ -79,10 +78,10 @@ export async function generateSuggestions(
     
     // APIキーが設定されていない場合の処理
     // これはエラーではなく、意図的な設計
-    logger.info('Using fallback suggestions (Gemini API key not configured)', {
+    logger.info('Using fallback suggestions (no AI provider configured)', {
       situation,
       duration,
-      reason: 'GEMINI_API_KEY environment variable not set'
+      reason: 'AI_PROVIDER not set or API key missing'
     });
     
     const suggestions = getFallbackSuggestions(situation, duration, ageGroup);

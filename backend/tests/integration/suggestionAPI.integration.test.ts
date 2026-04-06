@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import suggestionRouter from '../../src/api/routes/suggestions';
@@ -142,7 +142,7 @@ describe('Suggestion API Integration Tests', () => {
         })
         .expect(200);
 
-      const ids = response.body.suggestions.map((s: any) => s.id);
+      const ids = response.body.suggestions.map((s: Record<string, unknown>) => s.id);
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(ids.length);
     });
@@ -157,7 +157,7 @@ describe('Suggestion API Integration Tests', () => {
         })
         .expect(200);
 
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion).toHaveProperty('id');
         expect(suggestion).toHaveProperty('title');
         expect(suggestion).toHaveProperty('description');
@@ -182,7 +182,7 @@ describe('Suggestion API Integration Tests', () => {
         })
         .expect(200);
 
-      response.body.suggestions.forEach((suggestion: any) => {
+      response.body.suggestions.forEach((suggestion: Record<string, unknown>) => {
         expect(suggestion.duration).toBeLessThanOrEqual(duration);
       });
     });
@@ -268,7 +268,7 @@ describe('Suggestion API Integration Tests', () => {
 
       const responses = await Promise.all(requests);
 
-      responses.forEach((response, index) => {
+      responses.forEach((response, _index) => {
         expect(response.status).toBe(200);
         expect(response.body.suggestions).toBeDefined();
         expect(response.body.suggestions.length).toBeGreaterThan(0);

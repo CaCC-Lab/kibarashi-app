@@ -165,7 +165,7 @@ describe('HistoryStorage', () => {
       HistoryStorage.addHistoryItem(mockHistoryItem);
       
       HistoryStorage.updateHistoryItem('history-1', {
-        id: 'new-id' as any,
+        id: 'new-id',
         title: '新しいタイトル'
       });
       
@@ -322,17 +322,17 @@ describe('HistoryStorage', () => {
 
   describe('エラーハンドリングのテスト', () => {
     it('localStorageが使用できない場合でもエラーにならない', () => {
-      const originalSetItem = Storage.prototype.setItem;
-      Storage.prototype.setItem = vi.fn().mockImplementation(() => {
+      // localStorage.setItemを直接スパイしてエラーを投げるようにする
+      const setItemSpy = vi.spyOn(window.localStorage, 'setItem').mockImplementation(() => {
         throw new Error('QuotaExceededError');
       });
-      
+
       const result = HistoryStorage.addHistoryItem(mockHistoryItem);
-      
+
       expect(result).toBe(false);
       expect(consoleErrorSpy).toHaveBeenCalled();
-      
-      Storage.prototype.setItem = originalSetItem;
+
+      setItemSpy.mockRestore();
     });
   });
 });

@@ -96,8 +96,8 @@ export const getEnhancedSuggestions = async (
       });
       
       const appError = new Error('Invalid request parameters for enhanced suggestions');
-      (appError as any).statusCode = 400;
-      (appError as any).details = error.errors.map(err => ({
+      (appError as unknown as Record<string, unknown>).statusCode = 400;
+      (appError as unknown as Record<string, unknown>).details = error.errors.map(err => ({
         field: err.path.join('.'),
         message: err.message,
         code: err.code
@@ -204,8 +204,8 @@ export const submitSuggestionFeedback = async (
       });
       
       const appError = new Error('Invalid feedback data');
-      (appError as any).statusCode = 400;
-      (appError as any).details = error.errors;
+      (appError as unknown as Record<string, unknown>).statusCode = 400;
+      (appError as unknown as Record<string, unknown>).details = error.errors;
       return next(appError);
     }
     

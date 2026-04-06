@@ -1,6 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { fetchSuggestions } from '../suggestions';
-import { apiClient } from '../client';
 
 // fetchのモックを作成
 const mockFetch = vi.fn();
@@ -52,7 +51,7 @@ describe('キャッシュ無効化のテスト', () => {
     const fetchOptions = mockFetch.mock.calls[0][1];
     
     // Cache-Controlヘッダーの確認
-    expect(fetchOptions.headers['Cache-Control']).toBe('no-cache, no-store, must-revalidate');
+    expect(fetchOptions.headers['Cache-Control']).toBe('no-cache, no-store, must-revalidate, max-age=0');
     expect(fetchOptions.headers['Pragma']).toBe('no-cache');
     
     // cacheオプションの確認

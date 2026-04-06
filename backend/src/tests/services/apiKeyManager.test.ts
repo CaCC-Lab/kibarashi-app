@@ -1,8 +1,8 @@
 // APIKeyManagerクラスを直接インポートしてテスト用にモック
 class APIKeyManager {
-  private apiKeys: any[] = [];
+  private apiKeys: Array<Record<string, unknown>> = [];
   private currentKeyIndex: number = 0;
-  private config: any;
+  private config: Record<string, unknown>;
   private stats = {
     totalRequests: 0,
     successfulRequests: 0,
@@ -40,6 +40,7 @@ class APIKeyManager {
 
     // 番号付きキー
     let index = 1;
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const key = process.env[`GEMINI_API_KEY_${index}`];
       if (!key) break;
@@ -129,7 +130,7 @@ class APIKeyManager {
     }
   }
 
-  private setCooldown(keyInfo: any): void {
+  private setCooldown(keyInfo: Record<string, unknown>): void {
     keyInfo.isOnCooldown = true;
     keyInfo.cooldownUntil = new Date(Date.now() + this.config.cooldownMinutes * 60 * 1000);
     

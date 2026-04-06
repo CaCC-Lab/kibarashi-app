@@ -1,5 +1,5 @@
 import React from 'react';
-import { SituationId, getSituationsForAgeGroup, getStudentContextDescription, getJobHuntingContextDescription } from '../../types/situation';
+import { SituationId, StudentSituationId, getSituationsForAgeGroup, getStudentContextDescription, getJobHuntingContextDescription } from '../../types/situation';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
 
 interface SituationSelectorProps {
@@ -102,7 +102,7 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
                 {/* 学生向けの詳細説明 */}
                 {currentAgeGroup === 'student' && option.id !== 'home' && (
                   <p className="text-xs text-primary-600 mt-1 opacity-90">
-                    {getStudentContextDescription(option.id as any)}
+                    {getStudentContextDescription(option.id as StudentSituationId)}
                   </p>
                 )}
                 

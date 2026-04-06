@@ -1,7 +1,22 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AgeGroupProvider } from '../../hooks/useAgeGroup';
 import SituationSelector from './SituationSelector';
+
+// useAgeGroup hookのモック
+vi.mock('../../hooks/useAgeGroup', () => ({
+  useAgeGroup: vi.fn(() => ({
+    currentAgeGroup: 'office_worker',
+    profile: null,
+    isFirstTimeUser: false,
+    isLoading: false,
+    updateAgeGroup: vi.fn(),
+    resetProfile: vi.fn(),
+    availableAgeGroups: [],
+  })),
+}));
+
+import { useAgeGroup } from '../../hooks/useAgeGroup';
+const mockedUseAgeGroup = vi.mocked(useAgeGroup);
 
 /**
  * SituationSelectorコンポーネントのテスト
@@ -185,29 +200,37 @@ describe('SituationSelector', () => {
       
       // 実際の振動APIを一時的に置き換え
       const originalVibrate = navigator.vibrate;
-      (navigator as any).vibrate = (pattern: number | number[]) => {
-        vibrateCallCount++;
-        vibrateValue = pattern;
-        return true;
-      };
-      
+      Object.defineProperty(navigator, 'vibrate', {
+        value: (pattern: number | number[]) => {
+          vibrateCallCount++;
+          vibrateValue = pattern;
+          return true;
+        },
+        configurable: true,
+        writable: true,
+      });
+
       render(
-        <SituationSelector 
-          selected={null} 
-          onSelect={onSelect} 
-          onBack={onBack} 
+        <SituationSelector
+          selected={null}
+          onSelect={onSelect}
+          onBack={onBack}
         />
       );
-      
+
       const button = screen.getByText('職場');
       fireEvent.click(button);
-      
+
       // 振動が発生したことを確認
       expect(vibrateCallCount).toBe(1);
       expect(vibrateValue).toBe(30);
-      
+
       // 元の状態に戻す
-      (navigator as any).vibrate = originalVibrate;
+      Object.defineProperty(navigator, 'vibrate', {
+        value: originalVibrate,
+        configurable: true,
+        writable: true,
+      });
     });
 
     it('振動APIがサポートされていない場合でも正常に動作する', () => {
@@ -215,7 +238,11 @@ describe('SituationSelector', () => {
       const originalVibrate = navigator.vibrate;
       
       // vibrateを一時的にundefinedに設定
-      (navigator as any).vibrate = undefined;
+      Object.defineProperty(navigator, 'vibrate', {
+        value: undefined,
+        configurable: true,
+        writable: true,
+      });
       
       render(
         <SituationSelector 
@@ -233,7 +260,11 @@ describe('SituationSelector', () => {
       expect(selectedValue).toBe('workplace');
       
       // 元の状態に戻す
-      (navigator as any).vibrate = originalVibrate;
+      Object.defineProperty(navigator, 'vibrate', {
+        value: originalVibrate,
+        configurable: true,
+        writable: true,
+      });
     });
   });
 
@@ -303,136 +334,174 @@ describe('SituationSelector', () => {
 
   describe('就職活動関連状況のテスト', () => {
     it('就職活動者(job_seeker)の場合、就職・転職活動オプションが表示される', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'job_seeker',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected={null}
+          onSelect={onSelect}
+        />
       );
-      
-      // 就職・転職活動オプションが表示される
+
       expect(screen.getByText('就職・転職活動')).toBeInTheDocument();
-      
-      // 基本オプションも表示される
-      expect(screen.getByText('職場')).toBeInTheDocument();
       expect(screen.getByText('家')).toBeInTheDocument();
       expect(screen.getByText('外出先')).toBeInTheDocument();
+      expect(screen.getByText('職場')).toBeInTheDocument();
     });
 
     it('転職活動者(career_changer)の場合、就職・転職活動オプションが表示される', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'career_changer',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="career_changer">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected={null}
+          onSelect={onSelect}
+        />
       );
-      
-      // 就職・転職活動オプションが表示される
+
       expect(screen.getByText('就職・転職活動')).toBeInTheDocument();
     });
 
     it('job_hunting状況が選択されている場合、ハイライトされる', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'job_seeker',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected="job_hunting" 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected="job_hunting"
+          onSelect={onSelect}
+        />
       );
-      
+
       const jobHuntingButton = screen.getByText('就職・転職活動').closest('button');
       expect(jobHuntingButton?.className).toContain('border-primary-500');
       expect(jobHuntingButton?.className).toContain('shadow-lg');
     });
 
     it('就職・転職活動オプションをクリックするとonSelectが呼ばれる', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'job_seeker',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected={null}
+          onSelect={onSelect}
+        />
       );
-      
+
       const jobHuntingButton = screen.getByText('就職・転職活動');
       fireEvent.click(jobHuntingButton);
-      
+
       expect(selectCount).toBe(1);
       expect(selectedValue).toBe('job_hunting');
     });
 
     it('就職活動者の場合、適切なタイトルとメッセージが表示される', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'job_seeker',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected={null}
+          onSelect={onSelect}
+        />
       );
-      
-      // job_seeker向けのタイトルとメッセージを確認
+
       expect(screen.getByText('どちらでリフレッシュしますか？ 💼')).toBeInTheDocument();
       expect(screen.getByText('就活の合間に、少し息抜きしましょう')).toBeInTheDocument();
     });
 
     it('転職活動者の場合、適切なタイトルとメッセージが表示される', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'career_changer',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="career_changer">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected={null}
+          onSelect={onSelect}
+        />
       );
-      
-      // career_changer向けのタイトルとメッセージを確認
+
       expect(screen.getByText('どちらでリフレッシュされますか？ 🌟')).toBeInTheDocument();
       expect(screen.getByText('転職活動の合間に、少し気分転換しましょう')).toBeInTheDocument();
     });
 
     it('job_hunting状況選択時にコンテキスト説明が表示される', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'job_seeker',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected="job_hunting" 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected="job_hunting"
+          onSelect={onSelect}
+        />
       );
-      
-      // job_seekerのjob_hunting状況に対する説明文が表示される
+
       expect(screen.getByText('面接前の待ち時間、説明会の合間、ESの作成で疲れた時')).toBeInTheDocument();
     });
 
     it('通常の年齢層では就職・転職活動オプションが表示されない', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'office_worker',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="office_worker">
-          <SituationSelector 
-            selected={null} 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected={null}
+          onSelect={onSelect}
+        />
       );
-      
-      // 就職・転職活動オプションは表示されない
+
       expect(screen.queryByText('就職・転職活動')).not.toBeInTheDocument();
-      
-      // 基本オプションは表示される
       expect(screen.getByText('職場')).toBeInTheDocument();
       expect(screen.getByText('家')).toBeInTheDocument();
       expect(screen.getByText('外出先')).toBeInTheDocument();
@@ -441,33 +510,43 @@ describe('SituationSelector', () => {
 
   describe('年齢層に応じた状況コンテキスト説明のテスト', () => {
     it('job_seekerの場合、各状況に適切なコンテキスト説明が表示される', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'job_seeker',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="job_seeker">
-          <SituationSelector 
-            selected="workplace" 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected="workplace"
+          onSelect={onSelect}
+        />
       );
-      
-      // workplace状況でのjob_seeker向け説明
-      expect(screen.getByText('アルバイト先、インターン先での休憩時間')).toBeInTheDocument();
+
+      expect(screen.getByText('インターンシップの休憩時間、アルバイト先での息抜き')).toBeInTheDocument();
     });
 
     it('career_changerの場合、各状況に適切なコンテキスト説明が表示される', () => {
+      mockedUseAgeGroup.mockReturnValue({
+        currentAgeGroup: 'career_changer',
+        profile: null,
+        isFirstTimeUser: false,
+        isLoading: false,
+        updateAgeGroup: vi.fn(),
+        resetProfile: vi.fn(),
+        availableAgeGroups: [],
+      });
       render(
-        <AgeGroupProvider initialAgeGroup="career_changer">
-          <SituationSelector 
-            selected="home" 
-            onSelect={onSelect} 
-            onBack={onBack} 
-          />
-        </AgeGroupProvider>
+        <SituationSelector
+          selected="home"
+          onSelect={onSelect}
+        />
       );
-      
-      // home状況でのcareer_changer向け説明
-      expect(screen.getByText('自宅での転職準備、面接準備の合間')).toBeInTheDocument();
+
+      expect(screen.getByText('求人検索の休憩中、面接準備の合間、家族に相談した後')).toBeInTheDocument();
     });
   });
 });

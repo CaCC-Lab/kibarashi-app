@@ -22,7 +22,7 @@ describe('useHistory', () => {
   };
 
   // console.errorをスパイ化
-  let consoleSpy: any;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     // localStorageをクリア

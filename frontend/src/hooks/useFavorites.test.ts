@@ -12,7 +12,7 @@ import { Suggestion } from '../services/api/types';
  * - データの永続化とエクスポート/インポート機能を確認
  */
 describe('useFavorites', () => {
-  let consoleSpy: any;
+  let consoleSpy: ReturnType<typeof vi.spyOn>;
   
   const mockSuggestion: Suggestion = {
     id: 'test-1',

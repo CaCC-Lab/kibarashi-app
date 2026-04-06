@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AppDataManager, type AppDataExport } from './appDataManager';
 import { FavoritesStorage } from './favoritesStorage';
-import { HistoryStorage } from './historyStorage';
-import { CustomStorage } from './customStorage';
+// HistoryStorage and CustomStorage are used indirectly by AppDataManager
+import './historyStorage';
+import './customStorage';
 
 describe('AppDataManager', () => {
   beforeEach(() => {
@@ -38,17 +39,16 @@ describe('AppDataManager', () => {
 
     it('ファイル読み込みエラーを処理できる', async () => {
       // FileReaderのreadAsTextでエラーを発生させるモック
-      const error = new DOMException("Test error");
       const readerMock = {
         readAsText: vi.fn(function(this: FileReader) {
           if (this.onerror) {
             this.onerror(new ProgressEvent('error', { bubbles: true }));
           }
         }),
-        onerror: null as ((this: FileReader, ev: ProgressEvent) => any) | null,
+        onerror: null as ((this: FileReader, ev: ProgressEvent) => unknown) | null,
       };
-      
-      vi.spyOn(global, 'FileReader').mockImplementation(() => readerMock as any);
+
+      vi.spyOn(global, 'FileReader').mockImplementation(() => readerMock as unknown as FileReader);
 
       const mockFile = new File([''], 'error.json');
       const result = await AppDataManager.importFromFile(mockFile);

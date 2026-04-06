@@ -237,13 +237,13 @@ describe('Logger', () => {
   describe('エラーハンドリングのテスト', () => {
     it('nullメッセージでもエラーにならない', () => {
       expect(() => {
-        logger.info(null as any);
+        logger.info(null as unknown as string);
       }).not.toThrow();
     });
 
     it('undefinedメッセージでもエラーにならない', () => {
       expect(() => {
-        logger.info(undefined as any);
+        logger.info(undefined as unknown as string);
       }).not.toThrow();
     });
 
@@ -254,7 +254,7 @@ describe('Logger', () => {
     });
 
     it('循環参照オブジェクトでもエラーにならない', () => {
-      const circularObj: any = { name: 'test' };
+      const circularObj: Record<string, unknown> = { name: 'test' };
       circularObj.self = circularObj;
       
       expect(() => {

@@ -73,8 +73,12 @@ class GeminiTTSClient {
         throw new Error(`Gemini TTS API error: ${response.status} ${response.statusText}`);
       }
 
-      const data = await response.json() as any;
-      const audioBase64 = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      const data = await response.json() as Record<string, unknown>;
+      const candidates = data.candidates as Array<Record<string, unknown>> | undefined;
+      const content = candidates?.[0]?.content as Record<string, unknown> | undefined;
+      const parts = content?.parts as Array<Record<string, unknown>> | undefined;
+      const inlineData = parts?.[0]?.inlineData as Record<string, unknown> | undefined;
+      const audioBase64 = inlineData?.data as string | undefined;
 
       if (!audioBase64) {
         throw new Error('No audio data in Gemini response');
@@ -131,7 +135,10 @@ class GeminiTTSClient {
 let instance: GeminiTTSClient | null = null;
 
 export const geminiTTS = {
-  synthesizeSpeech: async (text: string, voiceConfig?: any) => {
+  synthesizeSpeech: async (text: string, voiceConfig?: {
+    languageCode?: string;
+    ssmlGender?: 'MALE' | 'FEMALE' | 'NEUTRAL';
+  }) => {
     if (!instance) {
       instance = new GeminiTTSClient();
     }

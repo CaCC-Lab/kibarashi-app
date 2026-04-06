@@ -300,7 +300,7 @@ export class AppDataManager {
   /**
    * インポートデータの検証
    */
-  private static validateImportData(data: any): string[] {
+  private static validateImportData(data: unknown): string[] {
     const errors: string[] = [];
 
     // 基本構造の検証
@@ -309,27 +309,34 @@ export class AppDataManager {
       return errors;
     }
 
+    const record = data as Record<string, unknown>;
+
     // バージョン情報の確認
-    if (!data.version || typeof data.version !== 'string') {
+    if (!record.version || typeof record.version !== 'string') {
       errors.push('バージョン情報が見つかりません');
     }
 
     // データセクションの確認
-    if (!data.data || typeof data.data !== 'object') {
+    if (!record.data || typeof record.data !== 'object') {
       errors.push('データセクションが見つかりません');
       return errors;
     }
 
+    const dataSection = record.data as Record<string, unknown>;
+
     // 各データタイプの検証
-    if (data.data.favorites && !Array.isArray(data.data.favorites.favorites)) {
+    const favorites = dataSection.favorites as Record<string, unknown> | undefined;
+    if (favorites && !Array.isArray(favorites.favorites)) {
       errors.push('お気に入りデータの形式が無効です');
     }
 
-    if (data.data.history && !Array.isArray(data.data.history.history)) {
+    const history = dataSection.history as Record<string, unknown> | undefined;
+    if (history && !Array.isArray(history.history)) {
       errors.push('履歴データの形式が無効です');
     }
 
-    if (data.data.customSuggestions && !Array.isArray(data.data.customSuggestions.customs)) {
+    const customSuggestions = dataSection.customSuggestions as Record<string, unknown> | undefined;
+    if (customSuggestions && !Array.isArray(customSuggestions.customs)) {
       errors.push('カスタム気晴らしデータの形式が無効です');
     }
 
