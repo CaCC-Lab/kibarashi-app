@@ -1,0 +1,90 @@
+# .coderabbit.yaml - CodeRabbit レビュー設定
+# ドキュメント: https://docs.coderabbit.ai/reference/configuration
+
+language: "ja-JP"
+early_access: true
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+
+  # Canon TDD の役割分離を反映
+  path_instructions:
+
+    # --- frontend/src/ : フロントエンド実装品質チェック ---
+    - path: "frontend/src/**"
+      instructions: |
+        このディレクトリは Claude Code / Cursor Cloud Agent が実装を担当する領域です。
+        以下の観点でレビューしてください:
+
+        【P0: 必須チェック】
+        - any型の使用がないか（unknown + 型ガードを推奨）
+        - console.log の使用がないか
+        - 外部 API キー・シークレットのハードコードがないか
+
+        【P1: 推奨チェック】
+        - TypeScript strict mode に準拠しているか
+        - React hooks の依存配列が正しいか
+        - メモ化（useMemo, useCallback）が適切に使われているか
+        - エッジケース（null, undefined, 空配列）の考慮漏れ
+
+        【P2: 任意チェック】
+        - 不要な再レンダリングがないか
+        - アクセシビリティ（aria属性、キーボードナビゲーション）
+
+    # --- backend/src/ : バックエンド実装品質チェック ---
+    - path: "backend/src/**"
+      instructions: |
+        バックエンド実装領域です。以下の観点でレビューしてください:
+
+        【P0: 必須チェック】
+        - any型の使用がないか
+        - APIキー・シークレットのハードコードがないか
+        - SQLインジェクション、コマンドインジェクションのリスク
+
+        【P1: 推奨チェック】
+        - エラーハンドリングが適切か（try-catch、エラーレスポンス形式）
+        - 入力バリデーションが実装されているか
+        - API レスポンス型が定義されているか
+
+    # --- テストファイル : テスト品質チェック ---
+    - path: "**/*.test.{ts,tsx}"
+      instructions: |
+        テストコードのレビューです。以下の観点に集中してください:
+
+        【P0: 必須チェック】
+        - .kiro/specs/*/requirements.md の Acceptance Criteria に対応するテストが網羅されているか
+        - エッジケース（null, undefined, 空配列, 空文字列, 0, 境界値）のテストが含まれているか
+
+        【P1: 推奨チェック】
+        - Given/When/Then コメントフォーマットに従っているか
+        - テスト名がテスト意図を表しているか
+        - 正常系と同数以上の異常系テストがあるか
+
+        * スタイル・命名への細かい指摘は不要です
+
+    # --- .kiro/specs/ : Spec 品質チェック ---
+    - path: ".kiro/specs/**"
+      instructions: |
+        Kiro Spec（Living Spec）のレビューです。以下の観点に集中してください:
+
+        - requirements.md: 各要件に REQ-xxx ID があるか、EARS 形式に従っているか
+        - design.md: requirements との整合性
+        - tasks.md: requirements/design へのトレーサビリティ
+        - bugfix.md: Current/Expected/Unchanged の3セクション構成になっているか
+
+        * Spec 間の同期状態（requirements → design → tasks）に矛盾があれば P0 で報告
+
+  tools:
+    # biome:
+    #   enabled: true
+    gitleaks:
+      enabled: true
+
+chat:
+  auto_reply: true

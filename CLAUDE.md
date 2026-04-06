@@ -208,3 +208,143 @@ interface SuggestionResponse {
 3. **ユーザー視点**: ストレスを抱えた状態でも使いやすいUI/UX
 4. **API依存**: Gemini API/TTSの利用制限とコストを常に監視
 5. **セキュリティ**: APIキーの管理、HTTPS通信の徹底
+
+---
+
+## AI開発フロー v7.8.5b 制約
+
+### Canon TDD制約
+- 実装PRではテストファイルを**変更禁止**
+- 既存テストを通す実装を作成する
+- テストが間違っていると思っても、まず実装で対応を試みる
+
+### Living Spec 前提
+- Kiro Spec は一回生成して終わりではなく、継続的に更新・同期する
+- requirements.md が変わったら、design.md と tasks.md の同期完了を確認してから実装へ進む
+- requirements/design/tasks が未同期なら、仕様解釈を進めてはならない
+
+### Canon TDD例外（Spec起点のみ）
+- 例外トリガー：Specの誤り、要件変更、テスト自体のバグ
+- **実装側からの例外発動は禁止**
+- 例外手順：
+  1. requirements.md 修正
+  2. design.md Refine
+  3. tasks.md Update tasks
+  4. 必要なら完了タスク再判定
+  5. テスト修正（Cursor）
+  6. FLOW_LOG記録
+  7. tests/変更禁止に復帰
+
+### Spec Sync Gate
+- Phase 3 以降に進む前に、requirements/design/tasks の同期状態を確認する
+- 以下のいずれかが未実施なら、実装を開始してはならない
+  - requirements 更新後の design Refine
+  - design 更新後の tasks Update
+  - 必要時の完了タスク再判定
+
+### Cursor Cloud Agent への委譲ルール
+- Cloud Agentに委譲する場合、スコープは「タスク定義済みの機械的置換・横断反映」に限定
+- Cloud Agent の MUST NOT：secrets操作、依存追加（未承認）、DB操作、大規模リファクタ、tests変更
+
+### /simplify 実行ルール（Phase 4.5）
+- 実装コミット後、レビュー前に `/simplify` を実行する（SHOULD）
+- `/simplify` は機能を変えずに再利用性・品質・効率性を改善する
+- `/simplify` 実行後、`git diff` で修正内容を必ず目視確認する（MUST）
+- 意図しない変更があれば `git checkout` で戻す
+- 確認後 `git commit -m "refactor: /simplify で品質改善"` でコミット
+
+### 参照ルール
+- 実装時は テストファイル と .kiro/specs/ を参照
+- 既存コードも参照可
+
+## MCP利用ルール
+
+- Spec の正本は `.kiro/specs/` と `.kiro/steering/` である
+- Context7 は外部仕様確認のために使う
+- Playwright MCP は UI / ブラウザ / 実行確認のために使う
+- Computer Use は Playwright MCP のフォールバックとして使う（DOM外UI / ネイティブUI 限定）
+- Computer Use で機密情報を入力しない、Cookie同意 / 規約同意 / 決済等の同意要求操作を自動実行しない
+- Computer Use で本番破壊的操作をしない
+- Sentry MCP は本番障害の証拠収集のために使う
+- MCP の結果だけで requirements / design / tasks / bugfix.md を確定しない
+- 仕様差分が見つかった場合は実装を続けず Phase 1 に戻る
+- テストは明示された例外手順または Bugfix Spec 以外では変更しない
+- 破壊的操作は local / dev / staging を原則とし、本番は明示承認が必要
+
+## コーディング規約
+
+- TypeScript strict mode
+- any型禁止（unknown + 型ガードを使う）
+- console.log 禁止（構造化ロギングを使用）
+- ESLint + Prettier 準拠
+
+## 禁止事項
+
+- any型の使用
+- console.log の使用（開発時デバッグ以外）
+- テストファイルの変更（Canon TDD制約）
+- 外部APIキーのハードコード
+- bare catch（catch (e: unknown) を使う）
+- requirements/design/tasks 未同期状態での実装開始
+
+## ローカルレビュー手順（v7.7：Agent Teams並列化）
+
+### 前提
+- 環境変数 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` が有効であること
+
+### Phase 5 実行手順
+
+#### Step 1: Agent Teams 並列レビュー
+
+以下の3つのteammateを同時にspawnしてレビューを並列実行する：
+
+**Teammate: security-reviewer**
+- /security-review を実行
+- 検出観点: SQLi, XSS, 認証・認可, データ処理, 依存関係
+- P0以上があれば即報告
+
+**Teammate: logic-reviewer**
+- セルフレビュー（review Skill相当）を実行
+- 検出観点: 可読性, バグ可能性, パフォーマンス, セキュリティ, テスト
+- 問題があれば優先度つきで報告
+
+**Teammate: supplement-reviewer**
+- REVIEW_SUPPLEMENT.md の観点でレビュー
+- 検出観点: 仕様・意図, 設計・保守性, AI可読性, 回帰リスク, テスト・運用
+- ※セキュリティは security-reviewer が担当するため対象外
+- 問題があれば優先度つきで報告
+
+#### Step 2: 指摘統合
+- 3つのteammateの結果を統合
+- 重複指摘を排除し、P0/P1/P2で整理
+- teammatesをシャットダウン
+
+#### Step 3: 修正
+- P0 → 必須修正（tests/変更禁止）
+- P1 → 推奨修正
+- P2 → 判断して対応/スキップ
+
+#### Step 4: 外部ツールクロスチェック
+1. /coderabbit:review uncommitted を実行、指摘があれば修正
+2. Pane2（Codex）へ「mainとの差分レビュー」を依頼
+3. Codex指摘があれば修正
+
+#### Step 4.5（SHOULD）: Runtime / Debug Investigation
+- レビューで「テストは通るが挙動が怪しい」「原因不明の不具合」が指摘された場合に発動
+- まず Playwright MCP で再現条件とUI挙動を固定する
+- Playwright で固定困難なUIは Computer Use で補完する
+- 必要なら Pane 1（Cursor）で Debug Mode を起動
+- 該当する指摘がなければスキップ
+
+#### Step 5: 完了宣言
+- すべてパスしたら「コミット可能」と宣言
+- コミットメッセージ案を3つ提示
+
+### フォールバック
+Agent Teams 起動失敗時は以下の逐次手順で実行：
+1. /security-review → 修正
+2. /coderabbit:review uncommitted → 修正
+3. セルフレビュー → 修正
+4. Pane2 Codex → 修正
+5. REVIEW_SUPPLEMENT.md 補完レビュー → 修正
+6. 「コミット可能」宣言
