@@ -107,6 +107,7 @@ cache/
 !manifest.json
 !vercel.json
 !backend/src/data/*.json
+!packages/core-logic/src/data/*.json
 gcp-credentials/
 
 # Firebase

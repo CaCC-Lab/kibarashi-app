@@ -13,23 +13,12 @@ export interface MetricsEvent {
  * イベントをトラッキングする関数
  * 実際の環境では、Google Analytics、Mixpanel、Amplitudeなどに送信
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function trackEvent(_event: MetricsEvent): void {
-  // 開発環境でのデバッグ用処理
-  if (process.env.NODE_ENV === 'development') {
-    // Metrics tracking would go here in development
-  }
-
+export function trackEvent(event: MetricsEvent): void {
   // TODO: 本番環境では実際のアナリティクスサービスに送信
-  // 例：
-  // if (window.gtag) {
-  //   window.gtag('event', event.name, {
-  //     event_category: 'AB_Test',
-  //     event_label: event.properties?.variant,
-  //     value: event.properties?.value,
-  //     ...event.properties
-  //   });
-  // }
+  if (process.env.NODE_ENV === 'development') {
+    // Development環境では何もしない（将来的にはconsole.debugで出力可能）
+    void event;
+  }
 }
 
 /**
