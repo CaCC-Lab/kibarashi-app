@@ -84,13 +84,16 @@ app.use('*', (_req, res) => {
 // エラーハンドリング
 app.use(errorHandler);
 
-// サーバー起動
-const server = app.listen(PORT, () => {
-  logger.info(`Server is running on port ${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV}`);
-  logger.info(`Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured (using fallback)'}`);
-  logger.info(`TTS API: ${process.env.GCP_TTS_ENABLED === 'true' ? 'Enabled' : 'Disabled'}`);
-});
+// サーバー起動（テスト時はlistenしない）
+let server: ReturnType<typeof app.listen> | undefined;
+if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+  server = app.listen(PORT, () => {
+    logger.info(`Server is running on port ${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV}`);
+    logger.info(`Gemini API: ${process.env.GEMINI_API_KEY ? 'Configured' : 'Not configured (using fallback)'}`);
+    logger.info(`TTS API: ${process.env.GCP_TTS_ENABLED === 'true' ? 'Enabled' : 'Disabled'}`);
+  });
+}
 
 // エクスポート（テスト用）
 export default server;

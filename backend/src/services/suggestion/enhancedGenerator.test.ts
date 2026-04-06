@@ -203,7 +203,7 @@ describe('Enhanced Suggestion Generator', () => {
       // Gemini APIキーを設定してエラーを発生させる
       process.env.GEMINI_API_KEY = 'test-key';
       
-      const { geminiClient } = await import('../gemini/geminiClient');
+      const { geminiClient } = await import('core-logic');
       vi.mocked(geminiClient.generateEnhancedSuggestions).mockRejectedValue(
         new Error('API Error')
       );
