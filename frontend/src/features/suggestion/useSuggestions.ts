@@ -69,7 +69,11 @@ export const useSuggestions = () => {
 
       if (!abortController.signal.aborted) {
         console.log('📝 Setting suggestions to state:', data.suggestions);
-        setSuggestions([...data.suggestions]);
+        const typed = data.suggestions.map((s) => ({
+          ...s,
+          category: (s.category === '認知的' ? '認知的' : '行動的') as '認知的' | '行動的',
+        })) as Suggestion[];
+        setSuggestions(typed);
         console.log('✅ Suggestions set successfully. Count:', data.suggestions.length);
       }
     } catch (err) {
