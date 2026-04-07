@@ -7,7 +7,14 @@ function safeParse(raw: string | null): StoredMission | null {
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as StoredMission;
-    if (!parsed?.mission?.date) return null;
+    if (
+      !parsed?.mission?.date ||
+      typeof parsed.mission.type !== 'string' ||
+      typeof parsed.mission.description !== 'string' ||
+      typeof parsed.mission.completed !== 'boolean'
+    ) {
+      return null;
+    }
     return parsed;
   } catch {
     console.error('Failed to parse daily mission storage');

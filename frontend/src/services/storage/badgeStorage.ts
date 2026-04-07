@@ -11,8 +11,15 @@ function safeParse(data: string | null): UnlockedBadgeData {
     if (!Array.isArray(parsed.badges)) {
       throw new Error('Invalid badge data');
     }
+    // runtime shape validation — guard against tampered localStorage
+    const validBadges = parsed.badges.filter(
+      (b): b is UnlockedBadge =>
+        typeof b.badgeId === 'string' &&
+        typeof b.unlockedAt === 'string' &&
+        typeof b.notificationSeen === 'boolean',
+    );
     return {
-      badges: parsed.badges,
+      badges: validBadges,
       lastUpdated: parsed.lastUpdated ?? new Date().toISOString(),
     };
   } catch {

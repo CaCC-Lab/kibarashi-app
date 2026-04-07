@@ -9,8 +9,14 @@ function safeParse(raw: string | null): DeckData {
   try {
     const parsed = JSON.parse(raw) as DeckData;
     if (!Array.isArray(parsed.decks)) throw new Error('invalid');
+    const validDecks = parsed.decks.filter(
+      (d): d is Deck =>
+        typeof d.id === 'string' &&
+        typeof d.name === 'string' &&
+        Array.isArray(d.favoriteIds),
+    );
     return {
-      decks: parsed.decks,
+      decks: validDecks,
       lastUpdated: parsed.lastUpdated ?? new Date().toISOString(),
     };
   } catch {
