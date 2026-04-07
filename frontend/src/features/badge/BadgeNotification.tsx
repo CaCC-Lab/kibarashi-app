@@ -1,22 +1,20 @@
 export interface BadgeNotificationProps {
-  badgeName: string | null;
-  badgeDescription: string | null;
+  badge: { name: string; description: string } | null;
   onClose: () => void;
 }
 
 export default function BadgeNotification({
-  badgeName,
-  badgeDescription,
+  badge,
   onClose,
 }: BadgeNotificationProps) {
-  if (!badgeName || !badgeDescription) {
+  if (!badge) {
     return null;
   }
 
   return (
     <div role="dialog" data-testid="badge-notification" aria-live="polite">
-      <p data-testid="celebration-title">{badgeName}</p>
-      <p data-testid="celebration-desc">{badgeDescription}</p>
+      <p data-testid="celebration-title">{badge.name}</p>
+      <p data-testid="celebration-desc">{badge.description}</p>
       <button type="button" data-testid="badge-notification-ok" onClick={onClose}>
         確認
       </button>

@@ -39,6 +39,17 @@ function toDurationRange(durationMinutes: number): DurationRange {
 const DATA_SHORT_MSG = 'もう少しデータが集まると傾向が見えてきます';
 
 export class JourneyAnalyzer {
+  private static getRecentCompleted(days: number = 14): HistoryItem[] {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(start.getDate() - days);
+    start.setHours(0, 0, 0, 0);
+
+    return HistoryStorage.getHistory().history.filter(
+      (h) => h.completed && inRange(h.startedAt, start, now),
+    );
+  }
+
   static getWeeklySummary(): JourneySummary {
     const now = new Date();
     const periodStart = startOfWeekMonday(now);
@@ -101,15 +112,7 @@ export class JourneyAnalyzer {
   }
 
   static getEffectiveCategories(): CategoryAnalysisResult {
-    const now = new Date();
-    const start = new Date(now);
-    start.setDate(start.getDate() - 14);
-    start.setHours(0, 0, 0, 0);
-
-    const hist = HistoryStorage.getHistory().history;
-    const recent = hist.filter(
-      (h) => h.completed && h.rating != null && inRange(h.startedAt, start, now),
-    );
+    const recent = this.getRecentCompleted(14).filter((h) => h.rating != null);
 
     if (recent.length < 3) {
       return {
@@ -153,13 +156,7 @@ export class JourneyAnalyzer {
   }
 
   static getTimePatterns(): TimePatternResult {
-    const now = new Date();
-    const start = new Date(now);
-    start.setDate(start.getDate() - 14);
-    start.setHours(0, 0, 0, 0);
-
-    const hist = HistoryStorage.getHistory().history;
-    const recent = hist.filter((h) => h.completed && inRange(h.startedAt, start, now));
+    const recent = this.getRecentCompleted(14);
 
     if (recent.length < 3) {
       return {

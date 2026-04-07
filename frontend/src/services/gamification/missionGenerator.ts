@@ -2,13 +2,7 @@ import { DailyMission, MissionType } from '../../types/dailyMission';
 import { DailyMissionStorage } from '../storage/dailyMissionStorage';
 import { HistoryStorage } from '../storage/historyStorage';
 import { CollectionService } from './collectionService';
-
-function todayStr(d = new Date()): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
+import { todayStr } from '../../utils/dateUtils';
 
 function buildMission(date: string): DailyMission {
   const entries = CollectionService.getCollectionEntries();

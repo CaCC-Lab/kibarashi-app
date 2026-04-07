@@ -1,4 +1,5 @@
 import {
+  BadgeConditionKey,
   BadgeDefinition,
   BadgeEvaluationResult,
   UnlockedBadge,
@@ -7,6 +8,9 @@ import { BadgeStorage } from '../storage/badgeStorage';
 import { HistoryStorage } from '../storage/historyStorage';
 import { FavoritesStorage } from '../storage/favoritesStorage';
 import { CustomStorage } from '../storage/customStorage';
+import type { HistoryItem } from '../../types/history';
+import type { Favorite } from '../../types/favorites';
+import type { CustomSuggestion } from '../../types/custom';
 
 const DEFINITIONS: BadgeDefinition[] = [
   {
@@ -59,16 +63,13 @@ const DEFINITIONS: BadgeDefinition[] = [
   },
 ];
 
-function completedHistory() {
-  return HistoryStorage.getHistory().history.filter((h) => h.completed);
-}
-
-function shouldUnlock(def: BadgeDefinition): boolean {
-  const completed = completedHistory();
-  const favs = FavoritesStorage.getFavorites().favorites;
-  const customs = CustomStorage.getCustomSuggestions().customs;
-
-  switch (def.conditionKey) {
+function shouldUnlock(
+  def: BadgeDefinition,
+  completed: HistoryItem[],
+  favorites: Favorite[],
+  customs: CustomSuggestion[],
+): boolean {
+  switch (def.conditionKey satisfies BadgeConditionKey) {
     case 'first_try':
       return completed.length >= 1;
     case 'three_completed':
@@ -79,7 +80,7 @@ function shouldUnlock(def: BadgeDefinition): boolean {
       return cog && act;
     }
     case 'favorite_saved':
-      return favs.length >= 1;
+      return favorites.length >= 1;
     case 'note_written':
       return completed.some((h) => (h.note ?? '').trim().length > 0);
     case 'custom_created':
@@ -95,13 +96,17 @@ export class BadgeEngine {
   }
 
   static evaluateBadges(): BadgeEvaluationResult {
+    const completed = HistoryStorage.getHistory().history.filter((h) => h.completed);
+    const favorites = FavoritesStorage.getFavorites().favorites;
+    const customs = CustomStorage.getCustomSuggestions().customs;
+
     const unlockedRows = BadgeStorage.getUnlockedBadges().badges;
     const unlockedIds = new Set(unlockedRows.map((u) => u.badgeId));
     const newlyUnlocked: BadgeDefinition[] = [];
 
     for (const def of DEFINITIONS) {
       if (unlockedIds.has(def.id)) continue;
-      if (shouldUnlock(def)) {
+      if (shouldUnlock(def, completed, favorites, customs)) {
         const ok = BadgeStorage.unlockBadge(def.id);
         if (ok) {
           newlyUnlocked.push(def);
@@ -121,9 +126,9 @@ export class BadgeEngine {
   }
 
   static checkNewUnlocks(): UnlockedBadge[] {
-    const before = new Set(BadgeStorage.getUnlockedBadges().badges.map((b) => b.badgeId));
-    this.evaluateBadges();
-    const after = BadgeStorage.getUnlockedBadges().badges;
-    return after.filter((b) => !before.has(b.badgeId));
+    const { newlyUnlocked } = this.evaluateBadges();
+    return BadgeStorage.getUnlockedBadges().badges.filter((b) =>
+      newlyUnlocked.some((def) => def.id === b.badgeId),
+    );
   }
 }

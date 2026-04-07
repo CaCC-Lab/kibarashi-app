@@ -3,17 +3,16 @@ import { BadgeEngine } from '../../services/gamification/badgeEngine';
 import BadgeCard from './BadgeCard';
 
 export interface BadgeListProps {
-  evaluation?: BadgeEvaluationResult;
+  evaluation: BadgeEvaluationResult;
   selectedId?: string | null;
   onSelectBadge?: (id: string) => void;
 }
 
 export default function BadgeList({
-  evaluation: evaluationProp,
+  evaluation,
   selectedId = null,
   onSelectBadge,
 }: BadgeListProps) {
-  const evaluation = evaluationProp ?? BadgeEngine.evaluateBadges();
   const defs = BadgeEngine.getBadgeDefinitions();
 
   return (

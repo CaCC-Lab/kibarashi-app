@@ -6,7 +6,7 @@ describe('BadgeNotification', () => {
   it('バッジ情報がないときは何も表示しない', () => {
     // Given: null
     const { container } = render(
-      <BadgeNotification badgeName={null} badgeDescription={null} onClose={() => {}} />,
+      <BadgeNotification badge={null} onClose={() => {}} />,
     );
     expect(container.firstChild).toBeNull();
   });
@@ -15,8 +15,7 @@ describe('BadgeNotification', () => {
     // Given: バッジ情報
     render(
       <BadgeNotification
-        badgeName="はじめの一歩"
-        badgeDescription="初めての気晴らしを完了しました"
+        badge={{ name: 'はじめの一歩', description: '初めての気晴らしを完了しました' }}
         onClose={() => {}}
       />,
     );
@@ -29,7 +28,7 @@ describe('BadgeNotification', () => {
   it('確認で onClose が呼ばれる', () => {
     const onClose = vi.fn();
     render(
-      <BadgeNotification badgeName="A" badgeDescription="B" onClose={onClose} />,
+      <BadgeNotification badge={{ name: 'A', description: 'B' }} onClose={onClose} />,
     );
     fireEvent.click(screen.getByTestId('badge-notification-ok'));
     expect(onClose).toHaveBeenCalled();

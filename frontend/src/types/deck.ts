@@ -1,4 +1,3 @@
-/** デッキ */
 export interface Deck {
   id: string;
   name: string;
@@ -8,7 +7,6 @@ export interface Deck {
   updatedAt: string;
 }
 
-/** デッキストレージデータ */
 export interface DeckData {
   decks: Deck[];
   lastUpdated: string;

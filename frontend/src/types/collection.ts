@@ -1,4 +1,3 @@
-/** 図鑑エントリー */
 export interface CollectionEntry {
   suggestionId: string;
   title: string;
@@ -9,7 +8,6 @@ export interface CollectionEntry {
   firstTriedAt?: string;
 }
 
-/** 図鑑統計 */
 export interface CollectionStats {
   totalCount: number;
   triedCount: number;
