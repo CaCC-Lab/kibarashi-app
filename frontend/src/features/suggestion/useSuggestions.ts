@@ -4,7 +4,7 @@ import { SituationId } from '../../types/situation';
 import { AgeGroup } from '../../types/ageGroup';
 import { fallbackSuggestions } from './fallbackSuggestions';
 
-const API_TIMEOUT = 8000; // 8秒
+const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '120000');
 
 export const useSuggestions = () => {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
