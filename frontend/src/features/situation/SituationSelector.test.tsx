@@ -88,12 +88,12 @@ describe('SituationSelector', () => {
       
       const workplaceButton = screen.getByText('職場').closest('button');
       expect(workplaceButton?.className).toContain('border-primary-500');
-      expect(workplaceButton?.className).toContain('shadow-lg');
+      expect(workplaceButton?.className).toContain('afford-card');
       
       // 他のボタンはハイライトされない
       const homeButton = screen.getByText('家').closest('button');
       expect(homeButton?.className).toContain('border-primary-200');
-      expect(homeButton?.className).not.toContain('shadow-lg');
+      expect(homeButton?.className).toContain('afford-card');
     });
 
     it('家が選択されている場合、ハイライトされる', () => {
@@ -107,7 +107,7 @@ describe('SituationSelector', () => {
       
       const homeButton = screen.getByText('家').closest('button');
       expect(homeButton?.className).toContain('border-primary-500');
-      expect(homeButton?.className).toContain('shadow-lg');
+      expect(homeButton?.className).toContain('afford-card');
     });
 
     it('外出先が選択されている場合、ハイライトされる', () => {
@@ -121,7 +121,7 @@ describe('SituationSelector', () => {
       
       const outsideButton = screen.getByText('外出先').closest('button');
       expect(outsideButton?.className).toContain('border-primary-500');
-      expect(outsideButton?.className).toContain('shadow-lg');
+      expect(outsideButton?.className).toContain('afford-card');
     });
   });
 
@@ -296,21 +296,21 @@ describe('SituationSelector', () => {
       const button = screen.getByText('職場').closest('button');
       // ホバースタイルはTailwindによって適用されるが、実際のホバー状態をテストするのは難しい
       // 代わりに、ホバースタイルクラスが存在することを確認
+      expect(button?.className).toContain('afford-card');
       expect(button?.className).toContain('hover:');
-      expect(button?.className).toContain('transition-all');
     });
 
     it('選択時のアニメーションクラスが適用される', () => {
       render(
-        <SituationSelector 
-          selected={null} 
-          onSelect={onSelect} 
-          onBack={onBack} 
+        <SituationSelector
+          selected={null}
+          onSelect={onSelect}
+          onBack={onBack}
         />
       );
-      
+
       const button = screen.getByText('職場').closest('button');
-      expect(button?.className).toContain('transition-all');
+      expect(button?.className).toContain('afford-card');
       expect(button?.className).toContain('animate-slideIn');
     });
   });
@@ -395,7 +395,7 @@ describe('SituationSelector', () => {
 
       const jobHuntingButton = screen.getByText('就職・転職活動').closest('button');
       expect(jobHuntingButton?.className).toContain('border-primary-500');
-      expect(jobHuntingButton?.className).toContain('shadow-lg');
+      expect(jobHuntingButton?.className).toContain('afford-card');
     });
 
     it('就職・転職活動オプションをクリックするとonSelectが呼ばれる', () => {

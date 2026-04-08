@@ -85,7 +85,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* 場所表示と変更ボタン */}
             <button
               onClick={() => setShowLocationSelector(true)}
-              className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+              className="flex items-center space-x-2 px-3 py-2 afford-icon-btn text-text-secondary hover:text-text-primary focus-ring"
               aria-label="場所を変更"
               title="場所を変更"
             >
@@ -101,7 +101,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* 実績ボタン */}
             <button
               onClick={() => setShowBadgeModal(true)}
-              className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+              className="p-2 afford-icon-btn text-text-secondary hover:text-text-primary focus-ring"
               aria-label="実績バッジ"
               title="実績バッジ"
             >
@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* 統計ボタン */}
             <button
               onClick={() => setShowJourneyModal(true)}
-              className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+              className="p-2 afford-icon-btn text-text-secondary hover:text-text-primary focus-ring"
               aria-label="回復ジャーニー"
               title="回復ジャーニー"
             >
@@ -121,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({
             {/* ヘルプボタン */}
             <button
               onClick={() => setShowHelpModal(true)}
-              className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+              className="p-2 afford-icon-btn text-text-secondary hover:text-text-primary focus-ring"
               aria-label="使い方・ヘルプ"
               title="使い方・ヘルプ"
             >
@@ -135,7 +135,7 @@ const Header: React.FC<HeaderProps> = ({
             {showFavoritesButton && onFavoritesClick && (
               <button
                 onClick={onFavoritesClick}
-                className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+                className="p-2 afford-icon-btn text-text-secondary hover:text-text-primary focus-ring"
                 aria-label="お気に入り"
                 title="お気に入り"
               >
@@ -158,7 +158,7 @@ const Header: React.FC<HeaderProps> = ({
             {showHistoryButton && onHistoryClick && (
               <button
                 onClick={onHistoryClick}
-                className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+                className="p-2 afford-icon-btn text-text-secondary hover:text-text-primary focus-ring"
                 aria-label="履歴"
                 title="履歴"
               >
@@ -181,7 +181,7 @@ const Header: React.FC<HeaderProps> = ({
             {showCustomButton && onCustomClick && (
               <button
                 onClick={onCustomClick}
-                className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+                className="p-2 afford-icon-btn text-text-secondary hover:text-text-primary focus-ring"
                 aria-label="マイ気晴らし"
                 title="マイ気晴らし"
               >
@@ -204,7 +204,7 @@ const Header: React.FC<HeaderProps> = ({
             <div className="relative">
               <button
                 onClick={handleSettingsClick}
-                className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+                className="p-2 afford-icon-btn text-text-secondary hover:text-text-primary focus-ring"
                 aria-label="設定"
               >
               <svg

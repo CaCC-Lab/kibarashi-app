@@ -141,9 +141,10 @@ function App() {
     <div className="flex items-center justify-center space-x-4 mb-8">
       <button
         onClick={() => setCurrentStep('situation')}
-        className={`flex items-center space-x-2 ${
+        className={`flex items-center space-x-2 afford-progress-step ${
           currentStep === 'situation' ? 'text-primary-600' : 'text-gray-500'
         }`}
+        data-active={currentStep === 'situation'}
       >
         <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
           situation ? 'bg-primary-500 text-white' : 'bg-gray-200'
@@ -158,9 +159,10 @@ function App() {
       <button
         onClick={() => situation && setCurrentStep('duration')}
         disabled={!situation}
-        className={`flex items-center space-x-2 ${
+        className={`flex items-center space-x-2 afford-progress-step ${
           currentStep === 'duration' ? 'text-primary-600' : 'text-gray-500'
         } ${!situation && 'cursor-not-allowed opacity-50'}`}
+        data-active={currentStep === 'duration'}
       >
         <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
           duration ? 'bg-primary-500 text-white' : 'bg-gray-200'
@@ -175,9 +177,10 @@ function App() {
       <button
         onClick={() => situation && duration && setCurrentStep('suggestions')}
         disabled={!situation || !duration}
-        className={`flex items-center space-x-2 ${
+        className={`flex items-center space-x-2 afford-progress-step ${
           currentStep === 'suggestions' ? 'text-primary-600' : 'text-gray-500'
         } ${(!situation || !duration) && 'cursor-not-allowed opacity-50'}`}
+        data-active={currentStep === 'suggestions'}
       >
         <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
           currentStep === 'suggestions' ? 'bg-primary-500 text-white' : 'bg-gray-200'

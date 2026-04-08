@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import SuggestionDetail from './SuggestionDetail';
 import type { Suggestion } from '@/types';
 
@@ -12,6 +12,10 @@ import type { Suggestion } from '@/types';
  */
 describe('SuggestionDetail', () => {
   let onBackCallCount = 0;
+
+  afterEach(() => {
+    cleanup();
+  });
   
   const mockSuggestion: Suggestion = {
     id: 'test-1',

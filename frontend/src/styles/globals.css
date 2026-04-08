@@ -17,6 +17,14 @@
     /* アクセシビリティ関連変数 */
     --focus-ring-color: var(--color-primary-500);
     --focus-ring-opacity: 0.5;
+
+    /* Affordance system */
+    --affordance-shadow-rest: 0 2px 8px rgba(59, 59, 107, 0.08), 0 1px 3px rgba(59, 59, 107, 0.12);
+    --affordance-shadow-hover: 0 4px 16px rgba(59, 59, 107, 0.15), 0 2px 6px rgba(59, 59, 107, 0.1);
+    --affordance-shadow-active: 0 1px 2px rgba(59, 59, 107, 0.15), inset 0 1px 3px rgba(0, 0, 0, 0.06);
+    --affordance-glow: 0 0 0 3px rgba(59, 59, 107, 0.15);
+    --affordance-radius: 16px;
+    --affordance-transition: 180ms cubic-bezier(0.2, 0, 0, 1);
   }
   
   /* ダークモード用変数 */
@@ -24,6 +32,11 @@
     --color-primary-50: #191932;
     --color-primary-100: #212140;
     --focus-ring-color: var(--color-primary-300);
+
+    --affordance-shadow-rest: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.4);
+    --affordance-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --affordance-shadow-active: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 3px rgba(0, 0, 0, 0.15);
+    --affordance-glow: 0 0 0 3px rgba(100, 100, 180, 0.3);
   }
   
   html {

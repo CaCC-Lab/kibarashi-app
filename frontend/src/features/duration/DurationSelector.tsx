@@ -55,12 +55,12 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
               onSelect(option.id);
             }}
             className={`
-              relative overflow-hidden rounded-xl border-2 transition-all duration-200
-              animate-slideIn hover-lift focus-ring min-h-[180px] md:min-h-[200px]
+              relative overflow-hidden afford-card border-2
+              animate-slideIn focus-ring min-h-[180px] md:min-h-[200px]
               ${
                 selected === option.id
-                  ? 'border-primary-500 shadow-lg transform scale-105'
-                  : 'border-primary-200 hover:border-primary-400 hover:shadow-md hover:scale-[1.02]'
+                  ? 'border-primary-500'
+                  : 'border-primary-200 hover:border-primary-400'
               }
             `}
             style={{ animationDelay: `${index * 100}ms` }}
