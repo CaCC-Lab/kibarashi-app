@@ -8,10 +8,15 @@ import {
   JobHuntingPromptInput,
 } from 'core-logic';
 
-const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://localhost:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'gemma4:26b';
-const OLLAMA_TIMEOUT = parseInt(process.env.OLLAMA_TIMEOUT || '120000');
 const MAX_RETRIES = 2;
+
+function getOllamaConfig() {
+  return {
+    baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
+    model: process.env.OLLAMA_MODEL || 'gemma3:4b',
+    timeout: parseInt(process.env.OLLAMA_TIMEOUT || '120000'),
+  };
+}
 
 interface OllamaSuggestion {
   id: string;
@@ -27,15 +32,16 @@ interface OllamaSuggestion {
  * Ollama APIにリクエストを送信し、テキストレスポンスを取得
  */
 async function callOllama(prompt: string): Promise<string> {
+  const config = getOllamaConfig();
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), OLLAMA_TIMEOUT);
+  const timeout = setTimeout(() => controller.abort(), config.timeout);
 
   try {
-    const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+    const response = await fetch(`${config.baseUrl}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: OLLAMA_MODEL,
+        model: config.model,
         messages: [
           {
             role: 'system',
@@ -186,7 +192,7 @@ export const ollamaClient = {
     let lastError: Error | null = null;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
-        logger.info('Calling Ollama API', { model: OLLAMA_MODEL, situation, duration, attempt });
+        logger.info('Calling Ollama API', { model: getOllamaConfig().model, situation, duration, attempt });
         const text = await callOllama(prompt);
         const suggestions = parseResponse(text, duration);
         logger.info('Ollama response parsed', { count: suggestions.length });

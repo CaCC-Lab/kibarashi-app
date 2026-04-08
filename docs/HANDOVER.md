@@ -56,7 +56,7 @@ NODE_ENV=development
 CORS_ORIGIN=http://localhost:3001
 AI_PROVIDER=ollama
 OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=gemma4:26b
+OLLAMA_MODEL=gemma4:31b-cloud
 ```
 
 ## 実装済み機能一覧
