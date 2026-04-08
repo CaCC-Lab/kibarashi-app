@@ -1,10 +1,14 @@
-import { useState, lazy, Suspense, useEffect } from 'react';
+import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
 import MainLayout from './components/layout/MainLayout';
 import Loading from './components/common/Loading';
 import { SituationId } from './types/situation';
 import { useAgeGroup } from './hooks/useAgeGroup';
 import { AgeGroupOnboardingModal } from './components/ageGroup/AgeGroupSelector';
 import { DebugModeToggle } from './components/debug/DebugModeToggle';
+import { BadgeEngine } from './services/gamification/badgeEngine';
+import { MissionGenerator } from './services/gamification/missionGenerator';
+import BadgeNotification from './features/badge/BadgeNotification';
+import DailyMission from './features/mission/DailyMission';
 
 // コンポーネントの遅延読み込み
 const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
@@ -30,6 +34,30 @@ function App() {
     return localStorage.getItem('kibarashi-debug-mode') === 'true';
   });
 
+  // バッジ通知
+  const [newBadge, setNewBadge] = useState<{ name: string; description: string } | null>(null);
+
+  // デイリーミッション
+  const todayMission = MissionGenerator.getTodayMission();
+  const [missionCelebration, setMissionCelebration] = useState<string | null>(null);
+
+  // バッジ＆ミッション判定（気晴らし完了等のアクション後に呼ぶ）
+  const checkGamification = useCallback(() => {
+    const unlocked = BadgeEngine.checkNewUnlocks();
+    if (unlocked.length > 0) {
+      const def = BadgeEngine.getBadgeDefinitions().find(d => d.id === unlocked[0].badgeId);
+      if (def) {
+        setNewBadge({ name: def.name, description: def.description });
+      }
+    }
+    if (todayMission && !todayMission.completed) {
+      const completed = MissionGenerator.checkMissionCompletion(todayMission);
+      if (completed) {
+        setMissionCelebration('ミッション達成！お疲れさまでした');
+      }
+    }
+  }, [todayMission]);
+
   // 初回ユーザーの場合、オンボーディングモーダルを表示
   useEffect(() => {
     if (!ageGroupLoading && isFirstTimeUser) {
@@ -49,6 +77,7 @@ function App() {
   };
 
   const handleReset = () => {
+    checkGamification();
     setSituation(null);
     setDuration(null);
     setCurrentStep('situation');
@@ -71,6 +100,7 @@ function App() {
   };
 
   const handleBackToMain = () => {
+    checkGamification();
     setCurrentStep('situation');
   };
 
@@ -190,6 +220,16 @@ function App() {
         onLocationChange={handleLocationChange}
       >
         <div className="max-w-4xl mx-auto">
+          {/* デイリーミッション（ホーム画面のみ） */}
+          {currentStep === 'situation' && todayMission && (
+            <div className="mb-4">
+              <DailyMission
+                mission={todayMission}
+                celebrationMessage={missionCelebration}
+              />
+            </div>
+          )}
+
           {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && currentStep !== 'custom' && renderBreadcrumb()}
           
           {currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom' ? (
@@ -233,9 +273,15 @@ function App() {
         isOpen={showOnboarding}
         onClose={() => setShowOnboarding(false)}
       />
-      
+
+      {/* バッジ解除通知 */}
+      <BadgeNotification
+        badge={newBadge}
+        onClose={() => setNewBadge(null)}
+      />
+
       {/* デバッグモードトグル（開発環境のみ） */}
-      <DebugModeToggle 
+      <DebugModeToggle
         onToggle={setDebugMode}
       />
     </>

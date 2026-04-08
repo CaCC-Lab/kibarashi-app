@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import DarkModeToggle from '../common/DarkModeToggle';
 import LocationSelector from '../location/LocationSelector';
 import HelpModal from '../help/HelpModal';
+import BadgeModal from '../../features/badge/BadgeModal';
+import JourneyModal from '../../features/journey/JourneyModal';
 
 interface HeaderProps {
   onFavoritesClick?: () => void;
@@ -29,6 +31,8 @@ const Header: React.FC<HeaderProps> = ({
   const [showMessage, setShowMessage] = useState(false);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [showJourneyModal, setShowJourneyModal] = useState(false);
 
   const handleSettingsClick = () => {
     if (onSettingsClick) {
@@ -94,6 +98,26 @@ const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
             
+            {/* 実績ボタン */}
+            <button
+              onClick={() => setShowBadgeModal(true)}
+              className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+              aria-label="実績バッジ"
+              title="実績バッジ"
+            >
+              <span className="text-lg">🏅</span>
+            </button>
+
+            {/* 統計ボタン */}
+            <button
+              onClick={() => setShowJourneyModal(true)}
+              className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200 focus-ring"
+              aria-label="回復ジャーニー"
+              title="回復ジャーニー"
+            >
+              <span className="text-lg">📊</span>
+            </button>
+
             {/* ヘルプボタン */}
             <button
               onClick={() => setShowHelpModal(true)}
@@ -230,6 +254,18 @@ const Header: React.FC<HeaderProps> = ({
       <HelpModal
         isOpen={showHelpModal}
         onClose={() => setShowHelpModal(false)}
+      />
+
+      {/* 実績バッジモーダル */}
+      <BadgeModal
+        isOpen={showBadgeModal}
+        onClose={() => setShowBadgeModal(false)}
+      />
+
+      {/* 回復ジャーニーモーダル */}
+      <JourneyModal
+        isOpen={showJourneyModal}
+        onClose={() => setShowJourneyModal(false)}
       />
     </header>
   );
