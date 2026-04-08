@@ -65,14 +65,12 @@ export async function generateSuggestions(
       const responseTime = Date.now() - startTime;
 
       // データソース情報を追加
-      const suggestionsWithMetadata = (suggestions as Record<string, unknown>[]).slice(0, 3).map(suggestion => ({
+      const suggestionsWithMetadata: Suggestion[] = (suggestions as Suggestion[]).slice(0, 3).map(suggestion => ({
         ...suggestion,
         dataSource: 'ai' as const,
         responseTime,
       }));
-      
-      // ステップ3: 必ず3つの提案を返す
-      // なぜ3つか：選択肢を提供しつつ、情報過多を避けるため
+
       return suggestionsWithMetadata;
     }
     

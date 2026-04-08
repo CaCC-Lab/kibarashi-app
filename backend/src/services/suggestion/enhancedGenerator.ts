@@ -104,7 +104,7 @@ export async function generateEnhancedSuggestions(
       const limitedSuggestions = enhancedSuggestions.slice(0, 3);
       
       // ステップ4: 詳細度の調整
-      return limitedSuggestions.map(suggestion => adjustDetailLevel(suggestion, detailLevel));
+      return limitedSuggestions.map(suggestion => adjustDetailLevel(suggestion as EnhancedSuggestion, detailLevel));
     }
     
     // APIキーが設定されていない場合または音声ガイドが不要な場合
