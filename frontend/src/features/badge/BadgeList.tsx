@@ -16,7 +16,11 @@ export default function BadgeList({
   const defs = BadgeEngine.getBadgeDefinitions();
 
   return (
-    <div data-testid="badge-list" role="list">
+    <div
+      className="grid grid-cols-2 gap-3"
+      data-testid="badge-list"
+      role="list"
+    >
       {defs.map((def) => {
         const row = evaluation.unlocked.find((u) => u.badgeId === def.id);
         const unlocked = Boolean(row);

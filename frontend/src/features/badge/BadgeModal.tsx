@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { BadgeEngine } from '../../services/gamification/badgeEngine';
+import type { BadgeEvaluationResult } from '../../types/badge';
 import BadgeList from './BadgeList';
 
 interface BadgeModalProps {
@@ -9,10 +10,21 @@ interface BadgeModalProps {
 
 export default function BadgeModal({ isOpen, onClose }: BadgeModalProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [evaluation, setEvaluation] = useState<BadgeEvaluationResult | null>(
+    null
+  );
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setEvaluation(null);
+      return;
+    }
+    setEvaluation(BadgeEngine.evaluateBadges());
+  }, [isOpen]);
 
   if (!isOpen) return null;
+  if (!evaluation) return null;
 
-  const evaluation = BadgeEngine.evaluateBadges();
   const total = BadgeEngine.getBadgeDefinitions().length;
   const unlocked = evaluation.unlocked.length;
 
@@ -41,8 +53,18 @@ export default function BadgeModal({ isOpen, onClose }: BadgeModalProps) {
               className="p-2 rounded-lg hover:bg-surface-secondary dark:hover:bg-gray-700 text-text-secondary hover:text-text-primary transition-all duration-200"
               aria-label="閉じる"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -50,13 +72,11 @@ export default function BadgeModal({ isOpen, onClose }: BadgeModalProps) {
 
         {/* バッジ一覧 */}
         <div className="p-5 overflow-y-auto max-h-[calc(85vh-140px)]">
-          <div className="grid grid-cols-2 gap-3">
-            <BadgeList
-              evaluation={evaluation}
-              selectedId={selectedId}
-              onSelectBadge={(id) => setSelectedId(selectedId === id ? null : id)}
-            />
-          </div>
+          <BadgeList
+            evaluation={evaluation}
+            selectedId={selectedId}
+            onSelectBadge={(id) => setSelectedId(selectedId === id ? null : id)}
+          />
         </div>
 
         {/* フッター */}
