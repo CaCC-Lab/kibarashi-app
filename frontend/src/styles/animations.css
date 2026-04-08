@@ -141,23 +141,16 @@
   top: 0;
 }
 
-/* Affordance: Gentle bounce on press */
-@keyframes affordPress {
-  0% { transform: scale(1); }
-  50% { transform: scale(0.97); }
-  100% { transform: scale(1); }
-}
-
-/* Affordance: Soft glow pulse for new/unvisited items */
-@keyframes affordGlow {
-  0%, 100% { box-shadow: var(--affordance-shadow-rest); }
-  50% { box-shadow: var(--affordance-shadow-rest), 0 0 12px rgba(59, 59, 107, 0.12); }
-}
-
-/* Affordance: Subtle breathing for CTAs */
+/* Affordance: Subtle breathing for progress dot (translateX keeps ::after centered) */
 @keyframes affordBreathe {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.02); opacity: 0.95; }
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.02);
+    opacity: 0.95;
+  }
 }
 
 .afford-card {
@@ -185,38 +178,14 @@
   border-color: var(--color-primary-500);
 }
 
-.afford-btn {
-  position: relative;
-  box-shadow: var(--affordance-shadow-rest);
-  border-radius: 12px;
-  transition: all var(--affordance-transition);
-  overflow: hidden;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.afford-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.afford-btn:hover {
-  box-shadow: var(--affordance-shadow-hover);
-  transform: translateY(-1px);
-}
-
-.afford-btn:active {
-  box-shadow: var(--affordance-shadow-active);
-  transform: translateY(0) scale(0.98);
-}
-
-.afford-btn:active::after {
-  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.04) 100%);
+/* Keep focus ring visible when selected (same specificity as .focus-ring:focus; wins by source order) */
+.afford-card.focus-ring:focus {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 3px hsla(from var(--focus-ring-color) h s l / var(--focus-ring-opacity)),
+    var(--affordance-glow),
+    var(--affordance-shadow-hover);
 }
 
 /* Header icon button affordance */
@@ -241,6 +210,10 @@
   background-color: rgba(59, 59, 107, 0.12);
 }
 
+.dark .afford-icon-btn:active {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
 /* Progress indicator affordance */
 .afford-progress-step {
   position: relative;
@@ -258,9 +231,4 @@
   border-radius: 50%;
   background: var(--color-primary-500);
   animation: affordBreathe 2.5s ease-in-out infinite;
-}
-
-/* CTA breathe hint */
-.afford-cta-hint {
-  animation: affordGlow 3s ease-in-out infinite;
 }
