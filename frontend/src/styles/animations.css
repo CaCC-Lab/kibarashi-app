@@ -140,3 +140,127 @@
 .skip-link:focus {
   top: 0;
 }
+
+/* Affordance: Gentle bounce on press */
+@keyframes affordPress {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+/* Affordance: Soft glow pulse for new/unvisited items */
+@keyframes affordGlow {
+  0%, 100% { box-shadow: var(--affordance-shadow-rest); }
+  50% { box-shadow: var(--affordance-shadow-rest), 0 0 12px rgba(59, 59, 107, 0.12); }
+}
+
+/* Affordance: Subtle breathing for CTAs */
+@keyframes affordBreathe {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.02); opacity: 0.95; }
+}
+
+.afford-card {
+  box-shadow: var(--affordance-shadow-rest);
+  border-radius: var(--affordance-radius);
+  transition: all var(--affordance-transition);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.afford-card:hover {
+  box-shadow: var(--affordance-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.afford-card:active {
+  box-shadow: var(--affordance-shadow-active);
+  transform: translateY(0) scale(0.98);
+}
+
+.afford-card[aria-pressed="true"],
+.afford-card[data-selected="true"] {
+  box-shadow: var(--affordance-glow), var(--affordance-shadow-hover);
+  border-color: var(--color-primary-500);
+}
+
+.afford-btn {
+  position: relative;
+  box-shadow: var(--affordance-shadow-rest);
+  border-radius: 12px;
+  transition: all var(--affordance-transition);
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.afford-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.afford-btn:hover {
+  box-shadow: var(--affordance-shadow-hover);
+  transform: translateY(-1px);
+}
+
+.afford-btn:active {
+  box-shadow: var(--affordance-shadow-active);
+  transform: translateY(0) scale(0.98);
+}
+
+.afford-btn:active::after {
+  background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.04) 100%);
+}
+
+/* Header icon button affordance */
+.afford-icon-btn {
+  position: relative;
+  border-radius: 10px;
+  transition: all var(--affordance-transition);
+  cursor: pointer;
+}
+
+.afford-icon-btn:hover {
+  background-color: rgba(59, 59, 107, 0.08);
+  transform: scale(1.08);
+}
+
+.dark .afford-icon-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.afford-icon-btn:active {
+  transform: scale(0.95);
+  background-color: rgba(59, 59, 107, 0.12);
+}
+
+/* Progress indicator affordance */
+.afford-progress-step {
+  position: relative;
+  transition: all var(--affordance-transition);
+}
+
+.afford-progress-step[data-active="true"]::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary-500);
+  animation: affordBreathe 2.5s ease-in-out infinite;
+}
+
+/* CTA breathe hint */
+.afford-cta-hint {
+  animation: affordGlow 3s ease-in-out infinite;
+}

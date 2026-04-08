@@ -74,12 +74,11 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
             }}
             className={`
               relative p-4 md:p-6 min-h-[100px] md:min-h-[120px] w-full
-              rounded-xl border-2 transition-all duration-200 
-              animate-slideIn hover-lift focus-ring
+              afford-card border-2 animate-slideIn focus-ring
               ${
                 selected === option.id
-                  ? 'border-primary-500 bg-primary-50 shadow-lg transform scale-105'
-                  : 'border-primary-200 bg-surface-primary hover:border-primary-400 hover:bg-primary-50 hover:shadow-md hover:scale-[1.02]'
+                  ? 'border-primary-500 bg-primary-50'
+                  : 'border-primary-200 bg-surface-primary hover:border-primary-400 hover:bg-primary-50'
               }
             `}
             style={{ animationDelay: `${index * 100}ms` }}

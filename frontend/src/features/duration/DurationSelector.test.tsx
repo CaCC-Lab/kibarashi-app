@@ -81,12 +81,12 @@ describe('DurationSelector', () => {
       
       const button5min = screen.getByText('5分').closest('button');
       expect(button5min?.className).toContain('border-primary-500');
-      expect(button5min?.className).toContain('shadow-lg');
+      expect(button5min?.className).toContain('afford-card');
       
       // 他のボタンはハイライトされない
       const button15min = screen.getByText('15分').closest('button');
       expect(button15min?.className).toContain('border-primary-200');
-      expect(button15min?.className).not.toContain('shadow-lg');
+      expect(button15min?.className).toContain('afford-card');
     });
 
     it('15分が選択されている場合、ハイライトされる', () => {
@@ -100,7 +100,7 @@ describe('DurationSelector', () => {
       
       const button15min = screen.getByText('15分').closest('button');
       expect(button15min?.className).toContain('border-primary-500');
-      expect(button15min?.className).toContain('shadow-lg');
+      expect(button15min?.className).toContain('afford-card');
     });
 
     it('30分が選択されている場合、ハイライトされる', () => {
@@ -114,7 +114,7 @@ describe('DurationSelector', () => {
       
       const button30min = screen.getByText('30分').closest('button');
       expect(button30min?.className).toContain('border-primary-500');
-      expect(button30min?.className).toContain('shadow-lg');
+      expect(button30min?.className).toContain('afford-card');
     });
   });
 
@@ -311,21 +311,21 @@ describe('DurationSelector', () => {
       const button = screen.getByText('5分').closest('button');
       // ホバースタイルはTailwindによって適用されるが、実際のホバー状態をテストするのは難しい
       // 代わりに、ホバースタイルクラスが存在することを確認
+      expect(button?.className).toContain('afford-card');
       expect(button?.className).toContain('hover:');
-      expect(button?.className).toContain('transition-all');
     });
 
     it('選択時のアニメーションクラスが適用される', () => {
       render(
-        <DurationSelector 
-          selected={null} 
-          onSelect={onSelect} 
-          onBack={onBack} 
+        <DurationSelector
+          selected={null}
+          onSelect={onSelect}
+          onBack={onBack}
         />
       );
-      
+
       const button = screen.getByText('5分').closest('button');
-      expect(button?.className).toContain('transition-all');
+      expect(button?.className).toContain('afford-card');
       expect(button?.className).toContain('animate-slideIn');
     });
   });
