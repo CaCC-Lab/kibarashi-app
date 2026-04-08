@@ -1,4 +1,11 @@
-import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
+import {
+  useState,
+  useCallback,
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+} from 'react';
 import MainLayout from './components/layout/MainLayout';
 import Loading from './components/common/Loading';
 import { SituationId } from './types/situation';
@@ -7,19 +14,35 @@ import { AgeGroupOnboardingModal } from './components/ageGroup/AgeGroupSelector'
 import { DebugModeToggle } from './components/debug/DebugModeToggle';
 import { BadgeEngine } from './services/gamification/badgeEngine';
 import { MissionGenerator } from './services/gamification/missionGenerator';
+import { DailyMissionStorage } from './services/storage/dailyMissionStorage';
 import BadgeNotification from './features/badge/BadgeNotification';
 import DailyMission from './features/mission/DailyMission';
 
 // コンポーネントの遅延読み込み
-const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
-const DurationSelector = lazy(() => import('./features/duration/DurationSelector'));
-const SuggestionList = lazy(() => import('./features/suggestion/SuggestionList'));
+const SituationSelector = lazy(
+  () => import('./features/situation/SituationSelector')
+);
+const DurationSelector = lazy(
+  () => import('./features/duration/DurationSelector')
+);
+const SuggestionList = lazy(
+  () => import('./features/suggestion/SuggestionList')
+);
 const FavoritesList = lazy(() => import('./features/favorites/FavoritesList'));
 const HistoryList = lazy(() => import('./features/history/HistoryList'));
 const Settings = lazy(() => import('./features/settings/Settings'));
-const CustomSuggestionList = lazy(() => import('./features/custom/CustomSuggestionList'));
+const CustomSuggestionList = lazy(
+  () => import('./features/custom/CustomSuggestionList')
+);
 
-type Step = 'situation' | 'duration' | 'suggestions' | 'favorites' | 'history' | 'settings' | 'custom';
+type Step =
+  | 'situation'
+  | 'duration'
+  | 'suggestions'
+  | 'favorites'
+  | 'history'
+  | 'settings'
+  | 'custom';
 type Duration = 5 | 15 | 30 | null;
 
 function App() {
@@ -34,26 +57,43 @@ function App() {
     return localStorage.getItem('kibarashi-debug-mode') === 'true';
   });
 
-  // バッジ通知
-  const [newBadge, setNewBadge] = useState<{ name: string; description: string } | null>(null);
+  // バッジ通知（複数同時解除時はキューで順に表示）
+  const [badgeNotificationQueue, setBadgeNotificationQueue] = useState<
+    { name: string; description: string }[]
+  >([]);
+  const currentBadgeNotification = badgeNotificationQueue[0] ?? null;
 
-  // デイリーミッション
-  const todayMission = MissionGenerator.getTodayMission();
-  const [missionCelebration, setMissionCelebration] = useState<string | null>(null);
+  // デイリーミッション（ストレージ更新後に再取得するためバージョンで同期）
+  const [missionStorageVersion, setMissionStorageVersion] = useState(0);
+  const todayMission = useMemo(() => {
+    void missionStorageVersion;
+    return MissionGenerator.getTodayMission();
+  }, [missionStorageVersion]);
+  const [missionCelebration, setMissionCelebration] = useState<string | null>(
+    null
+  );
 
   // バッジ＆ミッション判定（気晴らし完了等のアクション後に呼ぶ）
   const checkGamification = useCallback(() => {
     const unlocked = BadgeEngine.checkNewUnlocks();
     if (unlocked.length > 0) {
-      const def = BadgeEngine.getBadgeDefinitions().find(d => d.id === unlocked[0].badgeId);
-      if (def) {
-        setNewBadge({ name: def.name, description: def.description });
+      const defs = BadgeEngine.getBadgeDefinitions();
+      const items = unlocked
+        .map((u) => defs.find((d) => d.id === u.badgeId))
+        .filter((def): def is NonNullable<typeof def> => def != null)
+        .map((def) => ({ name: def.name, description: def.description }));
+      if (items.length > 0) {
+        setBadgeNotificationQueue((q) => [...q, ...items]);
       }
     }
     if (todayMission && !todayMission.completed) {
       const completed = MissionGenerator.checkMissionCompletion(todayMission);
       if (completed) {
-        setMissionCelebration('ミッション達成！お疲れさまでした');
+        const persisted = DailyMissionStorage.updateMissionStatus('completed');
+        if (persisted) {
+          setMissionStorageVersion((v) => v + 1);
+          setMissionCelebration('ミッション達成！お疲れさまでした');
+        }
       }
     }
   }, [todayMission]);
@@ -111,17 +151,29 @@ function App() {
   const renderStep = () => {
     switch (currentStep) {
       case 'situation':
-        return <SituationSelector selected={situation} onSelect={handleSituationSelect} />;
+        return (
+          <SituationSelector
+            selected={situation}
+            onSelect={handleSituationSelect}
+          />
+        );
       case 'duration':
-        return <DurationSelector selected={duration} onSelect={handleDurationSelect} />;
+        return (
+          <DurationSelector
+            selected={duration}
+            onSelect={handleDurationSelect}
+          />
+        );
       case 'suggestions':
         if (situation && duration) {
-          return <SuggestionList 
-            situation={situation} 
-            duration={duration} 
-            location={currentLocation} 
-            debugMode={debugMode}
-          />;
+          return (
+            <SuggestionList
+              situation={situation}
+              duration={duration}
+              location={currentLocation}
+              debugMode={debugMode}
+            />
+          );
         }
         return null;
       case 'favorites':
@@ -145,16 +197,18 @@ function App() {
           currentStep === 'situation' ? 'text-primary-600' : 'text-gray-500'
         }`}
       >
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-          situation ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>
+        <span
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            situation ? 'bg-primary-500 text-white' : 'bg-gray-200'
+          }`}
+        >
           1
         </span>
         <span className="hidden sm:inline">場所</span>
       </button>
-      
+
       <div className="w-8 h-0.5 bg-gray-300" />
-      
+
       <button
         onClick={() => situation && setCurrentStep('duration')}
         disabled={!situation}
@@ -162,16 +216,18 @@ function App() {
           currentStep === 'duration' ? 'text-primary-600' : 'text-gray-500'
         } ${!situation && 'cursor-not-allowed opacity-50'}`}
       >
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-          duration ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>
+        <span
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            duration ? 'bg-primary-500 text-white' : 'bg-gray-200'
+          }`}
+        >
           2
         </span>
         <span className="hidden sm:inline">時間</span>
       </button>
-      
+
       <div className="w-8 h-0.5 bg-gray-300" />
-      
+
       <button
         onClick={() => situation && duration && setCurrentStep('suggestions')}
         disabled={!situation || !duration}
@@ -179,9 +235,13 @@ function App() {
           currentStep === 'suggestions' ? 'text-primary-600' : 'text-gray-500'
         } ${(!situation || !duration) && 'cursor-not-allowed opacity-50'}`}
       >
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-          currentStep === 'suggestions' ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>
+        <span
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+            currentStep === 'suggestions'
+              ? 'bg-primary-500 text-white'
+              : 'bg-gray-200'
+          }`}
+        >
           3
         </span>
         <span className="hidden sm:inline">提案</span>
@@ -192,10 +252,10 @@ function App() {
   // 年齢層のローディング中は全体をローディング表示
   if (ageGroupLoading) {
     return (
-      <MainLayout 
-        onFavoritesClick={handleFavoritesClick} 
-        onHistoryClick={handleHistoryClick} 
-        onSettingsClick={handleSettingsClick} 
+      <MainLayout
+        onFavoritesClick={handleFavoritesClick}
+        onHistoryClick={handleHistoryClick}
+        onSettingsClick={handleSettingsClick}
         onCustomClick={handleCustomClick}
         currentLocation={currentLocation}
         onLocationChange={handleLocationChange}
@@ -211,10 +271,10 @@ function App() {
 
   return (
     <>
-      <MainLayout 
-        onFavoritesClick={handleFavoritesClick} 
-        onHistoryClick={handleHistoryClick} 
-        onSettingsClick={handleSettingsClick} 
+      <MainLayout
+        onFavoritesClick={handleFavoritesClick}
+        onHistoryClick={handleHistoryClick}
+        onSettingsClick={handleSettingsClick}
         onCustomClick={handleCustomClick}
         currentLocation={currentLocation}
         onLocationChange={handleLocationChange}
@@ -230,17 +290,19 @@ function App() {
             </div>
           )}
 
-          {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && currentStep !== 'custom' && renderBreadcrumb()}
-          
-          {currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom' ? (
-            <Suspense fallback={<Loading />}>
-              {renderStep()}
-            </Suspense>
+          {currentStep !== 'favorites' &&
+            currentStep !== 'history' &&
+            currentStep !== 'settings' &&
+            currentStep !== 'custom' &&
+            renderBreadcrumb()}
+
+          {currentStep === 'history' ||
+          currentStep === 'settings' ||
+          currentStep === 'custom' ? (
+            <Suspense fallback={<Loading />}>{renderStep()}</Suspense>
           ) : (
             <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-              <Suspense fallback={<Loading />}>
-                {renderStep()}
-              </Suspense>
+              <Suspense fallback={<Loading />}>{renderStep()}</Suspense>
             </div>
           )}
 
@@ -254,8 +316,11 @@ function App() {
               </button>
             </div>
           )}
-          
-          {(currentStep === 'favorites' || currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom') && (
+
+          {(currentStep === 'favorites' ||
+            currentStep === 'history' ||
+            currentStep === 'settings' ||
+            currentStep === 'custom') && (
             <div className="mt-6 text-center">
               <button
                 onClick={handleBackToMain}
@@ -267,7 +332,7 @@ function App() {
           )}
         </div>
       </MainLayout>
-      
+
       {/* 年齢層選択オンボーディングモーダル */}
       <AgeGroupOnboardingModal
         isOpen={showOnboarding}
@@ -276,14 +341,12 @@ function App() {
 
       {/* バッジ解除通知 */}
       <BadgeNotification
-        badge={newBadge}
-        onClose={() => setNewBadge(null)}
+        badge={currentBadgeNotification}
+        onClose={() => setBadgeNotificationQueue((q) => q.slice(1))}
       />
 
       {/* デバッグモードトグル（開発環境のみ） */}
-      <DebugModeToggle
-        onToggle={setDebugMode}
-      />
+      <DebugModeToggle onToggle={setDebugMode} />
     </>
   );
 }
