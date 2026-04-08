@@ -129,7 +129,8 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          cd frontend && npm ci
+          cd packages/core-logic && npm ci && npm run build
+          cd ../../frontend && npm ci
           cd ../backend && npm ci
 
       - name: Build Frontend
