@@ -8,11 +8,15 @@ const router = express.Router();
  * GET /api/context/current
  * 現在のコンテキストデータを取得
  */
-router.get('/current', async (_req, res) => {
+router.get('/current', async (req, res) => {
   try {
-    logger.info('Context data requested');
+    const lat = req.query.lat ? parseFloat(req.query.lat as string) : undefined;
+    const lon = req.query.lon ? parseFloat(req.query.lon as string) : undefined;
+    const location = req.query.location as string | undefined;
 
-    const context = await contextualPromptEnhancer.getCurrentContext();
+    logger.info('Context data requested', { lat, lon, location });
+
+    const context = await contextualPromptEnhancer.getCurrentContext(lat, lon, location);
     
     logger.info('Context data sent successfully', {
       hasWeatherData: !!context.weather,
@@ -45,11 +49,13 @@ router.get('/current', async (_req, res) => {
  */
 router.get('/weather', async (req, res) => {
   try {
+    const lat = req.query.lat ? parseFloat(req.query.lat as string) : undefined;
+    const lon = req.query.lon ? parseFloat(req.query.lon as string) : undefined;
     const location = req.query.location as string || 'Tokyo';
-    
-    logger.info('Weather data requested', { location });
 
-    const context = await contextualPromptEnhancer.getCurrentContext();
+    logger.info('Weather data requested', { lat, lon, location });
+
+    const context = await contextualPromptEnhancer.getCurrentContext(lat, lon, location);
     
     if (!context.weather) {
       return res.status(404).json({

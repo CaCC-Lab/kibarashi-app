@@ -13,11 +13,10 @@ class ContextAPI {
   /**
    * 現在のコンテキストデータを取得
    */
-  async getCurrentContext(location?: string): Promise<ContextualData | null> {
+  async getCurrentContext(location?: string, lat?: number, lon?: number): Promise<ContextualData | null> {
     try {
       // キャッシュチェック - 場所が変わった場合はキャッシュを無効化
       if (this.cache && Date.now() - this.cache.timestamp < this.cacheTimeout) {
-        // 場所が変わった場合はキャッシュをクリア
         if (location && this.cache.data.weather?.location !== this.getLocationDisplayName(location)) {
           this.cache = null;
         } else {
@@ -25,8 +24,17 @@ class ContextAPI {
         }
       }
 
-      // バックエンドAPIからデータを取得
-      const url = location ? `/api/v1/context?location=${encodeURIComponent(location)}` : '/api/v1/context';
+      // バックエンドAPIからデータを取得（GPS座標優先）
+      const params = new URLSearchParams();
+      if (lat && lon) {
+        params.set('lat', lat.toString());
+        params.set('lon', lon.toString());
+      }
+      if (location) {
+        params.set('location', location);
+      }
+      const query = params.toString();
+      const url = `/api/v1/context${query ? `?${query}` : ''}`;
       
       const response = await fetch(url, {
         method: 'GET',

@@ -4,12 +4,12 @@ import { TabId } from './components/layout/BottomTabBar';
 import Loading from './components/common/Loading';
 import { SituationId } from './types/situation';
 import { useAgeGroup } from './hooks/useAgeGroup';
+import { useGeolocation } from './hooks/useGeolocation';
 import { AgeGroupOnboardingModal } from './components/ageGroup/AgeGroupSelector';
 import { DebugModeToggle } from './components/debug/DebugModeToggle';
 import { BadgeEngine } from './services/gamification/badgeEngine';
 import { MissionGenerator } from './services/gamification/missionGenerator';
 import BadgeNotification from './features/badge/BadgeNotification';
-// import DailyMission from './features/mission/DailyMission';
 
 const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
 const DurationSelector = lazy(() => import('./features/duration/DurationSelector'));
@@ -23,6 +23,7 @@ type HomeStep = 'situation' | 'duration' | 'suggestions';
 
 function App() {
   const { isFirstTimeUser, isLoading: ageGroupLoading } = useAgeGroup();
+  const { position: geoPosition } = useGeolocation();
 
   // タブ管理
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -145,7 +146,7 @@ function App() {
             <DurationSelector selected={duration} onSelect={handleDurationSelect} />
           )}
           {homeStep === 'suggestions' && situation && duration && (
-            <SuggestionList situation={situation} duration={duration} location={currentLocation} debugMode={debugMode} />
+            <SuggestionList situation={situation} duration={duration} location={currentLocation} debugMode={debugMode} geoPosition={geoPosition} />
           )}
         </Suspense>
       </div>

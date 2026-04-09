@@ -18,10 +18,11 @@ import { contextAPI, ContextualData } from '../../services/contextAPI';
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
 interface SuggestionListProps {
-  situation: SituationId; // 場所：年齢層に応じた状況
-  duration: 5 | 15 | 30; // 所要時間：5分、15分、30分
-  location?: string; // 地理的位置（地域別の提案生成用）
-  debugMode?: boolean; // デバッグモードの状態
+  situation: SituationId;
+  duration: 5 | 15 | 30;
+  location?: string;
+  debugMode?: boolean;
+  geoPosition?: { lat: number; lon: number } | null;
 }
 
 /**
@@ -37,7 +38,7 @@ interface SuggestionListProps {
  * - 選択肢を一覧で表示し、興味を持ったものの詳細を確認できる
  * - ネットワークエラー等で失敗しても、ユーザーがあきらめずに済む
  */
-const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false }) => {
+const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false, geoPosition }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
   
@@ -101,7 +102,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
         if (location) {
           contextAPI.clearCache();
         }
-        const context = await contextAPI.getCurrentContext(location);
+        const context = await contextAPI.getCurrentContext(location, geoPosition?.lat, geoPosition?.lon);
         setContextData(context);
       } catch (error) {
         console.error('Failed to load context data:', error);
@@ -112,7 +113,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     };
 
     loadContextData();
-  }, [location]); // location が変わるたびに実行
+  }, [location, geoPosition]); // location/GPS が変わるたびに実行
 
   // コンポーネントマウント時と条件変更時に提案を取得
   useEffect(() => {
