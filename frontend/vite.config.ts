@@ -3,40 +3,33 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
+const isCapacitor = process.env.VITE_BUILD_TARGET === 'capacitor';
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '/',
   build: {
-    manifest: true, // マニフェストファイルを生成
-    // バンドルサイズ最適化
+    manifest: true,
     rollupOptions: {
-      output: {
-        // 一時的にmanualChunksを無効化
-        // manualChunks: {
-        //   vendor: ['react', 'react-dom'],
-        //   utils: ['web-vitals'],
-        // },
-      },
+      output: {},
     },
-    // 圧縮設定
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: false, // 一時的にconsole.logを残す
+        drop_console: false,
         drop_debugger: true,
       },
     },
-    // アセット最適化
     assetsInlineLimit: 4096,
     reportCompressedSize: false,
     chunkSizeWarningLimit: 500,
   },
   plugins: [
     react(),
-    VitePWA({
-      registerType: 'prompt', // autoUpdateからpromptに変更
+    // Capacitorビルド時はPWAを無効化、Web版では有効
+    ...(!isCapacitor ? [VitePWA({
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
-      // 開発時にService Workerを完全に無効化
       disable: process.env.NODE_ENV === 'development',
       manifest: {
         name: '5分気晴らし',
@@ -49,47 +42,28 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         icons: [
-          {
-            src: 'pwa-64x64.png',
-            sizes: '64x64',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any'
-          },
-          {
-            src: 'maskable-icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable'
-          }
+          { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,txt,woff,woff2}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
-        skipWaiting: true, // Service Workerを即座に更新
-        runtimeCaching: [], // ランタイムキャッシュを無効化
-        // APIリクエストをキャッシュ対象から除外
+        skipWaiting: true,
+        runtimeCaching: [],
         navigateFallbackDenylist: [/^\/api\//],
       },
       devOptions: {
-        enabled: false, // 開発時はPWAを無効化
+        enabled: false,
         suppressWarnings: true,
         navigateFallback: 'index.html',
         type: 'module',
       },
-      selfDestroying: true, // 既存のService Workerを削除
-    })
+      selfDestroying: true,
+    })] : []),
   ],
   resolve: {
     alias: {

@@ -1,20 +1,19 @@
 // APIクライアントの設定
-// なぜ必要か：外部APIとの通信を一元管理し、タイムアウトやエラーハンドリングを統一するため
 // 環境変数から設定を読み込むことで、環境ごとの設定変更を容易にする
-// Vercel Functions対応：本番環境では相対パス、開発環境では絶対パスを使用
+// Web版(Vercel) / Capacitor(iOS) / 開発環境 で適切なURLを返す
 const getApiBaseUrl = (): string => {
-  // 本番環境（Vercel）では相対パスを使用
-  if (import.meta.env.PROD) {
+  // VITE_API_URL が明示的に設定されていれば最優先（Capacitor等）
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  // 開発環境: Viteプロキシ経由
+  if (import.meta.env.DEV) {
     return window.location.origin;
   }
-  
-  // 開発環境での設定 - Viteプロキシを使用するため、同じオリジンを使用
-  // ただし、実際のポートが3001になっている場合は、そのポートを使用
-  if (typeof window !== 'undefined' && window.location.port === '3001') {
-    return `${window.location.protocol}//${window.location.hostname}:3001`;
-  }
-  
-  return import.meta.env.VITE_API_URL || window.location.origin;
+
+  // Web版本番（Vercel）: 同一オリジン
+  return window.location.origin;
 };
 
 const API_BASE_URL = getApiBaseUrl();

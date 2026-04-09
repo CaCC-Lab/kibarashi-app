@@ -103,7 +103,6 @@ export function useStudentABTest(options: UseStudentABTestOptions = {}): UseStud
     }
 
     // Phase 2でアナリティクスAPIに送信
-    console.log('[Student A/B Test Metric]', { metric, testGroup, data });
   }, [testGroup, onMetric]);
 
   // 完了メトリクス

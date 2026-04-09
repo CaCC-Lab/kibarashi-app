@@ -154,3 +154,7 @@ dump.rdb
 # ローカルデータ
 *.png
 playwright-report/
+
+# Capacitor
+frontend/ios/
+frontend/android/

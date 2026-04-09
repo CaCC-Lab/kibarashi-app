@@ -4,6 +4,12 @@
 
 @layer base {
   :root {
+    /* iOS Safe Area */
+    --safe-area-top: env(safe-area-inset-top);
+    --safe-area-bottom: env(safe-area-inset-bottom);
+    --safe-area-left: env(safe-area-inset-left);
+    --safe-area-right: env(safe-area-inset-right);
+
     /* 新カラーパレットのCSS変数定義 */
     --color-primary-50: #f4f4f8;
     --color-primary-100: #e8e8f0;

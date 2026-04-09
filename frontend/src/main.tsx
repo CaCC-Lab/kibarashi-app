@@ -1,23 +1,24 @@
 import ReactDOM from 'react-dom/client';
+import { Capacitor } from '@capacitor/core';
+import { StatusBar, Style } from '@capacitor/status-bar';
+import { SplashScreen } from '@capacitor/splash-screen';
 import App from './App';
 import './styles/globals.css';
 import './styles/animations.css';
 import { reportWebVitals } from './utils/reportWebVitals';
 
-// 開発時にService Workerを完全に削除
-if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+// Capacitor ネイティブ初期化
+if (Capacitor.isNativePlatform()) {
+  StatusBar.setStyle({ style: Style.Light });
+  SplashScreen.hide();
+} else if (import.meta.env.DEV && 'serviceWorker' in navigator) {
+  // Web開発時のみ: Service Workerを削除
   navigator.serviceWorker.getRegistrations().then(registrations => {
-    registrations.forEach(registration => {
-      registration.unregister();
-    });
+    registrations.forEach(registration => registration.unregister());
   });
-  
-  // 全てのキャッシュを削除
   if ('caches' in window) {
     caches.keys().then(cacheNames => {
-      cacheNames.forEach(cacheName => {
-        caches.delete(cacheName);
-      });
+      cacheNames.forEach(cacheName => caches.delete(cacheName));
     });
   }
 }

@@ -47,11 +47,11 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     isStudentOptimized, 
     trackMetric
   } = useStudentABTest({
-    onExposure: (event) => {
-      console.log('[A/B Test] Exposure:', event);
+    onExposure: (_event) => {
+      // A/B test exposure tracked
     },
-    onMetric: (event) => {
-      console.log('[A/B Test] Metric:', event);
+    onMetric: (_event) => {
+      // A/B test metric tracked
     }
   });
   
@@ -60,11 +60,11 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     isJobSeekerOptimized,
     trackMetric: trackJobSeekerMetric
   } = useJobSeekerABTest({
-    onExposure: (event) => {
-      console.log('[Job Seeker A/B Test] Exposure:', event);
+    onExposure: (_event) => {
+      // Job seeker A/B test exposure tracked
     },
-    onMetric: (event) => {
-      console.log('[Job Seeker A/B Test] Metric:', event);
+    onMetric: (_event) => {
+      // Job seeker A/B test metric tracked
     }
   });
   
@@ -73,11 +73,11 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     isCareerChangerOptimized,
     trackMetric: trackCareerChangerMetric
   } = useCareerChangerABTest({
-    onExposure: (event) => {
-      console.log('[Career Changer A/B Test] Exposure:', event);
+    onExposure: (_event) => {
+      // Career changer A/B test exposure tracked
     },
-    onMetric: (event) => {
-      console.log('[Career Changer A/B Test] Metric:', event);
+    onMetric: (_event) => {
+      // Career changer A/B test metric tracked
     }
   });
   
@@ -103,7 +103,6 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
         }
         const context = await contextAPI.getCurrentContext(location);
         setContextData(context);
-        console.log('Context data loaded for location:', location, context);
       } catch (error) {
         console.error('Failed to load context data:', error);
         // エラーが発生してもコンテキストなしで提案を表示
@@ -117,14 +116,6 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
 
   // コンポーネントマウント時と条件変更時に提案を取得
   useEffect(() => {
-    console.log('Fetching suggestions for:', { 
-      situation, 
-      duration, 
-      ageGroup: currentAgeGroup,
-      testGroup,
-      isStudentOptimized 
-    }); // デバッグログ追加
-    
     // 学生最適化版の場合、学生向けコンテキストも渡す
     const studentContext = isStudentOptimized && currentAgeGroup === 'student' ? {
       concern: '勉強の合間のリフレッシュ',
@@ -179,15 +170,14 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
 
   if (error) {
     return (
-      <ErrorMessage 
-        message="気晴らし方法の取得に失敗しました" 
+      <ErrorMessage
+        message={error}
         onRetry={refetch}
       />
     );
   }
 
   if (!suggestions || suggestions.length === 0) {
-    console.log('No suggestions found, suggestions state:', suggestions); // デバッグログ追加
     return (
       <div className="text-center py-8">
         <p className="text-text-secondary">提案が見つかりませんでした</p>

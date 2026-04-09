@@ -605,15 +605,12 @@ describe('SuggestionCard', () => {
       consoleWarnSpy.mockRestore();
     });
 
-    it('音声ガイド完了時のコールバックが機能する', () => {
+    it('音声ガイド完了時にエラーが発生しない', () => {
       // フィーチャーフラグを有効にする
       vi.mocked(useFeature).mockReturnValue(true);
-      
-      // console.logをモック
-      const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       render(
-        <SuggestionCard 
+        <SuggestionCard
           id="test-voice-5"
           title="完了テスト"
           description="完了コールバックのテスト"
@@ -624,17 +621,9 @@ describe('SuggestionCard', () => {
         />
       );
 
-      // 完了を発生させる
+      // 完了を発生させてもエラーが起きないことを確認
       const completeButton = screen.getByText('Trigger Complete');
-      fireEvent.click(completeButton);
-
-      // 完了が適切にログに記録される
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'Voice guide completed for suggestion:',
-        'test-voice-5'
-      );
-
-      consoleLogSpy.mockRestore();
+      expect(() => fireEvent.click(completeButton)).not.toThrow();
     });
 
     it('音声ガイドセクションのスタイリングが適切', () => {

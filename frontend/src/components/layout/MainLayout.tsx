@@ -1,52 +1,39 @@
 import React from 'react';
 import Header from './Header';
-import Footer from './Footer';
+import BottomTabBar, { TabId } from './BottomTabBar';
 
 interface MainLayoutProps {
   children: React.ReactNode;
-  onFavoritesClick?: () => void;
-  onHistoryClick?: () => void;
-  onSettingsClick?: () => void;
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
   onCustomClick?: () => void;
-  showFavoritesButton?: boolean;
-  showHistoryButton?: boolean;
-  showCustomButton?: boolean;
   currentLocation?: string;
   onLocationChange?: (location: string) => void;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ 
-  children, 
-  onFavoritesClick, 
-  onHistoryClick,
-  onSettingsClick,
+const MainLayout: React.FC<MainLayoutProps> = ({
+  children,
+  activeTab,
+  onTabChange,
   onCustomClick,
-  showFavoritesButton = true,
-  showHistoryButton = true,
-  showCustomButton = true,
   currentLocation,
   onLocationChange
 }) => {
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* アクセシビリティ: スキップリンク */}
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <a href="#main-content" className="skip-link">メインコンテンツにスキップ</a>
-      
-      <Header 
-        onFavoritesClick={onFavoritesClick} 
-        onHistoryClick={onHistoryClick}
-        onSettingsClick={onSettingsClick}
+
+      <Header
         onCustomClick={onCustomClick}
-        showFavoritesButton={showFavoritesButton}
-        showHistoryButton={showHistoryButton}
-        showCustomButton={showCustomButton}
         currentLocation={currentLocation}
         onLocationChange={onLocationChange}
       />
-      <main id="main-content" className="flex-1 container mx-auto px-4 py-8 animate-fadeIn">
+
+      <main id="main-content" className="flex-1 px-4 py-4 pb-20">
         {children}
       </main>
-      <Footer />
+
+      <BottomTabBar activeTab={activeTab} onTabChange={onTabChange} />
     </div>
   );
 };

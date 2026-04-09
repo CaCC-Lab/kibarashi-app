@@ -1,5 +1,6 @@
 import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
 import MainLayout from './components/layout/MainLayout';
+import { TabId } from './components/layout/BottomTabBar';
 import Loading from './components/common/Loading';
 import { SituationId } from './types/situation';
 import { useAgeGroup } from './hooks/useAgeGroup';
@@ -8,25 +9,29 @@ import { DebugModeToggle } from './components/debug/DebugModeToggle';
 import { BadgeEngine } from './services/gamification/badgeEngine';
 import { MissionGenerator } from './services/gamification/missionGenerator';
 import BadgeNotification from './features/badge/BadgeNotification';
-import DailyMission from './features/mission/DailyMission';
+// import DailyMission from './features/mission/DailyMission';
 
-// コンポーネントの遅延読み込み
 const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
 const DurationSelector = lazy(() => import('./features/duration/DurationSelector'));
 const SuggestionList = lazy(() => import('./features/suggestion/SuggestionList'));
 const FavoritesList = lazy(() => import('./features/favorites/FavoritesList'));
 const HistoryList = lazy(() => import('./features/history/HistoryList'));
 const Settings = lazy(() => import('./features/settings/Settings'));
-const CustomSuggestionList = lazy(() => import('./features/custom/CustomSuggestionList'));
+// const CustomSuggestionList = lazy(() => import('./features/custom/CustomSuggestionList'));
 
-type Step = 'situation' | 'duration' | 'suggestions' | 'favorites' | 'history' | 'settings' | 'custom';
-type Duration = 5 | 15 | 30 | null;
+type HomeStep = 'situation' | 'duration' | 'suggestions';
 
 function App() {
   const { isFirstTimeUser, isLoading: ageGroupLoading } = useAgeGroup();
-  const [currentStep, setCurrentStep] = useState<Step>('situation');
+
+  // タブ管理
+  const [activeTab, setActiveTab] = useState<TabId>('home');
+
+  // ホーム画面内のステップ管理
+  const [homeStep, setHomeStep] = useState<HomeStep>('situation');
   const [situation, setSituation] = useState<SituationId | null>(null);
-  const [duration, setDuration] = useState<Duration>(null);
+  const [duration, setDuration] = useState<5 | 15 | 30 | null>(null);
+
   const [currentLocation, setCurrentLocation] = useState<string>('Tokyo');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [debugMode, setDebugMode] = useState(() => {
@@ -34,14 +39,11 @@ function App() {
     return localStorage.getItem('kibarashi-debug-mode') === 'true';
   });
 
-  // バッジ通知
+  // ゲーミフィケーション
   const [newBadge, setNewBadge] = useState<{ name: string; description: string } | null>(null);
-
-  // デイリーミッション
   const todayMission = MissionGenerator.getTodayMission();
-  const [missionCelebration, setMissionCelebration] = useState<string | null>(null);
+  const [, setMissionCelebration] = useState<string | null>(null);
 
-  // バッジ＆ミッション判定（気晴らし完了等のアクション後に呼ぶ）
   const checkGamification = useCallback(() => {
     const unlocked = BadgeEngine.checkNewUnlocks();
     if (unlocked.length > 0) {
@@ -58,235 +60,166 @@ function App() {
     }
   }, [todayMission]);
 
-  // 初回ユーザーの場合、オンボーディングモーダルを表示
   useEffect(() => {
     if (!ageGroupLoading && isFirstTimeUser) {
-      // 一時的に無効化して表示問題をテスト
       // setShowOnboarding(true);
     }
   }, [ageGroupLoading, isFirstTimeUser]);
 
+  // タブ切替
+  const handleTabChange = (tab: TabId) => {
+    if (tab === 'home') {
+      checkGamification();
+      // ホームに戻るときは状態をリセット
+      setHomeStep('situation');
+      setSituation(null);
+      setDuration(null);
+    }
+    setActiveTab(tab);
+  };
+
+  // ホーム画面ナビゲーション
   const handleSituationSelect = (selected: SituationId) => {
     setSituation(selected);
-    setCurrentStep('duration');
+    setHomeStep('duration');
   };
 
   const handleDurationSelect = (selected: 5 | 15 | 30) => {
     setDuration(selected);
-    setCurrentStep('suggestions');
+    setHomeStep('suggestions');
   };
 
   const handleReset = () => {
     checkGamification();
     setSituation(null);
     setDuration(null);
-    setCurrentStep('situation');
-  };
-
-  const handleFavoritesClick = () => {
-    setCurrentStep('favorites');
-  };
-
-  const handleHistoryClick = () => {
-    setCurrentStep('history');
-  };
-
-  const handleSettingsClick = () => {
-    setCurrentStep('settings');
+    setHomeStep('situation');
   };
 
   const handleCustomClick = () => {
-    setCurrentStep('custom');
+    setActiveTab('home');
+    // カスタム画面は一時的にhomeタブ内で表示
+    setHomeStep('situation');
   };
 
-  const handleBackToMain = () => {
-    checkGamification();
-    setCurrentStep('situation');
-  };
-
-  const handleLocationChange = (location: string) => {
-    setCurrentLocation(location);
-  };
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 'situation':
-        return <SituationSelector selected={situation} onSelect={handleSituationSelect} />;
-      case 'duration':
-        return <DurationSelector selected={duration} onSelect={handleDurationSelect} />;
-      case 'suggestions':
-        if (situation && duration) {
-          return <SuggestionList 
-            situation={situation} 
-            duration={duration} 
-            location={currentLocation} 
-            debugMode={debugMode}
-          />;
-        }
-        return null;
+  // タブごとのコンテンツ描画
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'home':
+        return renderHome();
       case 'favorites':
-        return <FavoritesList />;
+        return (
+          <Suspense fallback={<Loading />}>
+            <FavoritesList />
+          </Suspense>
+        );
       case 'history':
-        return <HistoryList />;
+        return (
+          <Suspense fallback={<Loading />}>
+            <HistoryList />
+          </Suspense>
+        );
       case 'settings':
-        return <Settings onBack={handleBackToMain} />;
-      case 'custom':
-        return <CustomSuggestionList />;
+        return (
+          <Suspense fallback={<Loading />}>
+            <Settings onBack={() => handleTabChange('home')} />
+          </Suspense>
+        );
       default:
         return null;
     }
   };
 
+  const renderHome = () => (
+    <div className="max-w-4xl mx-auto">
+      {/* プログレスステップ */}
+      {renderBreadcrumb()}
+
+      {/* メインコンテンツ */}
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
+        <Suspense fallback={<Loading />}>
+          {homeStep === 'situation' && (
+            <SituationSelector selected={situation} onSelect={handleSituationSelect} />
+          )}
+          {homeStep === 'duration' && (
+            <DurationSelector selected={duration} onSelect={handleDurationSelect} />
+          )}
+          {homeStep === 'suggestions' && situation && duration && (
+            <SuggestionList situation={situation} duration={duration} location={currentLocation} debugMode={debugMode} />
+          )}
+        </Suspense>
+      </div>
+
+      {/* 戻るボタン */}
+      {homeStep === 'suggestions' && (
+        <div className="mt-4 text-center">
+          <button onClick={handleReset} className="text-gray-500 hover:text-gray-700 text-sm underline">
+            最初からやり直す
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   const renderBreadcrumb = () => (
-    <div className="flex items-center justify-center space-x-4 mb-8">
+    <div className="flex items-center justify-center space-x-3 mb-4">
       <button
-        onClick={() => setCurrentStep('situation')}
-        className={`flex items-center space-x-2 afford-progress-step ${
-          currentStep === 'situation' ? 'text-primary-600' : 'text-gray-500'
-        }`}
-        data-active={currentStep === 'situation'}
+        onClick={() => setHomeStep('situation')}
+        className={`flex items-center space-x-1.5 ${homeStep === 'situation' ? 'text-primary-600' : 'text-gray-400'}`}
       >
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
           situation ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>
-          1
-        </span>
-        <span className="hidden sm:inline">場所</span>
+        }`}>1</span>
+        <span className="text-xs">場所</span>
       </button>
-      
-      <div className="w-8 h-0.5 bg-gray-300" />
-      
+      <div className="w-6 h-0.5 bg-gray-300" />
       <button
-        onClick={() => situation && setCurrentStep('duration')}
+        onClick={() => situation && setHomeStep('duration')}
         disabled={!situation}
-        className={`flex items-center space-x-2 afford-progress-step ${
-          currentStep === 'duration' ? 'text-primary-600' : 'text-gray-500'
-        } ${!situation && 'cursor-not-allowed opacity-50'}`}
-        data-active={currentStep === 'duration'}
+        className={`flex items-center space-x-1.5 ${homeStep === 'duration' ? 'text-primary-600' : 'text-gray-400'} ${!situation && 'opacity-40'}`}
       >
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
           duration ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>
-          2
-        </span>
-        <span className="hidden sm:inline">時間</span>
+        }`}>2</span>
+        <span className="text-xs">時間</span>
       </button>
-      
-      <div className="w-8 h-0.5 bg-gray-300" />
-      
+      <div className="w-6 h-0.5 bg-gray-300" />
       <button
-        onClick={() => situation && duration && setCurrentStep('suggestions')}
+        onClick={() => situation && duration && setHomeStep('suggestions')}
         disabled={!situation || !duration}
-        className={`flex items-center space-x-2 afford-progress-step ${
-          currentStep === 'suggestions' ? 'text-primary-600' : 'text-gray-500'
-        } ${(!situation || !duration) && 'cursor-not-allowed opacity-50'}`}
-        data-active={currentStep === 'suggestions'}
+        className={`flex items-center space-x-1.5 ${homeStep === 'suggestions' ? 'text-primary-600' : 'text-gray-400'} ${(!situation || !duration) && 'opacity-40'}`}
       >
-        <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-          currentStep === 'suggestions' ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>
-          3
-        </span>
-        <span className="hidden sm:inline">提案</span>
+        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
+          homeStep === 'suggestions' ? 'bg-primary-500 text-white' : 'bg-gray-200'
+        }`}>3</span>
+        <span className="text-xs">提案</span>
       </button>
     </div>
   );
 
-  // 年齢層のローディング中は全体をローディング表示
   if (ageGroupLoading) {
     return (
-      <MainLayout 
-        onFavoritesClick={handleFavoritesClick} 
-        onHistoryClick={handleHistoryClick} 
-        onSettingsClick={handleSettingsClick} 
-        onCustomClick={handleCustomClick}
-        currentLocation={currentLocation}
-        onLocationChange={handleLocationChange}
-      >
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <Loading />
-          </div>
-        </div>
+      <MainLayout activeTab={activeTab} onTabChange={handleTabChange} currentLocation={currentLocation} onLocationChange={setCurrentLocation}>
+        <div className="flex items-center justify-center h-64"><Loading /></div>
       </MainLayout>
     );
   }
 
   return (
     <>
-      <MainLayout 
-        onFavoritesClick={handleFavoritesClick} 
-        onHistoryClick={handleHistoryClick} 
-        onSettingsClick={handleSettingsClick} 
+      <MainLayout
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
         onCustomClick={handleCustomClick}
         currentLocation={currentLocation}
-        onLocationChange={handleLocationChange}
+        onLocationChange={setCurrentLocation}
       >
-        <div className="max-w-4xl mx-auto">
-          {/* デイリーミッション（ホーム画面のみ） */}
-          {currentStep === 'situation' && todayMission && (
-            <div className="mb-4">
-              <DailyMission
-                mission={todayMission}
-                celebrationMessage={missionCelebration}
-              />
-            </div>
-          )}
-
-          {currentStep !== 'favorites' && currentStep !== 'history' && currentStep !== 'settings' && currentStep !== 'custom' && renderBreadcrumb()}
-          
-          {currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom' ? (
-            <Suspense fallback={<Loading />}>
-              {renderStep()}
-            </Suspense>
-          ) : (
-            <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-              <Suspense fallback={<Loading />}>
-                {renderStep()}
-              </Suspense>
-            </div>
-          )}
-
-          {currentStep === 'suggestions' && (
-            <div className="mt-6 text-center">
-              <button
-                onClick={handleReset}
-                className="text-gray-600 hover:text-gray-800 underline"
-              >
-                最初からやり直す
-              </button>
-            </div>
-          )}
-          
-          {(currentStep === 'favorites' || currentStep === 'history' || currentStep === 'settings' || currentStep === 'custom') && (
-            <div className="mt-6 text-center">
-              <button
-                onClick={handleBackToMain}
-                className="text-gray-600 hover:text-gray-800 underline"
-              >
-                気晴らし選択に戻る
-              </button>
-            </div>
-          )}
-        </div>
+        {renderContent()}
       </MainLayout>
-      
-      {/* 年齢層選択オンボーディングモーダル */}
-      <AgeGroupOnboardingModal
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-      />
 
-      {/* バッジ解除通知 */}
-      <BadgeNotification
-        badge={newBadge}
-        onClose={() => setNewBadge(null)}
-      />
-
-      {/* デバッグモードトグル（開発環境のみ） */}
-      <DebugModeToggle
-        onToggle={setDebugMode}
-      />
+      <AgeGroupOnboardingModal isOpen={showOnboarding} onClose={() => setShowOnboarding(false)} />
+      <BadgeNotification badge={newBadge} onClose={() => setNewBadge(null)} />
+      <DebugModeToggle onToggle={setDebugMode} />
     </>
   );
 }

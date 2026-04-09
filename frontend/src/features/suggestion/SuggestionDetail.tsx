@@ -80,7 +80,6 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
   // 音声URLが設定され、タイマーが実行中の場合は自動再生
   useEffect(() => {
     if (audioUrl && isRunning && audioPlayerRef.current && !useBrowserTTS) {
-      console.log('Auto-playing audio after URL is set');
       audioPlayerRef.current.play();
     }
   }, [audioUrl, isRunning, useBrowserTTS]);
@@ -113,7 +112,6 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
   const generateAudio = async () => {
     // 既に音声生成中の場合は何もしない
     if (isGeneratingAudio) {
-      console.log('Audio generation already in progress');
       return;
     }
 
@@ -124,7 +122,6 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
     try {
       // guideが存在しない場合のフォールバック
       const textToSpeak = guide || `${title}を始めましょう。${description}`;
-      console.log('Generating audio for text:', textToSpeak);
       
       if (useBrowserTTS && browserTTS.isAvailable()) {
         // ブラウザ内蔵のTTSを使用（無料）
@@ -180,17 +177,15 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
   };
 
   const handlePause = () => {
-    console.log('handlePause called', { useBrowserTTS, isSpeaking, audioPlayerRef: audioPlayerRef.current });
     setIsRunning(false);
     if (useBrowserTTS && isSpeaking) {
       browserTTS.stop();
       setIsSpeaking(false);
     } else if (audioPlayerRef.current) {
       // Gemini TTSの音声を停止
-      console.log('Stopping Gemini TTS audio');
       audioPlayerRef.current.stop();
     }
-    
+
     // 一時停止時に履歴を更新（未完了で記録）
     if (currentHistoryId && !isComplete) {
       const actualDuration = (duration * 60) - timeRemaining;
@@ -260,15 +255,13 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className={(() => {
-                const className = isComplete 
-                  ? 'text-5xl font-bold text-green-600' 
-                  : timeRemaining < 60 
-                    ? 'text-5xl font-bold text-red-600' 
-                    : 'text-5xl font-bold text-gray-800';
-                console.log('Timer className:', className, { isComplete, timeRemaining });
-                return className;
-              })()}>
+              <div className={
+                isComplete
+                  ? 'text-5xl font-bold text-green-600'
+                  : timeRemaining < 60
+                    ? 'text-5xl font-bold text-red-600'
+                    : 'text-5xl font-bold text-gray-800'
+              }>
                 {formatTime(timeRemaining)}
               </div>
               {!isComplete && timeRemaining < 60 && (
@@ -291,13 +284,11 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
             <button
               onClick={handleStart}
               disabled={isLoadingAudio}
-              className={(() => {
-                const className = isLoadingAudio 
-                  ? 'bg-gray-400 cursor-not-allowed text-white font-medium py-4 px-10 rounded-xl text-lg shadow-lg transition-all duration-200 flex items-center space-x-2' 
-                  : 'bg-primary-500 hover:bg-primary-600 transform hover:-translate-y-0.5 hover:shadow-xl text-white font-medium py-4 px-10 rounded-xl text-lg shadow-lg transition-all duration-200 flex items-center space-x-2';
-                console.log('Start button className:', className, { isLoadingAudio });
-                return className;
-              })()}
+              className={
+                isLoadingAudio
+                  ? 'bg-gray-400 cursor-not-allowed text-white font-medium py-4 px-10 rounded-xl text-lg shadow-lg transition-all duration-200 flex items-center space-x-2'
+                  : 'bg-primary-500 hover:bg-primary-600 transform hover:-translate-y-0.5 hover:shadow-xl text-white font-medium py-4 px-10 rounded-xl text-lg shadow-lg transition-all duration-200 flex items-center space-x-2'
+              }
             >
               {isLoadingAudio ? (
                 <>

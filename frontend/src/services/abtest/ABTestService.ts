@@ -23,7 +23,6 @@ export class ABTestService {
       try {
         // 後方互換性: 古い形式（単純な文字列 'A' or 'B'）をチェック
         if (stored === 'A' || stored === 'B') {
-          console.log('[A/B Test] Migrating legacy format:', stored);
           return this.migrateLegacyFormat(stored);
         }
         
@@ -93,12 +92,7 @@ export class ABTestService {
     
     // 新しい形式で保存し直す
     localStorage.setItem(this.AB_TEST_KEY, JSON.stringify(assignment));
-    
-    console.log('[A/B Test] Legacy format migrated successfully:', {
-      oldFormat: legacyGroup,
-      newFormat: assignment
-    });
-    
+
     return legacyGroup;
   }
 
@@ -112,14 +106,9 @@ export class ABTestService {
   /**
    * 振り分けイベントを記録
    */
-  private static trackAssignment(assignment: ABTestAssignment): void {
-    // Phase 1では console.log のみ
+  private static trackAssignment(_assignment: ABTestAssignment): void {
+    // Phase 1では記録のみ
     // Phase 2でアナリティクスAPIに送信
-    console.log('[A/B Test] User assigned:', {
-      group: assignment.group,
-      version: assignment.version,
-      userId: assignment.userId
-    });
   }
   
   /**

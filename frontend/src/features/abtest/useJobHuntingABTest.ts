@@ -87,11 +87,6 @@ export function useJobHuntingABTest({
     setIsInitialized(true);
 
     // 登録イベントを送信（将来的にはAnalyticsへ）
-    console.log('[JobHunting A/B Test] User enrolled:', {
-      userId,
-      testGroup,
-      features: newTestData.features
-    });
   }, [enabled, userId, testData, setTestData, isInitialized]);
 
   // メトリクス追跡
@@ -109,12 +104,6 @@ export function useJobHuntingABTest({
     setTestData(updatedTestData);
 
     // イベント送信（将来的にはAnalyticsへ）
-    console.log('[JobHunting A/B Test] Metric tracked:', {
-      userId: testData.userId,
-      testGroup: testData.testGroup,
-      metric: metricName,
-      value: updatedTestData.metrics[metricName]
-    });
   }, [testData, setTestData]);
 
   // 就活・転職活動選択の追跡
