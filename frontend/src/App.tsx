@@ -4,7 +4,7 @@ import { TabId } from './components/layout/BottomTabBar';
 import Loading from './components/common/Loading';
 import { SituationId } from './types/situation';
 import { useAgeGroup } from './hooks/useAgeGroup';
-import { useGeolocation } from './hooks/useGeolocation';
+import { useWeather } from './hooks/useWeather';
 import { AgeGroupOnboardingModal } from './components/ageGroup/AgeGroupSelector';
 import { DebugModeToggle } from './components/debug/DebugModeToggle';
 import { BadgeEngine } from './services/gamification/badgeEngine';
@@ -23,7 +23,7 @@ type HomeStep = 'situation' | 'duration' | 'suggestions';
 
 function App() {
   const { isFirstTimeUser, isLoading: ageGroupLoading } = useAgeGroup();
-  const { position: geoPosition } = useGeolocation();
+  const { weather, position: geoPosition } = useWeather();
 
   // タブ管理
   const [activeTab, setActiveTab] = useState<TabId>('home');
@@ -200,7 +200,7 @@ function App() {
 
   if (ageGroupLoading) {
     return (
-      <MainLayout activeTab={activeTab} onTabChange={handleTabChange} currentLocation={currentLocation} onLocationChange={setCurrentLocation}>
+      <MainLayout activeTab={activeTab} onTabChange={handleTabChange} currentLocation={currentLocation} onLocationChange={setCurrentLocation} weatherIcon={weather?.icon} weatherTemp={weather?.temperature} weatherDescription={weather?.description}>
         <div className="flex items-center justify-center h-64"><Loading /></div>
       </MainLayout>
     );
@@ -214,6 +214,9 @@ function App() {
         onCustomClick={handleCustomClick}
         currentLocation={currentLocation}
         onLocationChange={setCurrentLocation}
+        weatherIcon={weather?.icon}
+        weatherTemp={weather?.temperature}
+        weatherDescription={weather?.description}
       >
         {renderContent()}
       </MainLayout>

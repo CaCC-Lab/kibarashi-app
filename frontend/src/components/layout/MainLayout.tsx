@@ -9,6 +9,9 @@ interface MainLayoutProps {
   onCustomClick?: () => void;
   currentLocation?: string;
   onLocationChange?: (location: string) => void;
+  weatherIcon?: string;
+  weatherTemp?: number;
+  weatherDescription?: string;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -17,7 +20,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   onTabChange,
   onCustomClick,
   currentLocation,
-  onLocationChange
+  onLocationChange,
+  weatherIcon,
+  weatherTemp,
+  weatherDescription,
 }) => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
@@ -27,6 +33,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         onCustomClick={onCustomClick}
         currentLocation={currentLocation}
         onLocationChange={onLocationChange}
+        weatherIcon={weatherIcon}
+        weatherTemp={weatherTemp}
+        weatherDescription={weatherDescription}
       />
 
       <main id="main-content" className="flex-1 px-4 py-4 pb-20">

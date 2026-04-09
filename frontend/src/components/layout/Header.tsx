@@ -8,12 +8,18 @@ interface HeaderProps {
   onCustomClick?: () => void;
   currentLocation?: string;
   onLocationChange?: (location: string) => void;
+  weatherIcon?: string;
+  weatherTemp?: number;
+  weatherDescription?: string;
 }
 
 const Header: React.FC<HeaderProps> = ({
   onCustomClick,
   currentLocation = 'Tokyo',
-  onLocationChange
+  onLocationChange,
+  weatherIcon,
+  weatherTemp,
+  weatherDescription,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
@@ -49,12 +55,17 @@ const Header: React.FC<HeaderProps> = ({
         style={{ paddingTop: 'var(--safe-area-top)' }}
       >
         <div className="px-4 py-3 flex items-center justify-between">
-          {/* ロゴ */}
+          {/* ロゴ + 天気 */}
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
               <span className="text-text-inverse font-bold text-sm">気</span>
             </div>
             <h1 className="text-lg font-bold text-text-primary dark:text-text-inverse">気晴らし</h1>
+            {weatherIcon && weatherTemp !== undefined && (
+              <span className="text-sm text-gray-500 dark:text-gray-400" title={weatherDescription}>
+                {weatherIcon} {weatherTemp}°
+              </span>
+            )}
           </div>
 
           {/* 右側: ハンバーガー */}
