@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import LocationSelector from '../location/LocationSelector';
 import HelpModal from '../help/HelpModal';
 import BadgeModal from '../../features/badge/BadgeModal';
 import JourneyModal from '../../features/journey/JourneyModal';
 
 interface HeaderProps {
   onCustomClick?: () => void;
-  currentLocation?: string;
-  onLocationChange?: (location: string) => void;
   weatherIcon?: string;
   weatherTemp?: number;
   weatherDescription?: string;
@@ -15,33 +12,16 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({
   onCustomClick,
-  currentLocation = 'Tokyo',
-  onLocationChange,
   weatherIcon,
   weatherTemp,
   weatherDescription,
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showBadgeModal, setShowBadgeModal] = useState(false);
   const [showJourneyModal, setShowJourneyModal] = useState(false);
 
-  const handleLocationChange = (location: string) => {
-    if (onLocationChange) onLocationChange(location);
-  };
-
-  const getLocationDisplayName = (location: string) => {
-    const locationMap: Record<string, string> = {
-      'Tokyo': '東京', 'Osaka': '大阪', 'Kyoto': '京都', 'Yokohama': '横浜',
-      'Nagoya': '名古屋', 'Sapporo': '札幌', 'Fukuoka': '福岡', 'Sendai': '仙台',
-      'Hiroshima': '広島', 'Kobe': '神戸'
-    };
-    return locationMap[location] || location;
-  };
-
   const menuItems = [
-    { icon: '📍', label: `場所: ${getLocationDisplayName(currentLocation)}`, onClick: () => { setMenuOpen(false); setShowLocationSelector(true); } },
     { icon: '🏅', label: '実績バッジ', onClick: () => { setMenuOpen(false); setShowBadgeModal(true); } },
     { icon: '📊', label: '回復ジャーニー', onClick: () => { setMenuOpen(false); setShowJourneyModal(true); } },
     { icon: '✏️', label: 'マイ気晴らし', onClick: () => { setMenuOpen(false); onCustomClick?.(); } },
@@ -111,13 +91,6 @@ const Header: React.FC<HeaderProps> = ({
         </>
       )}
 
-      {/* モーダル類 */}
-      <LocationSelector
-        currentLocation={currentLocation}
-        onLocationChange={handleLocationChange}
-        isOpen={showLocationSelector}
-        onClose={() => setShowLocationSelector(false)}
-      />
       <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
       <BadgeModal isOpen={showBadgeModal} onClose={() => setShowBadgeModal(false)} />
       <JourneyModal isOpen={showJourneyModal} onClose={() => setShowJourneyModal(false)} />

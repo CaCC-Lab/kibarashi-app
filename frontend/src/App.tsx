@@ -33,7 +33,7 @@ function App() {
   const [situation, setSituation] = useState<SituationId | null>(null);
   const [duration, setDuration] = useState<5 | 15 | 30 | null>(null);
 
-  const [currentLocation, setCurrentLocation] = useState<string>('Tokyo');
+  // GPS位置情報のみで場所を管理（手動選択は廃止）
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [debugMode, setDebugMode] = useState(() => {
     if (process.env.NODE_ENV === 'production') return false;
@@ -146,7 +146,7 @@ function App() {
             <DurationSelector selected={duration} onSelect={handleDurationSelect} />
           )}
           {homeStep === 'suggestions' && situation && duration && (
-            <SuggestionList situation={situation} duration={duration} location={currentLocation} debugMode={debugMode} geoPosition={geoPosition} />
+            <SuggestionList situation={situation} duration={duration} debugMode={debugMode} geoPosition={geoPosition} />
           )}
         </Suspense>
       </div>
@@ -200,7 +200,7 @@ function App() {
 
   if (ageGroupLoading) {
     return (
-      <MainLayout activeTab={activeTab} onTabChange={handleTabChange} currentLocation={currentLocation} onLocationChange={setCurrentLocation} weatherIcon={weather?.icon} weatherTemp={weather?.temperature} weatherDescription={weather?.description}>
+      <MainLayout activeTab={activeTab} onTabChange={handleTabChange} weatherIcon={weather?.icon} weatherTemp={weather?.temperature} weatherDescription={weather?.description}>
         <div className="flex items-center justify-center h-64"><Loading /></div>
       </MainLayout>
     );
@@ -212,8 +212,6 @@ function App() {
         activeTab={activeTab}
         onTabChange={handleTabChange}
         onCustomClick={handleCustomClick}
-        currentLocation={currentLocation}
-        onLocationChange={setCurrentLocation}
         weatherIcon={weather?.icon}
         weatherTemp={weather?.temperature}
         weatherDescription={weather?.description}

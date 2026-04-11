@@ -7,8 +7,6 @@ interface MainLayoutProps {
   activeTab: TabId;
   onTabChange: (tab: TabId) => void;
   onCustomClick?: () => void;
-  currentLocation?: string;
-  onLocationChange?: (location: string) => void;
   weatherIcon?: string;
   weatherTemp?: number;
   weatherDescription?: string;
@@ -19,8 +17,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   activeTab,
   onTabChange,
   onCustomClick,
-  currentLocation,
-  onLocationChange,
   weatherIcon,
   weatherTemp,
   weatherDescription,
@@ -31,8 +27,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
       <Header
         onCustomClick={onCustomClick}
-        currentLocation={currentLocation}
-        onLocationChange={onLocationChange}
         weatherIcon={weatherIcon}
         weatherTemp={weatherTemp}
         weatherDescription={weatherDescription}
