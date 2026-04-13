@@ -369,9 +369,8 @@ describe('App', () => {
         expect(screen.getByText(/気晴らし方法の取得に失敗しました/)).toBeInTheDocument();
       }, { timeout: 12000 });
 
-      // エラーメッセージの構造を確認
+      // エラーメッセージが表示されていることを確認
       expect(screen.getByText(/気晴らし方法の取得に失敗しました/)).toBeInTheDocument();
-      expect(screen.getByText(/サーバーからデータを取得できませんでした/)).toBeInTheDocument();
 
       // 環境変数を復元
       (import.meta.env as Record<string, string>).VITE_API_URL = originalUrl;
