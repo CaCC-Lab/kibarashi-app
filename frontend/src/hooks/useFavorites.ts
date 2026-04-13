@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Favorite } from '../types/favorites';
 import { Suggestion } from '../services/api/types';
 import { FavoritesStorage } from '../services/storage/favoritesStorage';
+import { syncFavoritesToSupabase } from '../services/supabase/syncStorage';
 
 interface UseFavoritesReturn {
   favorites: Favorite[];
@@ -19,6 +20,15 @@ interface UseFavoritesReturn {
  */
 export function useFavorites(): UseFavoritesReturn {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // localStorage 変更後にデバウンスして Supabase に同期
+  const syncToCloud = useCallback((favs: Favorite[]) => {
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = setTimeout(() => {
+      syncFavoritesToSupabase(favs).catch(() => {});
+    }, 1000);
+  }, []);
 
   // 初期ロード
   useEffect(() => {
@@ -51,8 +61,9 @@ export function useFavorites(): UseFavoritesReturn {
     if (success) {
       const data = FavoritesStorage.getFavorites();
       setFavorites(data.favorites);
+      syncToCloud(data.favorites);
     }
-  }, []);
+  }, [syncToCloud]);
 
   // お気に入りから削除
   const removeFavorite = useCallback((suggestionId: string) => {
@@ -60,8 +71,9 @@ export function useFavorites(): UseFavoritesReturn {
     if (success) {
       const data = FavoritesStorage.getFavorites();
       setFavorites(data.favorites);
+      syncToCloud(data.favorites);
     }
-  }, []);
+  }, [syncToCloud]);
 
   // お気に入りをトグル
   const toggleFavorite = useCallback((suggestion: Suggestion) => {
@@ -76,7 +88,8 @@ export function useFavorites(): UseFavoritesReturn {
   const clearFavorites = useCallback(() => {
     FavoritesStorage.clearFavorites();
     setFavorites([]);
-  }, []);
+    syncToCloud([]);
+  }, [syncToCloud]);
 
   // エクスポート
   const exportFavorites = useCallback((): string => {

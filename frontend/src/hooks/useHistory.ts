@@ -7,11 +7,12 @@
  * - 統計情報の提供
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { HistoryStorage } from '../services/storage/historyStorage';
 import { HistoryItem, HistoryStats } from '../types/history';
 import { Suggestion } from '../services/api/types';
 import { SituationId } from '../types/situation';
+import { syncHistoryToSupabase } from '../services/supabase/syncStorage';
 
 export function useHistory() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -30,12 +31,22 @@ export function useHistory() {
     monthlyTrend: [],
   });
 
-  // 履歴データを読み込む
+  const syncTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const syncToCloud = useCallback((items: HistoryItem[]) => {
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    syncTimeoutRef.current = setTimeout(() => {
+      syncHistoryToSupabase(items).catch(() => {});
+    }, 2000);
+  }, []);
+
+  // 履歴データを読み込み、Supabase にバックグラウンド同期
   const loadHistory = useCallback(() => {
     const data = HistoryStorage.getHistory();
     setHistory(data.history);
     setStats(HistoryStorage.getStats());
-  }, []);
+    syncToCloud(data.history);
+  }, [syncToCloud]);
 
   // 初回読み込みとstorage イベントの監視
   useEffect(() => {
