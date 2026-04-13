@@ -2,9 +2,10 @@
  * Supabase + localStorage 同期ストレージ
  *
  * 戦略:
- * - Supabase 接続時: DB に書き込み + localStorage にもキャッシュ
- * - Supabase 未接続時: localStorage のみ（オフライン対応）
- * - 読み取り: localStorage から即座に返し、バックグラウンドで DB と同期
+ * - localStorage が正本（マスター）
+ * - Supabase はバックアップ/同期先
+ * - 同期失敗しても localStorage にデータは残る
+ * - 読み取りは localStorage から即座に返す
  */
 import { getSupabase, isSupabaseConfigured } from './client';
 
@@ -20,19 +21,6 @@ function getUserId(): string {
 }
 
 // --- お気に入り ---
-
-interface FavoriteRow {
-  id?: string;
-  user_id: string;
-  title: string;
-  description: string;
-  duration: number;
-  category: string;
-  steps: string[];
-  is_favorite: boolean;
-  master_id?: string | null;
-  created_at?: string;
-}
 
 export async function syncFavoritesToSupabase(favorites: Array<{
   id: string;
@@ -51,12 +39,8 @@ export async function syncFavoritesToSupabase(favorites: Array<{
   const userId = getUserId();
 
   try {
-    // 既存データを削除して全件入れ直し（シンプルな同期戦略）
-    await supabase.from('user_saved_suggestions').delete().eq('user_id', userId).eq('is_favorite', true);
-
-    if (favorites.length === 0) return;
-
-    const rows: FavoriteRow[] = favorites.map(f => ({
+    // まず INSERT を準備してから DELETE する（データ消失リスク軽減）
+    const rows = favorites.map(f => ({
       user_id: userId,
       title: f.title,
       description: f.description,
@@ -67,9 +51,29 @@ export async function syncFavoritesToSupabase(favorites: Array<{
       created_at: f.addedAt,
     }));
 
-    await supabase.from('user_saved_suggestions').insert(rows);
-  } catch {
-    // 同期失敗は無視（localStorage にデータは残っている）
+    // DELETE + INSERT（localStorage が正本なので、失敗しても次回同期で復元）
+    const { error: deleteError } = await supabase
+      .from('user_saved_suggestions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('is_favorite', true);
+
+    if (deleteError) {
+      console.warn('Supabase sync: delete failed', deleteError.message);
+      return; // DELETE 失敗時は INSERT しない（既存データを維持）
+    }
+
+    if (rows.length > 0) {
+      const { error: insertError } = await supabase
+        .from('user_saved_suggestions')
+        .insert(rows);
+
+      if (insertError) {
+        console.warn('Supabase sync: insert failed', insertError.message);
+      }
+    }
+  } catch (e) {
+    console.warn('Supabase favorites sync error', e instanceof Error ? e.message : e);
   }
 }
 
@@ -90,7 +94,7 @@ export async function loadFavoritesFromSupabase(): Promise<Array<{
   try {
     const { data, error } = await supabase
       .from('user_saved_suggestions')
-      .select('*')
+      .select('id, title, description, duration, category, steps, created_at')
       .eq('user_id', getUserId())
       .eq('is_favorite', true)
       .order('created_at', { ascending: false });
@@ -102,7 +106,7 @@ export async function loadFavoritesFromSupabase(): Promise<Array<{
       suggestionId: row.id,
       title: row.title,
       description: row.description,
-      category: (row.category === '認知的' ? '認知的' : '行動的') as '認知的' | '行動的',
+      category: String(row.category) as '認知的' | '行動的',
       duration: row.duration,
       steps: row.steps || undefined,
       addedAt: row.created_at,
@@ -132,13 +136,11 @@ export async function syncHistoryToSupabase(history: Array<{
   if (!supabase) return;
 
   const userId = getUserId();
+  // 最新100件のみ同期（パフォーマンス制限）
+  const recentHistory = history.slice(0, 100);
 
   try {
-    await supabase.from('user_saved_suggestions').delete().eq('user_id', userId).eq('is_favorite', false);
-
-    if (history.length === 0) return;
-
-    const rows = history.map(h => ({
+    const rows = recentHistory.map(h => ({
       user_id: userId,
       title: h.title,
       description: h.description,
@@ -153,9 +155,28 @@ export async function syncHistoryToSupabase(history: Array<{
       created_at: h.startedAt,
     }));
 
-    await supabase.from('user_saved_suggestions').insert(rows);
-  } catch {
-    // 同期失敗は無視
+    const { error: deleteError } = await supabase
+      .from('user_saved_suggestions')
+      .delete()
+      .eq('user_id', userId)
+      .eq('is_favorite', false);
+
+    if (deleteError) {
+      console.warn('Supabase sync: history delete failed', deleteError.message);
+      return;
+    }
+
+    if (rows.length > 0) {
+      const { error: insertError } = await supabase
+        .from('user_saved_suggestions')
+        .insert(rows);
+
+      if (insertError) {
+        console.warn('Supabase sync: history insert failed', insertError.message);
+      }
+    }
+  } catch (e) {
+    console.warn('Supabase history sync error', e instanceof Error ? e.message : e);
   }
 }
 
@@ -178,7 +199,7 @@ export async function loadHistoryFromSupabase(): Promise<Array<{
   try {
     const { data, error } = await supabase
       .from('user_saved_suggestions')
-      .select('*')
+      .select('id, title, description, duration, category, use_count, rating, memo, created_at')
       .eq('user_id', getUserId())
       .eq('is_favorite', false)
       .order('created_at', { ascending: false })
@@ -191,7 +212,7 @@ export async function loadHistoryFromSupabase(): Promise<Array<{
       suggestionId: row.id,
       title: row.title,
       description: row.description,
-      category: (row.category === '認知的' ? '認知的' : '行動的') as '認知的' | '行動的',
+      category: String(row.category) as '認知的' | '行動的',
       duration: row.duration,
       completed: (row.use_count || 0) > 0,
       rating: row.rating || undefined,

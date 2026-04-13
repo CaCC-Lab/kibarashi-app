@@ -40,27 +40,29 @@ export function useHistory() {
     }, 2000);
   }, []);
 
-  // 履歴データを読み込み、Supabase にバックグラウンド同期
-  const loadHistory = useCallback(() => {
+  // 履歴データを読み込む（同期はオプション）
+  const loadHistory = useCallback((sync = false) => {
     const data = HistoryStorage.getHistory();
     setHistory(data.history);
     setStats(HistoryStorage.getStats());
-    syncToCloud(data.history);
+    if (sync) syncToCloud(data.history);
   }, [syncToCloud]);
 
   // 初回読み込みとstorage イベントの監視
   useEffect(() => {
-    loadHistory();
+    loadHistory(false); // 初回は同期しない
 
-    // 他のタブでの変更を監視
-    const handleStorageChange = () => {
-      loadHistory();
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'kibarashi_history') {
+        loadHistory(false); // 他タブからの変更は同期しない（元タブが同期する）
+      }
     };
 
     window.addEventListener('storage', handleStorageChange);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
     };
   }, [loadHistory]);
 
@@ -89,7 +91,7 @@ export function useHistory() {
 
     const success = HistoryStorage.addHistoryItem(historyItem);
     if (success) {
-      loadHistory();
+      loadHistory(true);
       return historyItem.id;
     }
     return '';
@@ -118,7 +120,7 @@ export function useHistory() {
 
     const success = HistoryStorage.updateHistoryItem(id, updates);
     if (success) {
-      loadHistory();
+      loadHistory(true);
     }
     return success;
   }, [loadHistory]);
@@ -129,7 +131,7 @@ export function useHistory() {
   const deleteHistoryItem = useCallback((id: string): boolean => {
     const success = HistoryStorage.deleteHistoryItem(id);
     if (success) {
-      loadHistory();
+      loadHistory(true);
     }
     return success;
   }, [loadHistory]);
@@ -140,7 +142,7 @@ export function useHistory() {
   const updateRating = useCallback((id: string, rating: 1 | 2 | 3 | 4 | 5): boolean => {
     const success = HistoryStorage.updateHistoryItem(id, { rating });
     if (success) {
-      loadHistory();
+      loadHistory(true);
     }
     return success;
   }, [loadHistory]);
@@ -151,7 +153,7 @@ export function useHistory() {
   const updateNote = useCallback((id: string, note: string): boolean => {
     const success = HistoryStorage.updateHistoryItem(id, { note });
     if (success) {
-      loadHistory();
+      loadHistory(true);
     }
     return success;
   }, [loadHistory]);
@@ -162,7 +164,7 @@ export function useHistory() {
   const clearHistory = useCallback((): boolean => {
     const success = HistoryStorage.clearHistory();
     if (success) {
-      loadHistory();
+      loadHistory(true);
     }
     return success;
   }, [loadHistory]);
@@ -180,7 +182,7 @@ export function useHistory() {
   const importHistory = useCallback((jsonData: string, merge: boolean = false): boolean => {
     const success = HistoryStorage.importHistory(jsonData, merge);
     if (success) {
-      loadHistory();
+      loadHistory(true);
     }
     return success;
   }, [loadHistory]);

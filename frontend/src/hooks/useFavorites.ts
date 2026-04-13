@@ -47,7 +47,10 @@ export function useFavorites(): UseFavoritesReturn {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+    };
   }, []);
 
   // お気に入りかどうかチェック
@@ -102,6 +105,7 @@ export function useFavorites(): UseFavoritesReturn {
     if (success) {
       const data = FavoritesStorage.getFavorites();
       setFavorites(data.favorites);
+      syncToCloud(data.favorites);
     }
     return success;
   }, []);
