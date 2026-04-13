@@ -18,6 +18,13 @@ export function useGeolocation() {
   useEffect(() => {
     let cancelled = false;
 
+    function done(pos: GeoPosition) {
+      if (!cancelled) {
+        setPosition(pos);
+        setLoading(false);
+      }
+    }
+
     async function getPosition() {
       try {
         if (Capacitor.isNativePlatform()) {
@@ -25,35 +32,23 @@ export function useGeolocation() {
           if (perm.location === 'denied') {
             const req = await Geolocation.requestPermissions();
             if (req.location === 'denied') {
-              if (!cancelled) setPosition(DEMO_POSITION);
+              done(DEMO_POSITION);
               return;
             }
           }
           const pos = await Geolocation.getCurrentPosition({ timeout: 10000 });
-          if (!cancelled) {
-            setPosition({ lat: pos.coords.latitude, lon: pos.coords.longitude, isDemoMode: false });
-          }
+          done({ lat: pos.coords.latitude, lon: pos.coords.longitude, isDemoMode: false });
         } else if ('geolocation' in navigator) {
-          // Web ブラウザ
           navigator.geolocation.getCurrentPosition(
-            (pos) => {
-              if (!cancelled) {
-                setPosition({ lat: pos.coords.latitude, lon: pos.coords.longitude, isDemoMode: false });
-              }
-            },
-            () => {
-              if (!cancelled) setPosition(DEMO_POSITION);
-            },
+            (pos) => done({ lat: pos.coords.latitude, lon: pos.coords.longitude, isDemoMode: false }),
+            () => done(DEMO_POSITION),
             { timeout: 10000 }
           );
-          return; // callback ベースなので finally は不要
         } else {
-          if (!cancelled) setPosition(DEMO_POSITION);
+          done(DEMO_POSITION);
         }
       } catch {
-        if (!cancelled) setPosition(DEMO_POSITION);
-      } finally {
-        if (!cancelled) setLoading(false);
+        done(DEMO_POSITION);
       }
     }
 

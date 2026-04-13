@@ -26,7 +26,7 @@ class ContextAPI {
 
       // バックエンドAPIからデータを取得（GPS座標優先）
       const params = new URLSearchParams();
-      if (lat && lon) {
+      if (lat != null && lon != null) {
         params.set('lat', lat.toString());
         params.set('lon', lon.toString());
       }

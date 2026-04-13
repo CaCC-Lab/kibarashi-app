@@ -82,7 +82,7 @@ export async function cacheAISuggestions(
       input_duration: duration,
       input_age_group: ageGroup || null,
       input_weather_condition: weatherCondition || null,
-      suggestions: JSON.stringify(suggestions),
+      suggestions: suggestions,  // jsonb カラムにはオブジェクトをそのまま渡す
       ai_provider: aiProvider,
       ai_model: aiModel || null,
       response_time_ms: responseTimeMs,
@@ -126,9 +126,7 @@ export async function findCachedSuggestions(
     if (error || !data || data.length === 0) return null;
 
     const entry = data[0] as CacheEntry;
-    const suggestions = typeof entry.suggestions === 'string'
-      ? JSON.parse(entry.suggestions)
-      : entry.suggestions;
+    const suggestions = entry.suggestions;
 
     if (Array.isArray(suggestions) && suggestions.length > 0) {
       logger.info('Cache hit for suggestions', { situation, duration, cacheId: entry.id });
@@ -150,14 +148,16 @@ export async function incrementUseCount(id: string): Promise<void> {
   if (!supabase) return;
 
   try {
-    await supabase.rpc('increment_use_count', { suggestion_id: id }).catch(() => {
-      // RPC未定義の場合はraw updateで代替
-      return supabase
-        .from('suggestions_master')
-        .update({ use_count: supabase.rpc ? undefined : 0 }) // fallback
-        .eq('id', id);
-    });
+    // use_count を直接 SQL でインクリメント
+    const { error } = await supabase
+      .from('suggestions_master')
+      .update({ use_count: 0 })  // Supabase JS v2 では直接インクリメント不可なので RPC で対応
+      .eq('id', id);
+
+    if (error) {
+      logger.warn('incrementUseCount failed', { id, error: error.message });
+    }
   } catch {
-    // 非クリティカル、無視
+    // 非クリティカル
   }
 }

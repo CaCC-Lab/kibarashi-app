@@ -39,6 +39,10 @@ const WMO_CODES: Record<number, { description: string; icon: string; condition: 
 };
 
 export async function fetchWeather(latitude: number, longitude: number): Promise<WeatherData | null> {
+  // 座標値バリデーション
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return null;
+  if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) return null;
+
   try {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code&timezone=auto`;
     const response = await fetch(url);
@@ -49,10 +53,11 @@ export async function fetchWeather(latitude: number, longitude: number): Promise
     if (!current) return null;
 
     const code = current.weather_code ?? 0;
+    const temp = current.temperature_2m;
     const weather = WMO_CODES[code] ?? { description: '---', icon: '🌈', condition: 'unknown' as const };
 
     return {
-      temperature: Math.round(current.temperature_2m),
+      temperature: Number.isFinite(temp) ? Math.round(temp) : 0,
       description: weather.description,
       icon: weather.icon,
       weatherCode: code,

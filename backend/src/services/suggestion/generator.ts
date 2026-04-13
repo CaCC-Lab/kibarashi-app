@@ -4,6 +4,21 @@ import { generateAISuggestions, isAIProviderConfigured, getAIProviderInfo } from
 import { JobHuntingPromptInput } from './jobHuntingPromptTemplates';
 import { findMasterSuggestions, findCachedSuggestions, cacheAISuggestions } from '../supabase/suggestionRepository';
 
+function fisherYatesShuffle<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function isSuggestionLike(s: unknown): s is { title: string; description: string; category: string; duration: number } {
+  if (typeof s !== 'object' || s === null) return false;
+  const obj = s as Record<string, unknown>;
+  return typeof obj.title === 'string' && typeof obj.description === 'string';
+}
+
 export interface Suggestion {
   id: string;
   title: string;
@@ -40,8 +55,7 @@ export async function generateSuggestions(
     const masterResults = await findMasterSuggestions(situation, duration, ageGroup);
     if (masterResults.length >= 3) {
       logger.info('Serving suggestions from DB master', { count: masterResults.length, situation, duration });
-      // ランダムに3件選出（毎回同じにならないように）
-      const shuffled = masterResults.sort(() => Math.random() - 0.5).slice(0, 3);
+      const shuffled = fisherYatesShuffle(masterResults).slice(0, 3);
       return shuffled.map(s => ({
         id: s.id,
         title: s.title,
@@ -58,12 +72,15 @@ export async function generateSuggestions(
     // ステップ2: AIキャッシュから検索（24h以内）
     const cached = await findCachedSuggestions(situation, duration, ageGroup);
     if (cached && Array.isArray(cached) && cached.length >= 3) {
-      logger.info('Serving suggestions from AI cache', { situation, duration });
-      return (cached as Suggestion[]).slice(0, 3).map(s => ({
-        ...s,
-        dataSource: 'cache' as const,
-        responseTime: Date.now() - startTime,
-      }));
+      const validCached = cached.filter(isSuggestionLike);
+      if (validCached.length >= 3) {
+        logger.info('Serving suggestions from AI cache', { situation, duration });
+        return validCached.slice(0, 3).map(s => ({
+          ...(s as Suggestion),
+          dataSource: 'cache' as const,
+          responseTime: Date.now() - startTime,
+        }));
+      }
     }
 
     // ステップ3: AI生成
@@ -74,10 +91,11 @@ export async function generateSuggestions(
         dbResults: masterResults.length,
       });
 
-      const suggestions = await generateAISuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
+      const rawSuggestions = await generateAISuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
       const responseTime = Date.now() - startTime;
+      const validSuggestions = rawSuggestions.filter(isSuggestionLike);
 
-      const result: Suggestion[] = (suggestions as Suggestion[]).slice(0, 3).map(s => ({
+      const result: Suggestion[] = (validSuggestions as Suggestion[]).slice(0, 3).map(s => ({
         ...s,
         dataSource: 'ai' as const,
         responseTime,
@@ -87,7 +105,9 @@ export async function generateSuggestions(
       cacheAISuggestions(
         situation, duration, ageGroup, undefined,
         result, providerInfo.provider, providerInfo.model, responseTime
-      ).catch(() => {});
+      ).catch((e: unknown) => {
+        logger.warn('Failed to cache AI suggestions', { error: e instanceof Error ? e.message : String(e) });
+      });
 
       return result;
     }
