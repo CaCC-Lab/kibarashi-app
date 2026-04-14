@@ -106,9 +106,10 @@ export class ABTestService {
   /**
    * 振り分けイベントを記録
    */
-  private static trackAssignment(_assignment: ABTestAssignment): void {
-    // Phase 1では記録のみ
+  private static trackAssignment(assignment: ABTestAssignment): void {
+    // Phase 1では記録のみ（コンソールログで確認可能に）
     // Phase 2でアナリティクスAPIに送信
+    console.debug('[A/B Test] Assignment tracked:', assignment.group, assignment.version);
   }
   
   /**

@@ -108,7 +108,7 @@ export function useFavorites(): UseFavoritesReturn {
       syncToCloud(data.favorites);
     }
     return success;
-  }, []);
+  }, [syncToCloud]);
 
   return {
     favorites,

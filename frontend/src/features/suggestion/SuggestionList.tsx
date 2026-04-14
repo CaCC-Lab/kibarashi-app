@@ -48,36 +48,36 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     isStudentOptimized, 
     trackMetric
   } = useStudentABTest({
-    onExposure: (_event) => {
+    onExposure: () => {
       // A/B test exposure tracked
     },
-    onMetric: (_event) => {
+    onMetric: () => {
       // A/B test metric tracked
     }
   });
-  
+
   // 就職活動者向けA/Bテスト
   const {
     isJobSeekerOptimized,
     trackMetric: trackJobSeekerMetric
   } = useJobSeekerABTest({
-    onExposure: (_event) => {
+    onExposure: () => {
       // Job seeker A/B test exposure tracked
     },
-    onMetric: (_event) => {
+    onMetric: () => {
       // Job seeker A/B test metric tracked
     }
   });
-  
+
   // 転職活動者向けA/Bテスト
   const {
     isCareerChangerOptimized,
     trackMetric: trackCareerChangerMetric
   } = useCareerChangerABTest({
-    onExposure: (_event) => {
+    onExposure: () => {
       // Career changer A/B test exposure tracked
     },
-    onMetric: (_event) => {
+    onMetric: () => {
       // Career changer A/B test metric tracked
     }
   });

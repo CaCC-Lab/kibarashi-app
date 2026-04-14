@@ -44,37 +44,37 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   
   // 学生向けA/Bテストフックの統合
   const { trackMetric, shouldRender } = useStudentABTest({
-    onMetric: (_event) => {
+    onMetric: () => {
       // Student A/B test metric tracked
     }
   });
 
   // 主婦・主夫向けA/Bテストフックの統合
-  const { 
-    trackMetric: trackHousewifeMetric, 
-    shouldRender: shouldRenderHousewife 
+  const {
+    trackMetric: trackHousewifeMetric,
+    shouldRender: shouldRenderHousewife
   } = useHousewifeABTest({
-    onMetric: (_event) => {
+    onMetric: () => {
       // Housewife A/B test metric tracked
     }
   });
-  
+
   // 就職活動者向けA/Bテストフックの統合
   const {
     trackMetric: trackJobSeekerMetric,
     shouldRender: shouldRenderJobSeeker
   } = useJobSeekerABTest({
-    onMetric: (_event) => {
+    onMetric: () => {
       // Job seeker A/B test metric tracked
     }
   });
-  
+
   // 転職活動者向けA/Bテストフックの統合
   const {
     trackMetric: trackCareerChangerMetric,
     shouldRender: shouldRenderCareerChanger
   } = useCareerChangerABTest({
-    onMetric: (_event) => {
+    onMetric: () => {
       // Career changer A/B test metric tracked
     }
   });
