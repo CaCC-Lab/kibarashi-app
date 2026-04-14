@@ -18,6 +18,7 @@
     "test:frontend": "cd frontend && npm test",
     "test:backend": "cd backend && npm test",
     "test:api": "cd api/v1/_lib && node ../../../node_modules/.bin/mocha *.test.js",
+    "test:api:v2": "cd api/v2/_lib && node ../../../node_modules/.bin/mocha *.test.js",
     "test:e2e": "npx playwright test",
     "lint": "npm run lint:frontend && npm run lint:backend",
     "lint:frontend": "cd frontend && npm run lint",
@@ -38,6 +39,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@supabase/supabase-js": "^2.103.0",
     "@vercel/node": "^3.0.0",
     "axios": "^1.10.0",
     "cors": "^2.8.5",
