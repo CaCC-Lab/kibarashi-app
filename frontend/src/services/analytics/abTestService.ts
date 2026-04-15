@@ -195,9 +195,6 @@ export class ABTestService {
       // LocalStorageに保存
       this.saveMetricEvent(fullEvent);
       
-      // コンソールログ（開発時の確認用）
-      console.log('📊 A/B Test Metric:', fullEvent);
-      
     } catch (error) {
       console.error('Failed to track A/B test event:', error);
     }

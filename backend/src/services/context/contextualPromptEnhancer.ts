@@ -19,13 +19,17 @@ class ContextualPromptEnhancer {
   /**
    * 現在のコンテキストデータを取得
    */
-  async getCurrentContext(): Promise<ContextualData> {
+  async getCurrentContext(lat?: number, lon?: number, location?: string): Promise<ContextualData> {
     try {
-      logger.info('Gathering contextual data for enhanced suggestions');
+      logger.info('Gathering contextual data for enhanced suggestions', { lat, lon, location });
 
-      // 並列でデータを取得
+      // 緯度経度があれば座標から、なければ都市名から、どちらもなければTokyo
+      const weatherPromise = lat && lon
+        ? weatherClient.getCurrentWeatherByCoordinates(lat, lon, location || '現在地')
+        : weatherClient.getCurrentWeatherByCity(location || 'Tokyo');
+
       const [weather, seasonal] = await Promise.all([
-        weatherClient.getCurrentWeatherByCity('Tokyo').catch((error: unknown) => {
+        weatherPromise.catch((error: unknown) => {
           logger.warn('Weather data unavailable', { error: error instanceof Error ? error.message : String(error) });
           return null;
         }),
@@ -349,11 +353,11 @@ ${userHistory.slice(-5).map((item, index) => `${index + 1}. ${item}`).join('\n')
 let instance: ContextualPromptEnhancer | null = null;
 
 export const contextualPromptEnhancer = {
-  getCurrentContext: async () => {
+  getCurrentContext: async (lat?: number, lon?: number, location?: string) => {
     if (!instance) {
       instance = new ContextualPromptEnhancer();
     }
-    return instance.getCurrentContext();
+    return instance.getCurrentContext(lat, lon, location);
   },
 
   generateEnhancedPrompt: (params: EnhancedPromptParams) => {

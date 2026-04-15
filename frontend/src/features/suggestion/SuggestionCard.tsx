@@ -44,38 +44,38 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   
   // 学生向けA/Bテストフックの統合
   const { trackMetric, shouldRender } = useStudentABTest({
-    onMetric: (event) => {
-      console.log('[SuggestionCard] Student A/B Test Metric:', event);
+    onMetric: () => {
+      // Student A/B test metric tracked
     }
   });
 
   // 主婦・主夫向けA/Bテストフックの統合
-  const { 
-    trackMetric: trackHousewifeMetric, 
-    shouldRender: shouldRenderHousewife 
+  const {
+    trackMetric: trackHousewifeMetric,
+    shouldRender: shouldRenderHousewife
   } = useHousewifeABTest({
-    onMetric: (event) => {
-      console.log('[SuggestionCard] Housewife A/B Test Metric:', event);
+    onMetric: () => {
+      // Housewife A/B test metric tracked
     }
   });
-  
+
   // 就職活動者向けA/Bテストフックの統合
   const {
     trackMetric: trackJobSeekerMetric,
     shouldRender: shouldRenderJobSeeker
   } = useJobSeekerABTest({
-    onMetric: (event) => {
-      console.log('[SuggestionCard] Job Seeker A/B Test Metric:', event);
+    onMetric: () => {
+      // Job seeker A/B test metric tracked
     }
   });
-  
+
   // 転職活動者向けA/Bテストフックの統合
   const {
     trackMetric: trackCareerChangerMetric,
     shouldRender: shouldRenderCareerChanger
   } = useCareerChangerABTest({
-    onMetric: (event) => {
-      console.log('[SuggestionCard] Career Changer A/B Test Metric:', event);
+    onMetric: () => {
+      // Career changer A/B test metric tracked
     }
   });
   
@@ -282,7 +282,6 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
               }}
               onComplete={() => {
                 // 音声ガイド完了時の処理（必要に応じて）
-                console.log('Voice guide completed for suggestion:', id);
               }}
             />
           </div>

@@ -6,6 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:ios": "tsc && VITE_BUILD_TARGET=capacitor vite build --mode capacitor",
+    "cap:sync": "npx cap sync ios",
+    "cap:open": "npx cap open ios",
+    "ios": "npm run build:ios && npx cap sync ios && npx cap open ios",
     "preview": "vite preview",
     "test": "vitest --passWithNoTests",
     "test:watch": "vitest --watch",
@@ -15,8 +19,17 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/geolocation": "^8.2.0",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.3.0",
+    "@capacitor/keyboard": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.2",
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
+    "@supabase/supabase-js": "^2.103.0",
     "chart.js": "^4.5.0",
     "framer-motion": "^12.23.0",
     "react": "^18.2.0",

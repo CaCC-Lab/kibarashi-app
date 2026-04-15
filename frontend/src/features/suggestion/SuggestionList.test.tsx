@@ -39,10 +39,10 @@ describe('SuggestionList', () => {
       }, { timeout: 10000 });
       
       // エラーがない場合、提案が表示される
-      if (!screen.queryByText('気晴らし方法の取得に失敗しました')) {
+      if (!screen.queryByText(/気晴らし方法の取得に失敗しました/)) {
         expect(screen.getByText('あなたにおすすめの気晴らし方法')).toBeInTheDocument();
         expect(screen.getByText('職場で5分でできる気晴らしです')).toBeInTheDocument();
-        
+
         // 提案カードが表示されている
         const cards = screen.getAllByText('この気晴らしを始める');
         expect(cards.length).toBeGreaterThan(0);
@@ -57,7 +57,7 @@ describe('SuggestionList', () => {
         expect(screen.queryByText('気晴らし方法を探しています...')).not.toBeInTheDocument();
       }, { timeout: 10000 });
       
-      if (!screen.queryByText('気晴らし方法の取得に失敗しました')) {
+      if (!screen.queryByText(/気晴らし方法の取得に失敗しました/)) {
         expect(screen.getByText('家で15分でできる気晴らしです')).toBeInTheDocument();
       }
     });
@@ -69,7 +69,7 @@ describe('SuggestionList', () => {
         expect(screen.queryByText('気晴らし方法を探しています...')).not.toBeInTheDocument();
       }, { timeout: 10000 });
       
-      if (!screen.queryByText('気晴らし方法の取得に失敗しました')) {
+      if (!screen.queryByText(/気晴らし方法の取得に失敗しました/)) {
         expect(screen.getByText('外出先で30分でできる気晴らしです')).toBeInTheDocument();
       }
     });
@@ -84,9 +84,9 @@ describe('SuggestionList', () => {
       
       // エラーが表示されるまで待つ
       await waitFor(() => {
-        expect(screen.getByText('気晴らし方法の取得に失敗しました')).toBeInTheDocument();
+        expect(screen.getByText(/気晴らし方法の取得に失敗しました/)).toBeInTheDocument();
       }, { timeout: 10000 });
-      
+
       // 再試行ボタンが表示される
       expect(screen.getByText('もう一度試す')).toBeInTheDocument();
     });
@@ -98,9 +98,9 @@ describe('SuggestionList', () => {
       render(<SuggestionList situation="workplace" duration={5} />);
       
       await waitFor(() => {
-        expect(screen.getByText('気晴らし方法の取得に失敗しました')).toBeInTheDocument();
+        expect(screen.getByText(/気晴らし方法の取得に失敗しました/)).toBeInTheDocument();
       }, { timeout: 10000 });
-      
+
       // URLを正しく戻す
       (import.meta.env as Record<string, string>).VITE_API_URL = originalApiUrl;
       
@@ -126,7 +126,7 @@ describe('SuggestionList', () => {
         expect(screen.queryByText('気晴らし方法を探しています...')).not.toBeInTheDocument();
       }, { timeout: 10000 });
       
-      if (!screen.queryByText('気晴らし方法の取得に失敗しました')) {
+      if (!screen.queryByText(/気晴らし方法の取得に失敗しました/)) {
         // 最初の提案カードの「始める」ボタンをクリック
         const startButtons = screen.getAllByText('この気晴らしを始める');
         fireEvent.click(startButtons[0]);
@@ -145,7 +145,7 @@ describe('SuggestionList', () => {
         expect(screen.queryByText('気晴らし方法を探しています...')).not.toBeInTheDocument();
       }, { timeout: 10000 });
       
-      if (!screen.queryByText('気晴らし方法の取得に失敗しました')) {
+      if (!screen.queryByText(/気晴らし方法の取得に失敗しました/)) {
         // 詳細画面へ遷移
         const startButtons = screen.getAllByText('この気晴らしを始める');
         fireEvent.click(startButtons[0]);
@@ -171,7 +171,7 @@ describe('SuggestionList', () => {
         expect(screen.queryByText('気晴らし方法を探しています...')).not.toBeInTheDocument();
       }, { timeout: 10000 });
       
-      if (!screen.queryByText('気晴らし方法の取得に失敗しました')) {
+      if (!screen.queryByText(/気晴らし方法の取得に失敗しました/)) {
         // 「他の提案を見る」ボタンをクリック
         fireEvent.click(screen.getByText('他の提案を見る'));
         
@@ -210,7 +210,7 @@ describe('SuggestionList', () => {
         expect(screen.queryByText('気晴らし方法を探しています...')).not.toBeInTheDocument();
       }, { timeout: 10000 });
       
-      if (!screen.queryByText('気晴らし方法の取得に失敗しました')) {
+      if (!screen.queryByText(/気晴らし方法の取得に失敗しました/)) {
         // グリッドコンテナを探す
         const container = screen.getByText('あなたにおすすめの気晴らし方法')
           .parentElement?.parentElement;

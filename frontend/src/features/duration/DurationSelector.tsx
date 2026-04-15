@@ -1,4 +1,5 @@
 import React from 'react';
+import { lightImpact } from '../../utils/haptics';
 
 interface DurationOption {
   id: 5 | 15 | 30;
@@ -49,9 +50,7 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
             key={option.id}
             data-testid={`duration-${option.id}`}
             onClick={() => {
-              if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
-                navigator.vibrate(30);
-              }
+              lightImpact();
               onSelect(option.id);
             }}
             className={`

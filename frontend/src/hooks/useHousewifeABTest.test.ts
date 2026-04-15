@@ -43,8 +43,7 @@ describe('useHousewifeABTest', () => {
       });
     }
 
-    // console.logのモック（メトリクス出力用）
-    vi.spyOn(console, 'log').mockImplementation(() => {});
+    // console.errorのモック（エラーハンドリングテスト用）
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
     // ABTestServiceのデフォルトモック設定
@@ -142,22 +141,6 @@ describe('useHousewifeABTest', () => {
       });
     });
 
-    it('メトリクスがコンソールログに出力される', () => {
-      const { result } = renderHook(() => useHousewifeABTest());
-
-      act(() => {
-        result.current.trackMetric('childcareStress', { stressLevel: 'medium' });
-      });
-
-      expect(console.log).toHaveBeenCalledWith(
-        '[Housewife A/B Test Metric]',
-        {
-          metric: 'childcareStress',
-          testGroup: 'A',
-          data: { stressLevel: 'medium' }
-        }
-      );
-    });
   });
 
   describe('条件付きレンダリングのテスト', () => {

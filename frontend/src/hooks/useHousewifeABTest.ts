@@ -103,7 +103,6 @@ export function useHousewifeABTest(options: UseHousewifeABTestOptions = {}): Use
       }
 
       // Phase 2でアナリティクスAPIに送信
-      console.log('[Housewife A/B Test Metric]', { metric, testGroup, data });
     } catch (error) {
       // メトリクス送信エラーはサイレントに処理（アプリケーションを停止させない）
       console.error('Failed to track housewife A/B test metric:', error);

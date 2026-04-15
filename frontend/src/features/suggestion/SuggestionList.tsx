@@ -5,7 +5,7 @@ import { useSuggestions } from './useSuggestions';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
 import GlobalAudioControls from '../audio/GlobalAudioControls';
-import ContextDisplay from '../../components/context/ContextDisplay';
+// import ContextDisplay from '../../components/context/ContextDisplay';
 import type { Suggestion } from '../../services/api/suggestions';
 import { SituationId } from '../../types/situation';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
@@ -18,10 +18,11 @@ import { contextAPI, ContextualData } from '../../services/contextAPI';
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
 interface SuggestionListProps {
-  situation: SituationId; // 場所：年齢層に応じた状況
-  duration: 5 | 15 | 30; // 所要時間：5分、15分、30分
-  location?: string; // 地理的位置（地域別の提案生成用）
-  debugMode?: boolean; // デバッグモードの状態
+  situation: SituationId;
+  duration: 5 | 15 | 30;
+  location?: string;
+  debugMode?: boolean;
+  geoPosition?: { lat: number; lon: number } | null;
 }
 
 /**
@@ -37,7 +38,7 @@ interface SuggestionListProps {
  * - 選択肢を一覧で表示し、興味を持ったものの詳細を確認できる
  * - ネットワークエラー等で失敗しても、ユーザーがあきらめずに済む
  */
-const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false }) => {
+const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false, geoPosition }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
   
@@ -47,37 +48,37 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     isStudentOptimized, 
     trackMetric
   } = useStudentABTest({
-    onExposure: (event) => {
-      console.log('[A/B Test] Exposure:', event);
+    onExposure: () => {
+      // A/B test exposure tracked
     },
-    onMetric: (event) => {
-      console.log('[A/B Test] Metric:', event);
+    onMetric: () => {
+      // A/B test metric tracked
     }
   });
-  
+
   // 就職活動者向けA/Bテスト
   const {
     isJobSeekerOptimized,
     trackMetric: trackJobSeekerMetric
   } = useJobSeekerABTest({
-    onExposure: (event) => {
-      console.log('[Job Seeker A/B Test] Exposure:', event);
+    onExposure: () => {
+      // Job seeker A/B test exposure tracked
     },
-    onMetric: (event) => {
-      console.log('[Job Seeker A/B Test] Metric:', event);
+    onMetric: () => {
+      // Job seeker A/B test metric tracked
     }
   });
-  
+
   // 転職活動者向けA/Bテスト
   const {
     isCareerChangerOptimized,
     trackMetric: trackCareerChangerMetric
   } = useCareerChangerABTest({
-    onExposure: (event) => {
-      console.log('[Career Changer A/B Test] Exposure:', event);
+    onExposure: () => {
+      // Career changer A/B test exposure tracked
     },
-    onMetric: (event) => {
-      console.log('[Career Changer A/B Test] Metric:', event);
+    onMetric: () => {
+      // Career changer A/B test metric tracked
     }
   });
   
@@ -85,8 +86,8 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
   const isVoiceGuideEnabled = useFeature('enhancedVoiceGuide');
   
   // コンテキストデータの管理
-  const [contextData, setContextData] = useState<ContextualData | null>(null);
-  const [contextLoading, setContextLoading] = useState(false);
+  const [, setContextData] = useState<ContextualData | null>(null);
+  const [, setContextLoading] = useState(false);
   
   // 選択された提案の状態管理
   // なぜ必要か：ユーザーが選んだ提案の詳細画面を表示するため
@@ -101,9 +102,8 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
         if (location) {
           contextAPI.clearCache();
         }
-        const context = await contextAPI.getCurrentContext(location);
+        const context = await contextAPI.getCurrentContext(location, geoPosition?.lat, geoPosition?.lon);
         setContextData(context);
-        console.log('Context data loaded for location:', location, context);
       } catch (error) {
         console.error('Failed to load context data:', error);
         // エラーが発生してもコンテキストなしで提案を表示
@@ -113,18 +113,10 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     };
 
     loadContextData();
-  }, [location]); // location が変わるたびに実行
+  }, [location, geoPosition]); // location/GPS が変わるたびに実行
 
   // コンポーネントマウント時と条件変更時に提案を取得
   useEffect(() => {
-    console.log('Fetching suggestions for:', { 
-      situation, 
-      duration, 
-      ageGroup: currentAgeGroup,
-      testGroup,
-      isStudentOptimized 
-    }); // デバッグログ追加
-    
     // 学生最適化版の場合、学生向けコンテキストも渡す
     const studentContext = isStudentOptimized && currentAgeGroup === 'student' ? {
       concern: '勉強の合間のリフレッシュ',
@@ -179,15 +171,14 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
 
   if (error) {
     return (
-      <ErrorMessage 
-        message="気晴らし方法の取得に失敗しました" 
+      <ErrorMessage
+        message={error}
         onRetry={refetch}
       />
     );
   }
 
   if (!suggestions || suggestions.length === 0) {
-    console.log('No suggestions found, suggestions state:', suggestions); // デバッグログ追加
     return (
       <div className="text-center py-8">
         <p className="text-text-secondary">提案が見つかりませんでした</p>
@@ -222,15 +213,6 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
 
   return (
     <div className="w-full">
-      {/* コンテキスト情報表示 */}
-      {!contextLoading && contextData && (
-        <ContextDisplay 
-          weather={contextData.weather}
-          seasonal={contextData.seasonal}
-          className="mb-4"
-        />
-      )}
-
       <div className="mb-6">
         <h2 className="text-xl font-bold text-text-primary mb-2">
           あなたにおすすめの気晴らし方法
@@ -241,11 +223,6 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
           {situation === 'home' && '家で'}
           {situation === 'outside' && '外出先で'}
           {duration}分でできる気晴らしです
-          {contextData && (
-            <span className="ml-2 text-sm text-primary-600">
-              今の状況に合わせた提案を含んでいます
-            </span>
-          )}
         </p>
       </div>
 

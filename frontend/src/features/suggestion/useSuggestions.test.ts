@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { useSuggestions } from './useSuggestions';
 
@@ -107,28 +107,27 @@ describe('useSuggestions', () => {
 
   describe('エラーハンドリングのテスト', () => {
     it('ネットワークエラーを適切に処理する', async () => {
-      // 環境変数を一時的に変更して存在しないサーバーを指定
-      const originalUrl = import.meta.env.VITE_API_URL;
-      (import.meta.env as Record<string, string>).VITE_API_URL = 'http://localhost:9999';
-      
+      // fetchをモックしてネットワークエラーを強制的に発生させる
+      const originalFetch = global.fetch;
+      global.fetch = vi.fn().mockRejectedValue(new Error('Network error'));
+
       const { result } = renderHook(() => useSuggestions());
-      
+
       // エラーが発生するリクエスト
       act(() => {
         result.current.fetchSuggestions('workplace', 5);
       });
-      
+
       await waitFor(() => {
         expect(result.current.loading).toBe(false);
       }, { timeout: 5000 });
-      
+
       // エラーの検証 - エラー時もフォールバック提案が設定される
-      expect(result.current.error).toBeDefined();
       expect(result.current.error).toBeTruthy();
       expect(result.current.suggestions.length).toBeGreaterThan(0);
-      
-      // 環境変数を復元
-      (import.meta.env as Record<string, string>).VITE_API_URL = originalUrl;
+
+      // fetchを復元
+      global.fetch = originalFetch;
     });
 
     it.skip('エラー後に再試行できる', async () => {

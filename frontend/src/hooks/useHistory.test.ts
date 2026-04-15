@@ -299,7 +299,7 @@ describe('useHistory', () => {
         localStorage.setItem('kibarashi_history', JSON.stringify(currentData));
         
         // storageイベントを発火してデータを再読み込み
-        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new StorageEvent('storage', { key: 'kibarashi_history' }));
       });
       
       const filtered = result.current.getHistoryByDateRange(threeDaysAgo, tomorrow);
@@ -370,7 +370,7 @@ describe('useHistory', () => {
       
       act(() => {
         localStorage.setItem('kibarashi_history', JSON.stringify(newData));
-        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new StorageEvent('storage', { key: 'kibarashi_history' }));
       });
       
       // 変更が反映されることを確認

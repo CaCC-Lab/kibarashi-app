@@ -1,6 +1,7 @@
 import React from 'react';
 import { SituationId, StudentSituationId, getSituationsForAgeGroup, getStudentContextDescription, getJobHuntingContextDescription } from '../../types/situation';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
+import { lightImpact } from '../../utils/haptics';
 
 interface SituationSelectorProps {
   selected: SituationId | null;
@@ -67,9 +68,7 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
             key={option.id}
             data-testid={`situation-${option.id}`}
             onClick={() => {
-              if ('vibrate' in navigator && typeof navigator.vibrate === 'function') {
-                navigator.vibrate(30);
-              }
+              lightImpact();
               onSelect(option.id);
             }}
             className={`

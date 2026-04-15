@@ -27,15 +27,6 @@ export const useSuggestions = () => {
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
 
-    console.log('🚀 Starting fetchSuggestions with params:', {
-      situation,
-      duration,
-      ageGroup,
-      studentContext,
-      location,
-      skipCache,
-    });
-
     setSuggestions([]);
     setLoading(true);
     setError(null);
@@ -65,45 +56,29 @@ export const useSuggestions = () => {
         }>;
       };
       
-      console.log('✅ API Response received:', data);
-
       if (!abortController.signal.aborted) {
-        console.log('📝 Setting suggestions to state:', data.suggestions);
         const typed = data.suggestions.map((s) => ({
           ...s,
           category: (s.category === '認知的' ? '認知的' : '行動的') as '認知的' | '行動的',
         })) as Suggestion[];
         setSuggestions(typed);
-        console.log('✅ Suggestions set successfully. Count:', data.suggestions.length);
       }
     } catch (err) {
-      console.error('❌ Error in fetchSuggestions:', err);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const apiUrl = import.meta.env.VITE_API_URL || '(未設定→origin)';
+      console.error('❌ Error in fetchSuggestions:', errMsg, 'API_URL:', apiUrl);
 
       if (!abortController.signal.aborted) {
         if (err instanceof Error && (err.message === 'API timeout' || !navigator.onLine)) {
           setError('通信環境が不安定なため、代わりの提案を表示します。');
-          // フォールバック提案にメタデータを追加
-          const fallbackResponse = {
-            suggestions: fallbackSuggestions,
-            metadata: {
-              source: 'fallback' as const,
-              reason: err.message === 'API timeout' ? 'タイムアウト' : 'オフライン',
-              timestamp: new Date().toISOString()
-            }
-          };
-          setSuggestions(fallbackResponse.suggestions);
+          setSuggestions(fallbackSuggestions);
         } else {
-          setError(err instanceof Error ? err.message : '予期しないエラーが発生しました');
-          // エラー時もフォールバック提案にメタデータを追加
-          const fallbackResponse = {
-            suggestions: fallbackSuggestions,
-            metadata: {
-              source: 'fallback' as const,
-              reason: 'APIエラー',
-              timestamp: new Date().toISOString()
-            }
-          };
-          setSuggestions(fallbackResponse.suggestions);
+          // デバッグ用: エラー詳細とAPI URLを表示
+          const debugInfo = import.meta.env.DEV || import.meta.env.VITE_BUILD_TARGET === 'capacitor'
+            ? `\n[DEBUG] ${errMsg}\n[API] ${apiUrl}`
+            : '';
+          setError(`気晴らし方法の取得に失敗しました。${debugInfo}`);
+          setSuggestions(fallbackSuggestions);
         }
       }
     } finally {

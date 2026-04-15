@@ -2,46 +2,44 @@ import { logger } from '../../utils/logger';
 import { getFallbackSuggestions } from './fallbackData';
 import { generateAISuggestions, isAIProviderConfigured, getAIProviderInfo } from '../aiProvider';
 import { JobHuntingPromptInput } from './jobHuntingPromptTemplates';
+import { findMasterSuggestions, findCachedSuggestions, cacheAISuggestions } from '../supabase/suggestionRepository';
 
-// 気晴らし提案のデータ構造
-// なぜこの構造か：ユーザーが実践しやすいように、
-// 必要な情報を構造化して提供
+function fisherYatesShuffle<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+function isSuggestionLike(s: unknown): s is { title: string; description: string; category: string; duration: number } {
+  if (typeof s !== 'object' || s === null) return false;
+  const obj = s as Record<string, unknown>;
+  return typeof obj.title === 'string' && typeof obj.description === 'string';
+}
+
 export interface Suggestion {
-  id: string; // 一意識別子
-  title: string; // 提案のタイトル（例：「深呼吸でリラックス」）
-  description: string; // 提案の説明
-  duration: number; // 所要時間（分）
-  category: '認知的' | '行動的'; // 気晴らしのタイプ
-  steps?: string[]; // 実践手順（オプション）
-  guide?: string; // 音声ガイド用テキスト（オプション）
-  // データソース情報
-  dataSource?: 'ai' | 'fallback' | 'cache' | 'error';
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  category: '認知的' | '行動的';
+  steps?: string[];
+  guide?: string;
+  dataSource?: 'db' | 'ai' | 'fallback' | 'cache' | 'error';
   apiKeyIndex?: number;
   responseTime?: number;
 }
 
 /**
- * 気晴らし提案を生成する中核機能
- * 
- * 設計思想：
- * 1. AIを使った動的生成をメインとし、フォールバックで安定性を保証
- * 2. エラー発生時でもユーザーに価値を提供できるようにする
- * 3. 常に3つの提案を返すことで、選択肢を提供
- * 
- * なぜこの設計か：
- * - Gemini APIが利用できない場合でもサービスが停止しない
- * - APIキー設定を忘れても基本機能が動作する
- * - エラーをユーザーに見せず、シームレスな体験を提供
- * 
- * 処理の流れ：
- * 1. Gemini APIが有効か確認
- * 2a. 有効ならAIで提案を生成
- * 2b. 無効またはエラーならフォールバックデータを使用
- * 3. 必ず3つの提案を返す
- * 
- * @param situation - ユーザーの現在の場所
- * @param duration - 希望する気晴らし時間
- * @returns 3つの気晴らし提案の配列
+ * 気晴らし提案を生成（DB first + AI fallback）
+ *
+ * 優先順位:
+ * 1. suggestions_master（DBマスタ）
+ * 2. suggestion_generation_cache（AIキャッシュ、24h以内）
+ * 3. AI生成（Ollama/Gemini）→ 結果をキャッシュ保存
+ * 4. フォールバック（静的データ）
  */
 export async function generateSuggestions(
   situation: 'workplace' | 'home' | 'outside' | 'studying' | 'school' | 'commuting' | 'job_hunting',
@@ -51,68 +49,87 @@ export async function generateSuggestions(
   jobHuntingContext?: Partial<JobHuntingPromptInput>
 ): Promise<Suggestion[]> {
   const startTime = Date.now();
-  
+
   try {
-    // ステップ1: Gemini APIの有効性を確認
-    // なぜAPIキーを確認するか：APIキーが設定されていない場合、
-    // 無駄なAPI呼び出しを避け、即座にフォールバックを使用するため
+    // ステップ1: DBマスタから検索
+    const masterResults = await findMasterSuggestions(situation, duration, ageGroup);
+    if (masterResults.length >= 3) {
+      logger.info('Serving suggestions from DB master', { count: masterResults.length, situation, duration });
+      const shuffled = fisherYatesShuffle(masterResults).slice(0, 3);
+      return shuffled.map(s => ({
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        duration: s.duration,
+        category: s.category,
+        steps: s.steps,
+        guide: s.guide || undefined,
+        dataSource: 'db' as const,
+        responseTime: Date.now() - startTime,
+      }));
+    }
+
+    // ステップ2: AIキャッシュから検索（24h以内）
+    const cached = await findCachedSuggestions(situation, duration, ageGroup);
+    if (cached && Array.isArray(cached) && cached.length >= 3) {
+      const validCached = cached.filter(isSuggestionLike);
+      if (validCached.length >= 3) {
+        logger.info('Serving suggestions from AI cache', { situation, duration });
+        return validCached.slice(0, 3).map(s => ({
+          ...(s as Suggestion),
+          dataSource: 'cache' as const,
+          responseTime: Date.now() - startTime,
+        }));
+      }
+    }
+
+    // ステップ3: AI生成
     if (isAIProviderConfigured()) {
       const providerInfo = getAIProviderInfo();
-      logger.info('Generating suggestions with AI', { ...providerInfo, situation, duration, ageGroup });
+      logger.info('Generating suggestions with AI (DB had insufficient results)', {
+        ...providerInfo, situation, duration, ageGroup,
+        dbResults: masterResults.length,
+      });
 
-      // ステップ2: AIを使ってパーソナライズされた提案を生成
-      const suggestions = await generateAISuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
+      const rawSuggestions = await generateAISuggestions(situation, duration, ageGroup, studentContext, jobHuntingContext);
       const responseTime = Date.now() - startTime;
+      const validSuggestions = rawSuggestions.filter(isSuggestionLike);
 
-      // データソース情報を追加
-      const suggestionsWithMetadata: Suggestion[] = (suggestions as Suggestion[]).slice(0, 3).map(suggestion => ({
-        ...suggestion,
+      const result: Suggestion[] = (validSuggestions as Suggestion[]).slice(0, 3).map(s => ({
+        ...s,
         dataSource: 'ai' as const,
         responseTime,
       }));
 
-      return suggestionsWithMetadata;
+      // AI結果をキャッシュに保存（非同期、エラーは無視）
+      cacheAISuggestions(
+        situation, duration, ageGroup, undefined,
+        result, providerInfo.provider, providerInfo.model, responseTime
+      ).catch((e: unknown) => {
+        logger.warn('Failed to cache AI suggestions', { error: e instanceof Error ? e.message : String(e) });
+      });
+
+      return result;
     }
-    
-    // APIキーが設定されていない場合の処理
-    // これはエラーではなく、意図的な設計
-    logger.info('Using fallback suggestions (no AI provider configured)', {
-      situation,
-      duration,
-      reason: 'AI_PROVIDER not set or API key missing'
-    });
-    
-    const suggestions = getFallbackSuggestions(situation, duration, ageGroup);
-    const fallbackWithMetadata = suggestions.slice(0, 3).map(suggestion => ({
-      ...suggestion,
+
+    // ステップ4: フォールバック
+    logger.info('Using fallback suggestions', { situation, duration, reason: 'No DB/AI available' });
+    return getFallbackSuggestions(situation, duration, ageGroup).slice(0, 3).map(s => ({
+      ...s,
       dataSource: 'fallback' as const,
-      responseTime: Date.now() - startTime
+      responseTime: Date.now() - startTime,
     }));
-    
-    return fallbackWithMetadata;
-    
+
   } catch (error) {
-    // エラーハンドリング：AI生成が失敗してもサービスを継続
-    // なぜフォールバックするか：
-    // - ユーザーにエラーを見せず、常に価値を提供する
-    // - ネットワークエラーやAPIの一時的な問題でサービスが停止しない
     logger.error('Error generating suggestions, falling back to static data:', {
       error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      situation,
-      duration,
-      ageGroup,
+      situation, duration, ageGroup,
     });
-    
-    // フォールバックデータを使用
-    // ユーザーにはこの切り替えが透明に行われる
-    const errorFallback = getFallbackSuggestions(situation, duration, ageGroup).slice(0, 3);
-    const errorWithMetadata = errorFallback.map(suggestion => ({
-      ...suggestion,
+
+    return getFallbackSuggestions(situation, duration, ageGroup).slice(0, 3).map(s => ({
+      ...s,
       dataSource: 'error' as const,
-      responseTime: Date.now() - startTime
+      responseTime: Date.now() - startTime,
     }));
-    
-    return errorWithMetadata;
   }
 }
