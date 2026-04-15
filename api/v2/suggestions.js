@@ -1,5 +1,5 @@
 // V2 Suggestions endpoint - API key authentication required
-// Reuses v1 logic (Gemini client, cache, fallback)
+// Reuses v1 logic (Ollama client, cache, fallback)
 
 const { authenticate } = require('./_lib/authMiddleware.js');
 const { setRateLimitHeaders, setRetryHeaders } = require('./_lib/rateLimiter.js');
@@ -9,31 +9,28 @@ const { updateUsageLog } = require('./_lib/usageLogger.js');
 // Reuse v1 modules
 const { getFallbackSuggestions } = require('../v1/_lib/fallback.js');
 const { getCache } = require('../v1/_lib/cache.js');
-const { SimpleAPIKeyManager } = require('../v1/_lib/apiKeyManager.js');
 
-let geminiClient = null;
-let keyManager = null;
-let lastKeyRotation = 0;
+let ollamaClient = null;
+let lastClientRefresh = 0;
 const cache = getCache();
 
-function getGeminiClient() {
-  if (!geminiClient || Date.now() - lastKeyRotation > 60000) {
+function getOllamaClient() {
+  if (!ollamaClient || Date.now() - lastClientRefresh > 60000) {
     try {
-      if (!keyManager) keyManager = new SimpleAPIKeyManager();
-      let GeminiClient;
+      let OllamaClient;
       try {
-        ({ GeminiClient } = require('../v1/_lib/gemini.js'));
+        ({ OllamaClient } = require('../v1/_lib/ollama.js'));
       } catch (loadErr) {
-        console.error('[V2/SUGGESTIONS] Failed to load Gemini module:', loadErr.message);
+        console.error('[V2/SUGGESTIONS] Failed to load Ollama module:', loadErr.message);
         return null;
       }
-      geminiClient = new GeminiClient(keyManager);
-      lastKeyRotation = Date.now();
+      ollamaClient = new OllamaClient();
+      lastClientRefresh = Date.now();
     } catch (err) {
-      console.error('[V2/SUGGESTIONS] Failed to initialize Gemini client:', err.message);
+      console.error('[V2/SUGGESTIONS] Failed to initialize Ollama client:', err.message);
     }
   }
-  return geminiClient;
+  return ollamaClient;
 }
 
 module.exports = async (req, res) => {
@@ -94,16 +91,16 @@ module.exports = async (req, res) => {
       }
     }
 
-    // Gemini API (only if plan allows it)
+    // Ollama API (only if plan allows it — flag名は後方互換のため allowGemini のまま)
     if (!suggestions && auth.keyInfo.allowGemini) {
-      const client = getGeminiClient();
+      const client = getOllamaClient();
       if (client) {
         try {
           suggestions = await client.generateSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup);
-          source = 'gemini_api';
+          source = 'ollama_api';
           cache.set(cacheKey, suggestions);
-        } catch (geminiErr) {
-          console.error('[V2/SUGGESTIONS] Gemini error:', geminiErr.message);
+        } catch (ollamaErr) {
+          console.error('[V2/SUGGESTIONS] Ollama error:', ollamaErr.message);
         }
       }
     }

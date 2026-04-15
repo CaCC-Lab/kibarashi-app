@@ -1,6 +1,5 @@
-// APIキーの状態を確認するデバッグエンドポイント
+// APIキー / LLM 設定の状態を確認するデバッグエンドポイント
 const { SimpleAPIKeyManager } = require('./_lib/apiKeyManager.js');
-const { GeminiClient } = require('./_lib/gemini.js');
 
 module.exports = async (req, res) => {
   console.log('[KEY-STATUS] Called at:', new Date().toISOString());
@@ -61,6 +60,11 @@ module.exports = async (req, res) => {
         status: keyManager.getStatus(),
         totalKeys: totalKeys,
         currentIndex: keyManager.currentIndex
+      },
+      ollama: {
+        OLLAMA_BASE_URL: process.env.OLLAMA_BASE_URL ? 'SET' : 'NOT_SET',
+        OLLAMA_MODEL: process.env.OLLAMA_MODEL || '(default llama3.2)',
+        OLLAMA_TIMEOUT: process.env.OLLAMA_TIMEOUT || '(default 120000)',
       },
       environmentVariables: envVars,
       keyTests: keyTests,
