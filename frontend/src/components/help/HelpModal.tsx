@@ -103,7 +103,7 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-text-primary dark:text-text-inverse">
-                気晴らしアプリの使い方
+                気晴らしレシピの使い方
               </h2>
               <p className="text-text-secondary dark:text-gray-300 mt-1">
                 ストレス解消のための機能をご紹介します

@@ -43,7 +43,7 @@ This file provides guidance to the Gemini AI assistant when working with code in
 ## 5. Key File & Command References
 
 - **Official Documentation:**
-    - **Project Specification:** `音声ガイド付き気晴らしアプリ開発仕様書.md` (This is the source of truth for all features).
+    - **Project Specification:** `音声ガイド付き気晴らしレシピ開発仕様書.md` (This is the source of truth for all features).
     - **Claude's Notes:** `CLAUDE.md` (Contains detailed, specific implementation notes).
 - **Entry Points:**
     - **Frontend:** `/frontend/src/main.tsx`
