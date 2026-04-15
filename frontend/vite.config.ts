@@ -33,7 +33,7 @@ export default defineConfig({
       disable: process.env.NODE_ENV === 'development',
       manifest: {
         name: '気晴らしレシピ',
-        short_name: '気晴らし',
+        short_name: '気晴らしレシピ',
         description: '音声ガイド付きストレス解消アプリ',
         theme_color: '#ffffff',
         background_color: '#ffffff',
