@@ -1,8 +1,6 @@
 // Ollama Cloud APIクライアント
 // Gemini の代替として Ollama Cloud を使用した気晴らし提案生成
 
-const axios = require('axios');
-
 class OllamaClient {
   constructor() {
     this.baseUrl = (process.env.OLLAMA_BASE_URL || 'https://ollama.com/api').replace(/\/+$/, '');
@@ -26,9 +24,13 @@ class OllamaClient {
           headers['Authorization'] = `Bearer ${this.apiKey}`;
         }
 
-        const response = await axios.post(
-          `${this.baseUrl}/api/chat`,
-          {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+        const response = await fetch(`${this.baseUrl}/api/chat`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
             model: this.model,
             messages: [
               {
@@ -45,11 +47,18 @@ class OllamaClient {
               temperature: 0.8,
               num_predict: 4096,
             },
-          },
-          { timeout: this.timeout, headers }
-        );
+          }),
+          signal: controller.signal,
+        });
 
-        const text = response.data?.message?.content || '';
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const text = data?.message?.content || '';
         console.log('[OllamaClient] Generation successful, length:', text.length);
 
         return this.parseResponse(text, duration);
