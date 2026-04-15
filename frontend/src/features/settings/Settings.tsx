@@ -326,7 +326,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">アプリ情報</h3>
           <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
             <p>バージョン: 1.0.0 (Phase 2)</p>
-            <p>© 2025 5分気晴らし</p>
+            <p>© 2025 気晴らしレシピ</p>
             <p className="text-xs">
               このアプリは完全無料でご利用いただけます。<br />
               広告表示や課金要素は一切ありません。

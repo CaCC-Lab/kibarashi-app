@@ -4,7 +4,7 @@ This file provides guidance to the Gemini AI assistant when working with code in
 
 ## 1. Core Project Identity
 
-- **Project Name:** 5分気晴らし (5-Minute Diversion) - A voice-guided stress relief application.
+- **Project Name:** 気晴らしレシピ (Kibarashi Recipe) - A voice-guided stress relief application.
 - **Core Mission:** To provide a simple, accessible, and pressure-free tool for people in their 20s-40s to manage daily stress.
 - **Key Features:** AI-powered suggestions (Gemini API), voice guidance (Google TTS), and a Progressive Web App (PWA) architecture.
 - **Current Focus:** We are in **Phase 1 (MVP)**. The absolute priority is simplicity. Avoid adding any features not specified for this phase, such as user accounts, data persistence, or complex analytics.

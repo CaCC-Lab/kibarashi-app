@@ -5,7 +5,7 @@ const Footer: React.FC = () => {
     <footer className="bg-surface-secondary border-t border-primary-100 mt-auto dark:bg-gray-800 dark:border-gray-700">
       <div className="container mx-auto px-4 py-6">
         <div className="text-center text-sm text-text-secondary">
-          <p>© 2025 5分気晴らし - ストレスフリーな毎日を</p>
+          <p>© 2025 気晴らしレシピ - ストレスフリーな毎日を</p>
           <p className="mt-2">
             <a
               href="/privacy"

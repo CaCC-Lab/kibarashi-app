@@ -165,7 +165,7 @@ jobs:
         run: |
           if [ "${{ needs.health-check.result }}" == "success" ]; then
             echo "📢 デプロイ成功通知"
-            echo "✅ 5分気晴らしアプリがVercelに正常にデプロイされました"
+            echo "✅ 気晴らしレシピアプリがVercelに正常にデプロイされました"
             echo "🌐 URL: ${{ needs.deploy.outputs.url }}"
             echo "🚀 フロントエンド・バックエンド共に正常動作確認済み"
           else

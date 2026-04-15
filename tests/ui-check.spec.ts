@@ -17,9 +17,9 @@ test.describe('UI Title and Text Wrapping Issues', () => {
     const headerTitle = await page.locator('h1').first().textContent();
     console.log('Current header title:', headerTitle);
     
-    // Check if "5分気晴らし" appears anywhere in the UI
-    const titleElements = await page.locator('text="5分気晴らし"').all();
-    console.log('Number of "5分気晴らし" text occurrences:', titleElements.length);
+    // Check if "気晴らしレシピ" appears anywhere in the UI
+    const titleElements = await page.locator('text="気晴らしレシピ"').all();
+    console.log('Number of "気晴らしレシピ" text occurrences:', titleElements.length);
     
     // Take a screenshot after selection to see text wrapping
     await page.locator('text=職場').click();

@@ -32,7 +32,7 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       disable: process.env.NODE_ENV === 'development',
       manifest: {
-        name: '5分気晴らし',
+        name: '気晴らしレシピ',
         short_name: '気晴らし',
         description: '音声ガイド付きストレス解消アプリ',
         theme_color: '#ffffff',

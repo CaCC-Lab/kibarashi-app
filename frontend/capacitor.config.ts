@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.kibarashi.app',
-  appName: '5分気晴らし',
+  appName: '気晴らしレシピ',
   webDir: 'dist',
   server: {
     // WKWebViewをHTTPSローカルサーバーとして動かし、外部fetch制限を回避

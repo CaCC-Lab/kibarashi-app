@@ -44,7 +44,7 @@ DIFY_TIMEOUT=120000
 ```
 VITE_API_URL=http://localhost:8081
 VITE_API_TIMEOUT=120000
-VITE_APP_NAME=5分気晴らし
+VITE_APP_NAME=気晴らしレシピ
 VITE_ENABLE_PWA=true
 VITE_ENABLE_VOICE_GUIDE=true
 ```
@@ -110,7 +110,7 @@ OLLAMA_MODEL=gemma4:31b-cloud
 ```bash
 cd frontend
 npm install @capacitor/core @capacitor/cli
-npx cap init "5分気晴らし" "com.kibarashi.app"
+npx cap init "気晴らしレシピ" "com.kibarashi.app"
 npm install @capacitor/ios
 npx cap add ios
 npm run build

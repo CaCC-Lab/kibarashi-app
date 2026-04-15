@@ -18,7 +18,7 @@ describe('AppDataManager', () => {
       const testData: AppDataExport = {
         version: '1.0.0',
         exportedAt: new Date().toISOString(),
-        appInfo: { name: '5分気晴らし', version: '2.0.0' },
+        appInfo: { name: '気晴らしレシピ', version: '2.0.0' },
         data: {
           favorites: { favorites: [{ id: 'fav-1', suggestionId: 'test-1', title: 'インポートテスト', description: '説明', category: '認知的', duration: 5, steps: [], addedAt: new Date().toISOString() }], lastUpdated: new Date().toISOString() },
           history: { history: [], lastUpdated: new Date().toISOString() },

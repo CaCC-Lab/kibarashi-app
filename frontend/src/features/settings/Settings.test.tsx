@@ -202,7 +202,7 @@ describe('Settings', () => {
     
     expect(screen.getByText('アプリ情報')).toBeInTheDocument();
     expect(screen.getByText('バージョン: 1.0.0 (Phase 2)')).toBeInTheDocument();
-    expect(screen.getByText('© 2025 5分気晴らし')).toBeInTheDocument();
+    expect(screen.getByText('© 2025 気晴らしレシピ')).toBeInTheDocument();
     expect(screen.getByText(/このアプリは完全無料でご利用いただけます/)).toBeInTheDocument();
   });
 

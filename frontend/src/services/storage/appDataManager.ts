@@ -51,7 +51,7 @@ export interface ImportResult {
 
 export class AppDataManager {
   private static readonly CURRENT_VERSION = '1.0.0';
-  private static readonly APP_NAME = '5分気晴らし';
+  private static readonly APP_NAME = '気晴らしレシピ';
   private static readonly APP_VERSION = '2.0.0'; // Phase 2バージョン
 
   /**

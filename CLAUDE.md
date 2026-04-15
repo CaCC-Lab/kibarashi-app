@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-**5分気晴らし - 音声ガイド付きストレス解消アプリ**
+**気晴らしレシピ - 音声ガイド付きストレス解消アプリ**
 
 職場の人間関係でストレスを抱える20-40代をターゲットとした、シンプルで使いやすい気晴らし提案アプリケーション。Gemini APIによるAI提案生成とGoogle Cloud TTSによる音声ガイド機能が特徴。
 
