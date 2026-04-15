@@ -1,34 +1,26 @@
-// Gemini API統合版 - 動的な提案生成
-// Updated: 2026-04-06 - gemini-2.5-flash + robust parser
+// Ollama API統合版 - 動的な提案生成（gemini.js の代替）
 
-const { GeminiClient } = require('./_lib/gemini.js');
-const { SimpleAPIKeyManager } = require('./_lib/apiKeyManager.js');
+const { OllamaClient } = require('./_lib/ollama.js');
 const { getFallbackSuggestions } = require('./_lib/fallback.js');
 const { getCache } = require('./_lib/cache.js');
 
-let geminiClient = null;
-let keyManager = null;
-let lastKeyRotation = 0;
+let ollamaClient = null;
+let lastClientRefresh = 0;
 const cache = getCache();
 
 // 遅延初期化（コールドスタート対策）
-function getGeminiClient() {
-  if (!geminiClient || Date.now() - lastKeyRotation > 60000) { // 1分ごとに再評価
+function getOllamaClient() {
+  if (!ollamaClient || Date.now() - lastClientRefresh > 60000) {
+    // 1分ごとに再評価
     try {
-      if (!keyManager) {
-        keyManager = new SimpleAPIKeyManager();
-      }
-      
-      // クライアントを再作成（キーの状態が変わっている可能性があるため）
-      geminiClient = new GeminiClient(keyManager);
-      lastKeyRotation = Date.now();
-      console.log('[SUGGESTIONS] Gemini client initialized/refreshed');
+      ollamaClient = new OllamaClient();
+      lastClientRefresh = Date.now();
+      console.log('[SUGGESTIONS] Ollama client initialized/refreshed');
     } catch (error) {
-      console.error('[SUGGESTIONS] Failed to initialize Gemini client:', error.message);
-      // クライアント初期化失敗時はnullのまま
+      console.error('[SUGGESTIONS] Failed to initialize Ollama client:', error.message);
     }
   }
-  return geminiClient;
+  return ollamaClient;
 }
 
 module.exports = async (req, res) => {
@@ -37,8 +29,8 @@ module.exports = async (req, res) => {
   console.log('[SUGGESTIONS] Query params:', req.query);
   
   // 環境変数の確認（デバッグ用）
-  const hasGeminiKey = !!process.env.GEMINI_API_KEY_1;
-  console.log('[SUGGESTIONS] Environment check - GEMINI_API_KEY_1:', hasGeminiKey ? 'SET' : 'NOT SET');
+  const hasOllamaUrl = !!process.env.OLLAMA_BASE_URL;
+  console.log('[SUGGESTIONS] Environment check - OLLAMA_BASE_URL:', hasOllamaUrl ? 'SET' : 'NOT SET');
   
   // CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -106,11 +98,11 @@ module.exports = async (req, res) => {
     
     // キャッシュが使えない、またはキャッシュミスの場合
     if (!suggestions) {
-      // キャッシュミスの場合、Gemini APIを試行
-      const client = getGeminiClient();
+      // キャッシュミスの場合、Ollama APIを試行
+      const client = getOllamaClient();
       if (client) {
         try {
-          console.log('[SUGGESTIONS] Cache miss, attempting Gemini API generation...');
+          console.log('[SUGGESTIONS] Cache miss, attempting Ollama API generation...');
           console.log('[SUGGESTIONS] Request parameters:', {
             situation: normalizedSituation,
             duration: normalizedDuration,
@@ -122,27 +114,26 @@ module.exports = async (req, res) => {
             normalizedDuration, 
             ageGroup
           );
-          source = 'gemini_api';
-          debugInfo.gemini_success = true;
+          source = 'ollama_api';
+          debugInfo.ollama_success = true;
           
           // 成功したらキャッシュに保存
           cache.set(cacheKey, suggestions);
-          console.log('[SUGGESTIONS] Cached Gemini response for key:', cacheKey);
+          console.log('[SUGGESTIONS] Cached Ollama response for key:', cacheKey);
           
-          console.log('[SUGGESTIONS] Gemini API generation successful');
+          console.log('[SUGGESTIONS] Ollama API generation successful');
           console.log('[SUGGESTIONS] Generated suggestions count:', suggestions?.length || 0);
-        } catch (geminiError) {
-          console.error('[SUGGESTIONS] Gemini API error details:', {
-            message: geminiError.message,
-            stack: geminiError.stack?.substring(0, 500),
-            name: geminiError.name
+        } catch (ollamaError) {
+          console.error('[SUGGESTIONS] Ollama API error details:', {
+            message: ollamaError.message,
+            stack: ollamaError.stack?.substring(0, 500),
+            name: ollamaError.name
           });
-          debugInfo.gemini_error = geminiError.message;
-          // Gemini API失敗時はフォールバックへ
+          debugInfo.ollama_error = ollamaError.message;
         }
       } else {
-        console.log('[SUGGESTIONS] Gemini client not available, using fallback');
-        debugInfo.gemini_client_available = false;
+        console.log('[SUGGESTIONS] Ollama client not available, using fallback');
+        debugInfo.ollama_client_available = false;
       }
     }
     

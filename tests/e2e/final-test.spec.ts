@@ -126,8 +126,12 @@ test.describe('最終動作確認テスト', () => {
               console.log('⚠️ 両方のレスポンスがフォールバックデータです');
             }
             
-            if (firstResponse.metadata?.source === 'gemini_api' && secondResponse.metadata?.source === 'gemini_api') {
-              console.log('⚠️ GeminiAPIは呼び出されていますが、同じ結果を返しています');
+            const aiSources = ['gemini_api', 'ollama_api'];
+            if (
+              aiSources.includes(firstResponse.metadata?.source) &&
+              aiSources.includes(secondResponse.metadata?.source)
+            ) {
+              console.log('⚠️ LLM APIは呼び出されていますが、同じ結果を返しています');
             }
           }
         } catch (parseError) {

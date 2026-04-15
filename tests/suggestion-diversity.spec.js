@@ -170,7 +170,7 @@ test.describe('提案の多様性テスト', () => {
     const secondData = await secondResponse.json();
     
     // 2回目がキャッシュから返されることを期待
-    if (firstSource === 'gemini_api') {
+    if (firstSource === 'gemini_api' || firstSource === 'ollama_api') {
       expect(secondData.metadata.source).toBe('cache');
       console.log('✓ Cache is working correctly');
     }
