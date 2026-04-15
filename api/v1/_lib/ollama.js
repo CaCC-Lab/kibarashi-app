@@ -27,41 +27,43 @@ class OllamaClient {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-        const response = await fetch(`${this.baseUrl}/api/chat`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            model: this.model,
-            messages: [
-              {
-                role: 'system',
-                content: 'あなたは気晴らし提案の専門家です。回答はJSON配列のみを出力してください。説明文や前置きは不要です。',
+        try {
+          const response = await fetch(`${this.baseUrl}/api/chat`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              model: this.model,
+              messages: [
+                {
+                  role: 'system',
+                  content: 'あなたは気晴らし提案の専門家です。回答はJSON配列のみを出力してください。説明文や前置きは不要です。',
+                },
+                {
+                  role: 'user',
+                  content: prompt,
+                },
+              ],
+              stream: false,
+              options: {
+                temperature: 0.8,
+                num_predict: 4096,
               },
-              {
-                role: 'user',
-                content: prompt,
-              },
-            ],
-            stream: false,
-            options: {
-              temperature: 0.8,
-              num_predict: 4096,
-            },
-          }),
-          signal: controller.signal,
-        });
+            }),
+            signal: controller.signal,
+          });
 
-        clearTimeout(timeoutId);
+          if (!response.ok) {
+            throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+          }
 
-        if (!response.ok) {
-          throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+          const data = await response.json();
+          const text = data?.message?.content || '';
+          console.log('[OllamaClient] Generation successful, length:', text.length);
+
+          return this.parseResponse(text, duration);
+        } finally {
+          clearTimeout(timeoutId);
         }
-
-        const data = await response.json();
-        const text = data?.message?.content || '';
-        console.log('[OllamaClient] Generation successful, length:', text.length);
-
-        return this.parseResponse(text, duration);
 
       } catch (error) {
         lastError = error;
