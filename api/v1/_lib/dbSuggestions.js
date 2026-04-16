@@ -1,0 +1,89 @@
+// Supabase suggestions_master からの提案取得
+// DB first で高速レスポンスを実現（~65ms）
+
+const { createClient } = require('@supabase/supabase-js');
+
+let supabase = null;
+
+function getSupabase() {
+  if (supabase) return supabase;
+
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    console.log('[DB] Supabase not configured, skipping DB lookup');
+    return null;
+  }
+
+  supabase = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+
+  return supabase;
+}
+
+/**
+ * suggestions_master からランダムに3件取得
+ * situation配列に含まれ、durationが一致するものを抽出
+ */
+async function getDbSuggestions(situation, duration, ageGroup) {
+  const client = getSupabase();
+  if (!client) return null;
+
+  try {
+    const startTime = Date.now();
+
+    // situation配列にマッチ、duration一致、公開フラグ
+    const { data, error } = await client
+      .from('suggestions_master')
+      .select('id, title, description, duration, category, steps')
+      .contains('situation', [situation])
+      .eq('duration', duration)
+      .eq('is_public', true)
+      .order('quality_score', { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error('[DB] Query error:', error.message);
+      return null;
+    }
+
+    if (!data || data.length === 0) {
+      console.log('[DB] No suggestions found for:', { situation, duration });
+      return null;
+    }
+
+    // ランダムに3件選択
+    const shuffled = shuffleArray(data);
+    const selected = shuffled.slice(0, 3);
+
+    const elapsed = Date.now() - startTime;
+    console.log(`[DB] Found ${data.length} suggestions, selected 3 in ${elapsed}ms`);
+
+    return selected.map((s, index) => ({
+      id: `db-${s.id}`,
+      title: s.title,
+      description: s.description,
+      duration: s.duration,
+      category: s.category,
+      steps: Array.isArray(s.steps) ? s.steps : []
+    }));
+
+  } catch (err) {
+    console.error('[DB] Unexpected error:', err.message);
+    return null;
+  }
+}
+
+function shuffleArray(array) {
+  if (!array || array.length === 0) return array;
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+module.exports = { getDbSuggestions };

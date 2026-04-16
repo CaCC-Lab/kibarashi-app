@@ -1,6 +1,7 @@
 // Ollama API統合版 - 動的な提案生成（gemini.js の代替）
 
 const { OllamaClient } = require('./_lib/ollama.js');
+const { getDbSuggestions } = require('./_lib/dbSuggestions.js');
 const { getFallbackSuggestions } = require('./_lib/fallback.js');
 const { getCache } = require('./_lib/cache.js');
 
@@ -96,9 +97,27 @@ module.exports = async (req, res) => {
       debugInfo.cache_skipped = true;
     }
     
-    // キャッシュが使えない、またはキャッシュミスの場合
+    // キャッシュミス → DB first で取得を試みる
     if (!suggestions) {
-      // キャッシュミスの場合、Ollama APIを試行
+      try {
+        console.log('[SUGGESTIONS] Cache miss, trying Supabase DB...');
+        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, ageGroup);
+        if (dbResult && dbResult.length > 0) {
+          suggestions = dbResult;
+          source = 'database';
+          debugInfo.db_hit = true;
+          // DBから取得した結果もキャッシュ
+          cache.set(cacheKey, suggestions);
+          console.log('[SUGGESTIONS] DB suggestions found:', dbResult.length);
+        }
+      } catch (dbError) {
+        console.error('[SUGGESTIONS] DB lookup error:', dbError.message);
+        debugInfo.db_error = dbError.message;
+      }
+    }
+
+    // DB にもない場合、Ollama APIを試行
+    if (!suggestions) {
       const client = getOllamaClient();
       if (client) {
         try {
