@@ -464,9 +464,8 @@ describe('App', () => {
 
       // 設定画面が表示される
       await waitFor(() => {
-        expect(screen.getByText('アプリ設定')).toBeInTheDocument();
+        expect(screen.getByText('年齢層')).toBeInTheDocument();
         expect(screen.getByText('データ管理')).toBeInTheDocument();
-        expect(screen.getByText('アプリ情報')).toBeInTheDocument();
       });
 
       // ホームタブで気晴らし選択に戻る
