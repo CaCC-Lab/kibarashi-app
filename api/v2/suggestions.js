@@ -8,6 +8,7 @@ const { updateUsageLog } = require('./_lib/usageLogger.js');
 
 // Reuse v1 modules
 const { getFallbackSuggestions } = require('../v1/_lib/fallback.js');
+const { getDbSuggestions } = require('../v1/_lib/dbSuggestions.js');
 const { getCache } = require('../v1/_lib/cache.js');
 
 let ollamaClient = null;
@@ -91,7 +92,21 @@ module.exports = async (req, res) => {
       }
     }
 
-    // Ollama API (only if plan allows it — flag名は後方互換のため allowGemini のまま)
+    // DB first
+    if (!suggestions) {
+      try {
+        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup);
+        if (dbResult && dbResult.length > 0) {
+          suggestions = dbResult;
+          source = 'database';
+          cache.set(cacheKey, suggestions);
+        }
+      } catch (dbErr) {
+        console.error('[V2/SUGGESTIONS] DB lookup error:', dbErr.message);
+      }
+    }
+
+    // Ollama API (only if plan allows it and DB had no results)
     if (!suggestions && auth.keyInfo.allowGemini) {
       const client = getOllamaClient();
       if (client) {
