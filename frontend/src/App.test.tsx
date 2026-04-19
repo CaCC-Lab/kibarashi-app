@@ -422,7 +422,7 @@ describe('App', () => {
 
       // お気に入り画面が表示される（お気に入りがない場合のメッセージ）
       await waitFor(() => {
-        expect(screen.getByText('お気に入りがありません')).toBeInTheDocument();
+        expect(screen.getByText('まだ、お気に入りはありません')).toBeInTheDocument();
       });
 
       // ホームタブで気晴らし選択に戻る

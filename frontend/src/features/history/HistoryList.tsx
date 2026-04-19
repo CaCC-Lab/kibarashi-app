@@ -4,6 +4,7 @@ import HistoryItem from './HistoryItem';
 import HistoryStats from './HistoryStats';
 import HistoryFilter, { type FilterValue } from './HistoryFilter';
 import ErrorMessage from '../../components/common/ErrorMessage';
+import EmptyState from '../../components/common/EmptyState';
 import type { HistoryItem as HistoryItemType } from '../../types/history';
 
 /**
@@ -114,31 +115,24 @@ const HistoryList: React.FC = () => {
   if (history.length === 0 && filterType === 'all') {
     return (
       <div className="w-full max-w-4xl mx-auto">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+        <div
+          className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8"
+          style={{
+            background: 'var(--kb-surface)',
+            border: '1px solid var(--kb-line)',
+          }}
+        >
+          <h2
+            className="text-2xl font-bold text-gray-800 dark:text-white mb-4"
+            style={{ color: 'var(--kb-ink)' }}
+          >
             実行履歴
           </h2>
-          <div className="text-center py-12">
-            <svg
-              className="w-24 h-24 text-gray-400 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              まだ実行履歴がありません
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500">
-              気晴らしを実行すると、ここに履歴が表示されます
-            </p>
-          </div>
+          <EmptyState
+            icon="clock"
+            title="記録はまだありません"
+            sub="気晴らしを試すと、ここにそっと残ります。"
+          />
         </div>
       </div>
     );

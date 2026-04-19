@@ -158,8 +158,8 @@ describe('HistoryList', () => {
 
       render(<HistoryList />);
 
-      expect(screen.getByText('まだ実行履歴がありません')).toBeInTheDocument();
-      expect(screen.getByText('気晴らしを実行すると、ここに履歴が表示されます')).toBeInTheDocument();
+      expect(screen.getByText('記録はまだありません')).toBeInTheDocument();
+      expect(screen.getByText('気晴らしを試すと、ここにそっと残ります。')).toBeInTheDocument();
     });
   });
 
