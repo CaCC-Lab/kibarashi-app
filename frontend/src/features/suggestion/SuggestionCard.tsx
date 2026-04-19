@@ -136,12 +136,16 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
 
   const categoryStyles = {
     認知的: {
+      // Tailwind fallback classes kept for tests / dark-utility compatibility
       bg: 'bg-blue-50 dark:bg-blue-900/30',
       border: 'border-blue-200 dark:border-blue-700',
       text: 'text-blue-700 dark:text-blue-300',
+      // Aurora-tinted tone from kb tokens
+      tokenBg: 'color-mix(in oklab, var(--kb-aurora-1) 55%, transparent)',
+      tokenInk: 'var(--kb-ink)',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
         </svg>
       ),
@@ -150,9 +154,11 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
       bg: 'bg-green-50 dark:bg-green-900/30',
       border: 'border-green-200 dark:border-green-700',
       text: 'text-green-700 dark:text-green-300',
+      tokenBg: 'color-mix(in oklab, var(--kb-aurora-3) 55%, transparent)',
+      tokenInk: 'var(--kb-ink)',
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
       ),
@@ -162,10 +168,25 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   const style = categoryStyles[category] || categoryStyles['認知的']; // フォールバック
 
   return (
-    <div 
+    <div
       data-testid="suggestion-card"
       className="bg-white dark:bg-gray-700 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg hover-lift animate-slideIn h-full flex flex-col"
+      style={{
+        background: 'var(--kb-surface)',
+        border: '1px solid var(--kb-line)',
+        borderRadius: 'var(--kb-r-lg)',
+        position: 'relative',
+      }}
     >
+      {/* Soft aurora accent spot — adds the "featured" breathable feel to every card */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute', top: 0, right: 0, width: '60%', height: '55%',
+          opacity: 0.18, pointerEvents: 'none',
+          background: 'radial-gradient(circle at 85% 15%, var(--kb-aurora-1) 0%, transparent 55%)',
+        }}
+      />
       <div className="p-6 flex-1 flex flex-col">
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -189,8 +210,15 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
             </div>
             <p className="text-gray-600 dark:text-gray-100 text-sm">{description}</p>
           </div>
-          <div className={`ml-4 px-3 py-1 rounded-full ${style?.bg || ''} ${style?.border || ''} border`}>
-            <div className={`flex items-center space-x-1 ${style?.text || ''}`}>
+          <div
+            className={`ml-4 px-3 py-1 rounded-full ${style?.bg || ''} ${style?.border || ''} border`}
+            style={{
+              background: style.tokenBg,
+              border: '1px solid color-mix(in oklab, var(--kb-ink) 10%, transparent)',
+              color: style.tokenInk,
+            }}
+          >
+            <div className={`flex items-center space-x-1 ${style?.text || ''}`} style={{ color: style.tokenInk }}>
               {style?.icon}
               <span className="text-sm font-medium">{category}</span>
             </div>
@@ -367,6 +395,12 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
           onClick={handleStart}
           className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center space-x-2 hover-scale focus-ring"
           aria-label={`${title}の気晴らしを開始`}
+          style={{
+            background: 'var(--kb-accent)',
+            color: '#fff',
+            borderRadius: 'var(--kb-r-full, 999px)',
+            boxShadow: '0 8px 24px color-mix(in oklab, var(--kb-accent) 25%, transparent)',
+          }}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
