@@ -5,11 +5,13 @@ import Loading from './components/common/Loading';
 import { SituationId } from './types/situation';
 import { useAgeGroup } from './hooks/useAgeGroup';
 import { useWeather } from './hooks/useWeather';
+import { useAppearance } from './hooks/useAppearance';
 import { AgeGroupOnboardingModal } from './components/ageGroup/AgeGroupSelector';
 import { DebugModeToggle } from './components/debug/DebugModeToggle';
 import { BadgeEngine } from './services/gamification/badgeEngine';
 import { MissionGenerator } from './services/gamification/missionGenerator';
 import BadgeNotification from './features/badge/BadgeNotification';
+import type { MoodId } from './features/home/HomeMood';
 
 const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
 const DurationSelector = lazy(() => import('./features/duration/DurationSelector'));
@@ -17,21 +19,26 @@ const SuggestionList = lazy(() => import('./features/suggestion/SuggestionList')
 const FavoritesList = lazy(() => import('./features/favorites/FavoritesList'));
 const HistoryList = lazy(() => import('./features/history/HistoryList'));
 const Settings = lazy(() => import('./features/settings/Settings'));
+const HomeCTA = lazy(() => import('./features/home/HomeCTA'));
+const HomeMood = lazy(() => import('./features/home/HomeMood'));
 // const CustomSuggestionList = lazy(() => import('./features/custom/CustomSuggestionList'));
 
-type HomeStep = 'situation' | 'duration' | 'suggestions';
+type HomeStep = 'intro' | 'situation' | 'duration' | 'suggestions';
 
 function App() {
   const { isFirstTimeUser, isLoading: ageGroupLoading } = useAgeGroup();
   const { weather, position: geoPosition } = useWeather();
+  const { appearance } = useAppearance();
 
   // タブ管理
   const [activeTab, setActiveTab] = useState<TabId>('home');
 
-  // ホーム画面内のステップ管理
-  const [homeStep, setHomeStep] = useState<HomeStep>('situation');
+  // ホーム画面内のステップ管理 — 初期ステップは外観設定(steps以外はintro)に従う
+  const initialHomeStep: HomeStep = appearance.homeVariant === 'steps' ? 'situation' : 'intro';
+  const [homeStep, setHomeStep] = useState<HomeStep>(initialHomeStep);
   const [situation, setSituation] = useState<SituationId | null>(null);
   const [duration, setDuration] = useState<5 | 15 | 30 | null>(null);
+  const [mood, setMood] = useState<MoodId | null>(null);
 
   // GPS位置情報のみで場所を管理（手動選択は廃止）
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -67,14 +74,18 @@ function App() {
     }
   }, [ageGroupLoading, isFirstTimeUser]);
 
+  // ホームの最初に表示すべきステップ（appearance.homeVariant によって切替）
+  const homeStartStep: HomeStep = appearance.homeVariant === 'steps' ? 'situation' : 'intro';
+
   // タブ切替
   const handleTabChange = (tab: TabId) => {
     if (tab === 'home') {
       checkGamification();
       // ホームに戻るときは状態をリセット
-      setHomeStep('situation');
+      setHomeStep(homeStartStep);
       setSituation(null);
       setDuration(null);
+      setMood(null);
     }
     setActiveTab(tab);
   };
@@ -94,13 +105,31 @@ function App() {
     checkGamification();
     setSituation(null);
     setDuration(null);
-    setHomeStep('situation');
+    setMood(null);
+    setHomeStep(homeStartStep);
   };
 
   const handleCustomClick = () => {
     setActiveTab('home');
     // カスタム画面は一時的にhomeタブ内で表示
-    setHomeStep('situation');
+    setHomeStep(homeStartStep);
+  };
+
+  // CTAクイックスタート: situation/durationが揃っていればsuggestions、無ければsituationへ
+  const handleQuickStart = () => {
+    const effSituation = situation ?? 'home';
+    const effDuration = duration ?? 5;
+    setSituation(effSituation);
+    setDuration(effDuration);
+    setHomeStep('suggestions');
+  };
+
+  const handleMoodSelect = (m: MoodId | null) => {
+    setMood(m);
+    // 気分型は状況/時間を既定値で埋めて直接提案へ
+    setSituation(situation ?? 'home');
+    setDuration(duration ?? 5);
+    setHomeStep('suggestions');
   };
 
   // タブごとのコンテンツ描画
@@ -131,36 +160,60 @@ function App() {
     }
   };
 
-  const renderHome = () => (
-    <div className="max-w-4xl mx-auto">
-      {/* プログレスステップ */}
-      {renderBreadcrumb()}
-
-      {/* メインコンテンツ */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
-        <Suspense fallback={<Loading />}>
-          {homeStep === 'situation' && (
-            <SituationSelector selected={situation} onSelect={handleSituationSelect} />
-          )}
-          {homeStep === 'duration' && (
-            <DurationSelector selected={duration} onSelect={handleDurationSelect} />
-          )}
-          {homeStep === 'suggestions' && situation && duration && (
-            <SuggestionList situation={situation} duration={duration} debugMode={debugMode} geoPosition={geoPosition} />
-          )}
-        </Suspense>
-      </div>
-
-      {/* 戻るボタン */}
-      {homeStep === 'suggestions' && (
-        <div className="mt-4 text-center">
-          <button onClick={handleReset} className="text-gray-500 hover:text-gray-700 text-sm underline">
-            最初からやり直す
-          </button>
+  const renderHome = () => {
+    // intro画面（CTA/気分型）では breadcrumb と白カードを出さず、バリアント自身の演出に委ねる
+    if (homeStep === 'intro') {
+      return (
+        <div className="max-w-4xl mx-auto">
+          <Suspense fallback={<Loading />}>
+            {appearance.homeVariant === 'cta' && (
+              <HomeCTA
+                situation={situation}
+                duration={duration}
+                onSituationChange={setSituation}
+                onDurationChange={setDuration}
+                onQuickStart={handleQuickStart}
+              />
+            )}
+            {appearance.homeVariant === 'mood' && (
+              <HomeMood selected={mood} onSelect={handleMoodSelect} />
+            )}
+          </Suspense>
         </div>
-      )}
-    </div>
-  );
+      );
+    }
+
+    return (
+      <div className="max-w-4xl mx-auto">
+        {/* プログレスステップ */}
+        {renderBreadcrumb()}
+
+        {/* メインコンテンツ */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 md:p-6">
+          <Suspense fallback={<Loading />}>
+            {homeStep === 'situation' && (
+              <SituationSelector selected={situation} onSelect={handleSituationSelect} />
+            )}
+            {homeStep === 'duration' && (
+              <DurationSelector selected={duration} onSelect={handleDurationSelect} />
+            )}
+            {homeStep === 'suggestions' && situation && duration && (
+              <SuggestionList situation={situation} duration={duration} debugMode={debugMode} geoPosition={geoPosition} />
+            )}
+          </Suspense>
+        </div>
+
+        {/* 戻るボタン */}
+        {homeStep === 'suggestions' && (
+          <div className="mt-4 text-center">
+            <button onClick={handleReset} className="text-gray-500 hover:text-gray-700 text-sm underline">
+              最初からやり直す
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const renderBreadcrumb = () => (
     <div className="flex items-center justify-center space-x-3 mb-4">
