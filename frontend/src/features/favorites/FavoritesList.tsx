@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useFavorites } from '../../hooks/useFavorites';
 import SuggestionCard from '../suggestion/SuggestionCard';
 import SuggestionDetail from '../suggestion/SuggestionDetail';
+import EmptyState from '../../components/common/EmptyState';
 import { Suggestion } from '../../services/api/types';
 
 /**
@@ -67,31 +68,28 @@ export default function FavoritesList() {
 
   if (favorites.length === 0) {
     return (
-      <div className="text-center py-12">
-        <svg
-          className="mx-auto w-16 h-16 text-gray-300 mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-          />
-        </svg>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">お気に入りがありません</h3>
-        <p className="text-gray-500 mb-6">
-          気に入った気晴らし方法をハートアイコンで保存しましょう
-        </p>
-        <button
-          onClick={() => setShowImportDialog(true)}
-          className="px-4 py-2 text-sm font-medium text-primary-600 bg-primary-50 rounded-lg hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:bg-primary-900/20 dark:hover:bg-primary-900/30"
-        >
-          保存済みのお気に入りをインポート
-        </button>
-      </div>
+      <EmptyState
+        icon="heart"
+        title="まだ、お気に入りはありません"
+        sub="気晴らしが合ったら、ハートで残しておけます。"
+        cta={
+          <button
+            onClick={() => setShowImportDialog(true)}
+            style={{
+              padding: '10px 18px',
+              borderRadius: 999,
+              background: 'var(--kb-accent-soft)',
+              color: 'var(--kb-accent-ink)',
+              fontSize: 'var(--kb-fs-sm)',
+              fontWeight: 600,
+              border: '1px solid var(--kb-line)',
+              cursor: 'pointer',
+            }}
+          >
+            保存済みのお気に入りをインポート
+          </button>
+        }
+      />
     );
   }
 
