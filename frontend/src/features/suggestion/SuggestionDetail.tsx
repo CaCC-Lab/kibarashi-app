@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import AudioPlayer, { AudioPlayerHandle } from '../../components/audio/AudioPlayer';
+import AuroraBackground from '../../components/common/AuroraBackground';
 import { ttsService } from '../../services/api/tts';
 import { browserTTS } from '../../services/browserTTS';
 import { useHistory } from '../../hooks/useHistory';
@@ -213,70 +214,116 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
     }
   };
 
+  const totalSec = duration * 60;
+  const progress = 1 - timeRemaining / totalSec;
+  const ringRadius = 88;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <button
-        onClick={onBack}
-        className="mb-6 flex items-center space-x-2 text-gray-600 hover:text-gray-800"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        <span>戻る</span>
-      </button>
+    <div className="w-full max-w-2xl mx-auto relative">
+      {/* Aurora background — only visible while running or just completed */}
+      {(isRunning || isComplete) && (
+        <AuroraBackground
+          fixed
+          paused={!isRunning && !isComplete}
+          veil={0.55}
+        />
+      )}
 
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-3">{title}</h2>
-        <p className="text-gray-600 mb-8">{description}</p>
+      <div className="relative z-10">
+        <button
+          onClick={onBack}
+          className="mb-6 flex items-center space-x-2 text-gray-600 hover:text-gray-800"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          <span>戻る</span>
+        </button>
 
-        {/* Timer Display */}
-        <div className="text-center mb-8">
-          <div className="relative w-48 h-48 mx-auto mb-4">
-            <svg className="transform -rotate-90 w-48 h-48">
-              <circle
-                cx="96"
-                cy="96"
-                r="88"
-                stroke="#e5e7eb"
-                strokeWidth="8"
-                fill="none"
-              />
-              <circle
-                cx="96"
-                cy="96"
-                r="88"
-                stroke={isComplete ? '#10b981' : timeRemaining < 60 ? '#ef4444' : '#3b3b6b'}
-                strokeWidth="8"
-                fill="none"
-                strokeDasharray="553"
-                strokeDashoffset={553 - (553 * (1 - timeRemaining / (duration * 60)))}
-                className="transition-all duration-1000"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className={
-                isComplete
-                  ? 'text-5xl font-bold text-green-600'
-                  : timeRemaining < 60
-                    ? 'text-5xl font-bold text-red-600'
-                    : 'text-5xl font-bold text-gray-800'
-              }>
-                {formatTime(timeRemaining)}
+        <div
+          className="bg-white rounded-xl shadow-lg p-8"
+          style={{
+            background: isRunning || isComplete
+              ? 'color-mix(in oklab, var(--kb-surface) 82%, transparent)'
+              : 'var(--kb-surface, #fff)',
+            backdropFilter: isRunning || isComplete ? 'blur(18px) saturate(140%)' : undefined,
+            WebkitBackdropFilter: isRunning || isComplete ? 'blur(18px) saturate(140%)' : undefined,
+            border: '1px solid var(--kb-line, transparent)',
+          }}
+        >
+          <h2 className="text-2xl font-bold text-gray-800 mb-3" style={{ color: 'var(--kb-ink)' }}>{title}</h2>
+          <p className="text-gray-600 mb-8" style={{ color: 'var(--kb-ink-2)' }}>{description}</p>
+
+          {/* Breathing orb + progress ring */}
+          <div className="text-center mb-8">
+            <div className="relative mx-auto mb-4" style={{ width: 240, height: 240 }}>
+              {/* Progress ring */}
+              <svg
+                width="240"
+                height="240"
+                viewBox="0 0 240 240"
+                style={{ position: 'absolute', inset: 0, transform: 'rotate(-90deg)' }}
+              >
+                <circle
+                  cx="120" cy="120" r={ringRadius}
+                  stroke="color-mix(in oklab, var(--kb-ink) 10%, transparent)"
+                  strokeWidth="2" fill="none"
+                />
+                <circle
+                  cx="120" cy="120" r={ringRadius}
+                  stroke={timeRemaining < 60 && !isComplete ? '#ef4444' : 'var(--kb-accent)'}
+                  strokeWidth="3" fill="none" strokeLinecap="round"
+                  strokeDasharray={ringCircumference}
+                  strokeDashoffset={ringCircumference * (1 - progress)}
+                  style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
+                />
+              </svg>
+
+              {/* Breathing inner circle */}
+              <div
+                style={{
+                  position: 'absolute', inset: 28, borderRadius: '50%',
+                  background: `radial-gradient(circle at 30% 30%, color-mix(in oklab, var(--kb-accent) 40%, transparent), color-mix(in oklab, var(--kb-accent) 18%, transparent))`,
+                  animation: isRunning ? 'kb-breathe 6s ease-in-out infinite' : 'none',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexDirection: 'column',
+                }}
+              >
+                <div
+                  className={
+                    isComplete
+                      ? 'text-5xl font-bold text-green-600'
+                      : timeRemaining < 60
+                        ? 'text-5xl font-bold text-red-600'
+                        : 'text-5xl font-bold text-gray-800'
+                  }
+                  style={{
+                    color: isComplete ? undefined : timeRemaining < 60 ? undefined : 'var(--kb-ink)',
+                    fontVariantNumeric: 'tabular-nums',
+                    letterSpacing: 2,
+                    fontWeight: 300,
+                  }}
+                >
+                  {formatTime(timeRemaining)}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--kb-ink-2)', marginTop: 4, letterSpacing: 1 }}>
+                  {isComplete ? '完了' : '残り時間'}
+                </div>
+                {!isComplete && timeRemaining < 60 && (
+                  <p className="text-sm text-red-600 mt-1 animate-pulse">
+                    まもなく終了
+                  </p>
+                )}
               </div>
-              {!isComplete && timeRemaining < 60 && (
-                <p className="text-sm text-red-600 mt-1 animate-pulse">
-                  まもなく終了
-                </p>
-              )}
             </div>
+            {isComplete && (
+              <p className="text-green-600 font-medium animate-fadeIn">
+                お疲れさまでした！気晴らしが完了しました。
+              </p>
+            )}
           </div>
-          {isComplete && (
-            <p className="text-green-600 font-medium animate-fadeIn">
-              お疲れさまでした！気晴らしが完了しました。
-            </p>
-          )}
-        </div>
 
         {/* Control Buttons */}
         <div className="flex justify-center gap-3 mb-8">
@@ -418,15 +465,17 @@ const SuggestionDetail: React.FC<SuggestionDetailProps> = ({
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mt-8">
-          <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
-            <div 
-              className="bg-primary-500 h-full transition-all duration-1000 ease-linear"
-              style={{ 
-                width: `${((duration * 60 - timeRemaining) / (duration * 60)) * 100}%` 
-              }}
-            />
+          {/* Progress Bar */}
+          <div className="mt-8">
+            <div className="bg-gray-200 rounded-full h-3 overflow-hidden" style={{ background: 'color-mix(in oklab, var(--kb-ink) 8%, transparent)' }}>
+              <div
+                className="bg-primary-500 h-full transition-all duration-1000 ease-linear"
+                style={{
+                  width: `${((duration * 60 - timeRemaining) / (duration * 60)) * 100}%`,
+                  background: 'var(--kb-accent)',
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
