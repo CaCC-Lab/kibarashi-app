@@ -3,9 +3,13 @@ import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SplashScreen } from '@capacitor/splash-screen';
 import App from './App';
+import './styles/tokens.css';
 import './styles/globals.css';
 import './styles/animations.css';
 import { reportWebVitals } from './utils/reportWebVitals';
+import { hydrateAppearanceFromStorage } from './hooks/useAppearance';
+
+hydrateAppearanceFromStorage();
 
 // Capacitor ネイティブ初期化
 if (Capacitor.isNativePlatform()) {
