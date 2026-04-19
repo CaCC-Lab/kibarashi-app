@@ -1,0 +1,202 @@
+/* ──────────────────────────────────────────────
+   Kibarashi — Design System Tokens
+   Philosophy: 静けさ・余白・呼吸
+   Source: Claude Design bundle 2026-04
+   ────────────────────────────────────────────── */
+
+:root {
+  /* MOOD: mist (default) — cool, quiet blue-gray */
+  --mist-bg: #F3F5F7;
+  --mist-surface: #FFFFFF;
+  --mist-surface-soft: #F8FAFB;
+  --mist-ink: #1F2530;
+  --mist-ink-2: #4A5361;
+  --mist-ink-3: #8590A0;
+  --mist-line: #E4E9EE;
+  --mist-accent: #5B7A99;
+  --mist-accent-soft: #D6E0EA;
+  --mist-accent-ink: #2E4258;
+  --mist-aurora-1: #AEC8DF;
+  --mist-aurora-2: #D4C7DE;
+  --mist-aurora-3: #C7DCCE;
+
+  /* MOOD: paper — warm ivory */
+  --paper-bg: #F6F3EC;
+  --paper-surface: #FDFBF5;
+  --paper-surface-soft: #F1EDE2;
+  --paper-ink: #2B2620;
+  --paper-ink-2: #5A5348;
+  --paper-ink-3: #97907F;
+  --paper-line: #E5DFD0;
+  --paper-accent: #8A6A4A;
+  --paper-accent-soft: #E6D9C5;
+  --paper-accent-ink: #4A3828;
+  --paper-aurora-1: #E6D2B5;
+  --paper-aurora-2: #D6C4B0;
+  --paper-aurora-3: #C9B896;
+
+  /* MOOD: sage — muted green */
+  --sage-bg: #EEF1EC;
+  --sage-surface: #F7F9F4;
+  --sage-surface-soft: #E8EDE3;
+  --sage-ink: #222A22;
+  --sage-ink-2: #4E5748;
+  --sage-ink-3: #8A9285;
+  --sage-line: #DCE3D6;
+  --sage-accent: #6B8566;
+  --sage-accent-soft: #D4DDCD;
+  --sage-accent-ink: #2F4030;
+  --sage-aurora-1: #B9CBB2;
+  --sage-aurora-2: #C8D9B9;
+  --sage-aurora-3: #DCD3B6;
+
+  /* Dark base */
+  --dark-bg: #101317;
+  --dark-surface: #181C22;
+  --dark-surface-soft: #20262E;
+  --dark-ink: #E6E9EE;
+  --dark-ink-2: #A8AFBA;
+  --dark-ink-3: #6E7683;
+  --dark-line: #282E38;
+  --dark-accent: #8FA9C4;
+  --dark-accent-soft: #2D3A4A;
+  --dark-accent-ink: #C8D6E4;
+  --dark-aurora-1: #2E4259;
+  --dark-aurora-2: #3A2E4A;
+  --dark-aurora-3: #2A3E36;
+
+  /* Semantic aliases (default = mist light) */
+  --kb-bg: var(--mist-bg);
+  --kb-surface: var(--mist-surface);
+  --kb-surface-soft: var(--mist-surface-soft);
+  --kb-ink: var(--mist-ink);
+  --kb-ink-2: var(--mist-ink-2);
+  --kb-ink-3: var(--mist-ink-3);
+  --kb-line: var(--mist-line);
+  --kb-accent: var(--mist-accent);
+  --kb-accent-soft: var(--mist-accent-soft);
+  --kb-accent-ink: var(--mist-accent-ink);
+  --kb-aurora-1: var(--mist-aurora-1);
+  --kb-aurora-2: var(--mist-aurora-2);
+  --kb-aurora-3: var(--mist-aurora-3);
+
+  /* Type scale — mobile-first, WCAG AA */
+  --kb-fs-xxl: 32px;
+  --kb-fs-xl:  24px;
+  --kb-fs-lg:  20px;
+  --kb-fs-md:  17px;
+  --kb-fs-sm:  15px;
+  --kb-fs-xs:  13px;
+  --kb-lh-tight: 1.28;
+  --kb-lh-body:  1.65;
+
+  /* Spacing — 4px base */
+  --kb-s-1: 4px;
+  --kb-s-2: 8px;
+  --kb-s-3: 12px;
+  --kb-s-4: 16px;
+  --kb-s-5: 20px;
+  --kb-s-6: 24px;
+  --kb-s-7: 32px;
+  --kb-s-8: 40px;
+  --kb-s-9: 56px;
+  --kb-s-10: 72px;
+
+  /* Radius */
+  --kb-r-sm: 10px;
+  --kb-r-md: 16px;
+  --kb-r-lg: 20px;
+  --kb-r-xl: 28px;
+  --kb-r-full: 9999px;
+
+  /* Transitions */
+  --kb-ease-quiet: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --kb-dur-fast: 180ms;
+  --kb-dur-med: 320ms;
+  --kb-dur-slow: 560ms;
+
+  /* Fonts */
+  --kb-font-sans: "Noto Sans JP", -apple-system, system-ui, sans-serif;
+  --kb-font-serif: "Noto Serif JP", "Hiragino Mincho ProN", serif;
+  --kb-font-ui: var(--kb-font-sans);
+}
+
+/* Mood overrides */
+[data-mood="paper"] {
+  --kb-bg: var(--paper-bg);
+  --kb-surface: var(--paper-surface);
+  --kb-surface-soft: var(--paper-surface-soft);
+  --kb-ink: var(--paper-ink);
+  --kb-ink-2: var(--paper-ink-2);
+  --kb-ink-3: var(--paper-ink-3);
+  --kb-line: var(--paper-line);
+  --kb-accent: var(--paper-accent);
+  --kb-accent-soft: var(--paper-accent-soft);
+  --kb-accent-ink: var(--paper-accent-ink);
+  --kb-aurora-1: var(--paper-aurora-1);
+  --kb-aurora-2: var(--paper-aurora-2);
+  --kb-aurora-3: var(--paper-aurora-3);
+}
+[data-mood="sage"] {
+  --kb-bg: var(--sage-bg);
+  --kb-surface: var(--sage-surface);
+  --kb-surface-soft: var(--sage-surface-soft);
+  --kb-ink: var(--sage-ink);
+  --kb-ink-2: var(--sage-ink-2);
+  --kb-ink-3: var(--sage-ink-3);
+  --kb-line: var(--sage-line);
+  --kb-accent: var(--sage-accent);
+  --kb-accent-soft: var(--sage-accent-soft);
+  --kb-accent-ink: var(--sage-accent-ink);
+  --kb-aurora-1: var(--sage-aurora-1);
+  --kb-aurora-2: var(--sage-aurora-2);
+  --kb-aurora-3: var(--sage-aurora-3);
+}
+[data-dark="true"] {
+  --kb-bg: var(--dark-bg);
+  --kb-surface: var(--dark-surface);
+  --kb-surface-soft: var(--dark-surface-soft);
+  --kb-ink: var(--dark-ink);
+  --kb-ink-2: var(--dark-ink-2);
+  --kb-ink-3: var(--dark-ink-3);
+  --kb-line: var(--dark-line);
+  --kb-accent: var(--dark-accent);
+  --kb-accent-soft: var(--dark-accent-soft);
+  --kb-accent-ink: var(--dark-accent-ink);
+  --kb-aurora-1: var(--dark-aurora-1);
+  --kb-aurora-2: var(--dark-aurora-2);
+  --kb-aurora-3: var(--dark-aurora-3);
+}
+
+[data-serif="true"] {
+  --kb-font-ui: var(--kb-font-serif);
+}
+
+[data-fs="lg"] {
+  --kb-fs-xxl: 36px;
+  --kb-fs-xl:  27px;
+  --kb-fs-lg:  22px;
+  --kb-fs-md:  19px;
+  --kb-fs-sm:  16px;
+  --kb-fs-xs:  14px;
+}
+
+/* Animations — shared with Phase 2+ */
+@keyframes kb-aurora-drift {
+  0%   { transform: translate(-10%, -8%) scale(1.1); }
+  33%  { transform: translate(8%, 4%) scale(1.2); }
+  66%  { transform: translate(-4%, 10%) scale(1.15); }
+  100% { transform: translate(-10%, -8%) scale(1.1); }
+}
+@keyframes kb-breathe {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50%      { transform: scale(1.08); opacity: 1; }
+}
+@keyframes kb-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes kb-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}

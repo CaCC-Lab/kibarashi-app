@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { useFavorites } from '../../hooks/useFavorites';
 import { useHistory } from '../../hooks/useHistory';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
+import { useAppearance } from '../../hooks/useAppearance';
 import { AppDataManager } from '../../services/storage/appDataManager';
 import { AgeGroupSelector } from '../../components/ageGroup/AgeGroupSelector';
 import { AgeGroup } from '../../types/ageGroup';
 import { TTSSettings } from './components/TTSSettings';
 import { ClearDataDialog } from './components/ClearDataDialog';
+import { AppearanceSettings } from './components/AppearanceSettings';
 
 interface SettingsProps {
   onBack: () => void;
@@ -16,6 +18,7 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const { clearFavorites } = useFavorites();
   const { clearHistory } = useHistory();
   const { updateAgeGroup } = useAgeGroup();
+  const { appearance, update: updateAppearance } = useAppearance();
   const [defaultTTS, setDefaultTTS] = useState<'gemini' | 'browser'>(
     localStorage.getItem('defaultTTS') as 'gemini' | 'browser' || 'gemini'
   );
@@ -118,6 +121,11 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             年齢層に応じた提案を受け取れます
           </p>
+        </section>
+
+        {/* 外観 */}
+        <section>
+          <AppearanceSettings appearance={appearance} onChange={updateAppearance} />
         </section>
 
         {/* 音声ガイド */}
