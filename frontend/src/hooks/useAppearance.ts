@@ -26,7 +26,9 @@ function readInitial(): Appearance {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return { ...DEFAULTS, ...JSON.parse(raw) };
-  } catch {}
+  } catch {
+    // storage unavailable or JSON malformed — fall through to defaults
+  }
 
   // Fall back to legacy dark-mode flag + system preference
   let dark = DEFAULTS.dark;
@@ -35,7 +37,9 @@ function readInitial(): Appearance {
     if (legacy === 'dark') dark = true;
     else if (legacy === 'light') dark = false;
     else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) dark = true;
-  } catch {}
+  } catch {
+    // storage/matchMedia unavailable — keep default
+  }
 
   return { ...DEFAULTS, dark };
 }
@@ -59,7 +63,9 @@ export function useAppearance() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(appearance));
       localStorage.setItem('theme', appearance.dark ? 'dark' : 'light');
-    } catch {}
+    } catch {
+      // storage unavailable — appearance persists for session only
+    }
   }, [appearance]);
 
   const update = <K extends keyof Appearance>(key: K, value: Appearance[K]) => {
