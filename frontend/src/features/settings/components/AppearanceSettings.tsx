@@ -7,6 +7,7 @@ interface AppearanceSettingsProps {
 }
 
 const MOODS: Array<{ id: Mood; label: string; swatch: string }> = [
+  { id: 'blossom', label: 'blossom', swatch: '#C96F82' },
   { id: 'mist', label: 'mist', swatch: '#5B7A99' },
   { id: 'paper', label: 'paper', swatch: '#8A6A4A' },
   { id: 'sage', label: 'sage', swatch: '#6B8566' },
