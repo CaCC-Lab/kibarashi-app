@@ -22,7 +22,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   weatherDescription,
 }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="h-dvh flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden">
       <a href="#main-content" className="skip-link">メインコンテンツにスキップ</a>
 
       <Header
@@ -32,7 +32,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         weatherDescription={weatherDescription}
       />
 
-      <main id="main-content" className="flex-1 px-4 py-4 pb-20">
+      <main id="main-content" className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 py-4 pb-20 kb-no-scrollbar">
         {children}
       </main>
 

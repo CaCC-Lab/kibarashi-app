@@ -33,7 +33,10 @@ const HomeCTA: React.FC<HomeCTAProps> = ({
   onQuickStart,
 }) => {
   return (
-    <div className="relative w-full max-w-xl mx-auto" style={{ color: 'var(--kb-ink)' }}>
+    <div
+      className="relative w-full max-w-xl mx-auto"
+      style={{ color: 'var(--kb-ink)', overflow: 'hidden' }}
+    >
       {/* soft aurora blobs */}
       <div
         aria-hidden="true"
