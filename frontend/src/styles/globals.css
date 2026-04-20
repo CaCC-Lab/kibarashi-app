@@ -149,12 +149,32 @@
   .bg-primary {
     background-color: var(--color-primary-500);
   }
-  
+
   .text-primary {
     color: var(--color-primary-500);
   }
-  
+
   .border-primary {
     border-color: var(--color-primary-500);
   }
+
+  /* Hidden scrollbar — keeps scroll behavior but removes the bar visually.
+     Used on the main content pane so the app feels native instead of web-scrolly. */
+  .kb-no-scrollbar {
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/old Edge */
+  }
+  .kb-no-scrollbar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;                  /* Chromium / Safari */
+  }
+}
+
+/* Lock the document: only the main pane should ever scroll. */
+html, body {
+  overscroll-behavior: none;
+}
+body {
+  overflow: hidden;
 }

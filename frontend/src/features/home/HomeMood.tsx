@@ -20,7 +20,10 @@ const MOODS: Array<{ id: MoodId; label: string; hint: string }> = [
  */
 const HomeMood: React.FC<HomeMoodProps> = ({ selected, onSelect }) => {
   return (
-    <div className="relative w-full max-w-xl mx-auto" style={{ color: 'var(--kb-ink)' }}>
+    <div
+      className="relative w-full max-w-xl mx-auto"
+      style={{ color: 'var(--kb-ink)', overflow: 'hidden' }}
+    >
       <div
         aria-hidden="true"
         style={{
