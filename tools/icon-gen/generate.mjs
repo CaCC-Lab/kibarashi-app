@@ -17,10 +17,14 @@ const repoRoot = join(__dirname, '..', '..');
  *   center: sunny yellow with a warm orange rim — restores the daisy's
  *           "little sun" feeling
  */
-const masterSvg = ({ size = 1024 } = {}) => {
+const masterSvg = ({ size = 1024, maskable = false } = {}) => {
   const S = size;
   const cx = S / 2;
   const cy = S / 2;
+  // PWA maskable: keep foreground inside the central 80% safe zone (10% inset).
+  const fgTransform = maskable
+    ? ` transform="translate(${cx.toFixed(2)} ${cy.toFixed(2)}) scale(0.8) translate(${(-cx).toFixed(2)} ${(-cy).toFixed(2)})"`
+    : '';
   // Overall daisy radius (from center to petal tip)
   const R = S * 0.42;
   // Petal size & placement
@@ -83,6 +87,7 @@ const masterSvg = ({ size = 1024 } = {}) => {
   <rect width="${S}" height="${S}" fill="url(#aurora)"/>
 
   <!-- Decorative inner ring, echoing the "breathing" motif -->
+  <g${fgTransform}>
   <circle cx="${cx}" cy="${cy}" r="${(R + S * 0.02).toFixed(2)}" fill="none"
     stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="${(S * 0.005).toFixed(2)}"/>
 
@@ -90,6 +95,7 @@ const masterSvg = ({ size = 1024 } = {}) => {
   <g filter="url(#flowerShadow)">
     ${petals.join('\n    ')}
     <circle cx="${cx}" cy="${cy}" r="${centerR.toFixed(2)}" fill="url(#center)"/>
+  </g>
   </g>
 </svg>`;
 };
@@ -111,7 +117,10 @@ console.log(`✓ wrote frontend/public/pwa-64x64.svg`);
 for (const { path, size, label } of outputs) {
   const outPath = join(repoRoot, path);
   mkdirSync(dirname(outPath), { recursive: true });
-  const svg = masterSvg({ size });
+  const svg = masterSvg({
+    size,
+    maskable: path.includes('maskable-icon'),
+  });
   const buf = Buffer.from(svg);
   // iOS App Store rejects icons with an alpha channel, so flatten the main
   // Xcode asset (the source SVG already paints a full-bleed opaque bg).

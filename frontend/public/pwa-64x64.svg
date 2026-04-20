@@ -41,6 +41,7 @@
   <rect width="64" height="64" fill="url(#aurora)"/>
 
   <!-- Decorative inner ring, echoing the "breathing" motif -->
+  <g>
   <circle cx="32" cy="32" r="28.16" fill="none"
     stroke="#FFFFFF" stroke-opacity="0.12" stroke-width="0.32"/>
 
@@ -53,5 +54,6 @@
     <ellipse cx="19.81" cy="39.04" rx="7.36" ry="13.12" transform="rotate(240 19.81 39.04)" fill="url(#petal)"/>
     <ellipse cx="19.81" cy="24.96" rx="7.36" ry="13.12" transform="rotate(300 19.81 24.96)" fill="url(#petal)"/>
     <circle cx="32" cy="32" r="7.04" fill="url(#center)"/>
+  </g>
   </g>
 </svg>
