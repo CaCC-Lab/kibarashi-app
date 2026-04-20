@@ -87,8 +87,11 @@ const outputs = [
   { path: 'frontend/public/maskable-icon-512x512.png', size: 512, label: 'maskable 512' },
 ];
 
-// Also emit the master SVG so designers can iterate
+// Also emit master SVGs so designers can iterate
 const svg1024 = masterSvg({ size: 1024 });
+const svgMasterPath = join(__dirname, 'icon-master.svg');
+writeFileSync(svgMasterPath, svg1024, 'utf8');
+console.log(`✓ wrote ${svgMasterPath}`);
 const svgOutPath = join(repoRoot, 'frontend/public/pwa-64x64.svg');
 writeFileSync(svgOutPath, masterSvg({ size: 64 }), 'utf8');
 console.log(`✓ wrote ${svgOutPath}`);
@@ -98,11 +101,11 @@ for (const { path, size, label } of outputs) {
   mkdirSync(dirname(outPath), { recursive: true });
   const svg = masterSvg({ size });
   const buf = Buffer.from(svg);
-  // iOS App Store rejects icons with an alpha channel, so flatten the main
-  // Xcode asset (the source SVG already paints a full-bleed opaque bg).
+  // iOS App Store rejects icons with an alpha channel; composite semi-transparent
+  // pixels from gradients onto a solid background (matches outer bg stop #2E4258).
   const isIOS = path.includes('Assets.xcassets');
   let pipeline = sharp(buf).resize(size, size);
-  if (isIOS) pipeline = pipeline.removeAlpha();
+  if (isIOS) pipeline = pipeline.flatten({ background: '#2E4258' });
   await pipeline
     .png({ compressionLevel: 9, adaptiveFiltering: true })
     .toFile(outPath);
@@ -111,7 +114,7 @@ for (const { path, size, label } of outputs) {
 
 // Extra: save a master reference at 1024 in tools/ for sanity
 const refPath = join(__dirname, 'icon-master-1024.png');
-await sharp(Buffer.from(masterSvg({ size: 1024 })))
+await sharp(Buffer.from(svg1024))
   .resize(1024, 1024)
   .png()
   .toFile(refPath);

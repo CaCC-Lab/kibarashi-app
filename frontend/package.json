@@ -10,7 +10,7 @@
     "cap:sync": "npx cap sync ios",
     "cap:open": "npx cap open ios",
     "icons:generate": "node ../tools/icon-gen/generate.mjs",
-    "ios": "npm run icons:generate && npm run build:ios && npx cap sync ios && npm run icons:generate && bash ../scripts/fix-ios-display-name.sh && npx cap open ios",
+    "ios": "npm run icons:generate && npm run build:ios && npx cap sync ios && bash ../scripts/fix-ios-display-name.sh && npx cap open ios",
     "preview": "vite preview",
     "test": "vitest --passWithNoTests",
     "test:watch": "vitest --watch",
