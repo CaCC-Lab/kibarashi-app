@@ -1,11 +1,50 @@
-<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#06b6d4" />
-      <stop offset="100%" style="stop-color:#0284c7" />
-    </linearGradient>
+    <!-- Mist aurora background gradient -->
+    <radialGradient id="bg" cx="30%" cy="25%" r="90%">
+      <stop offset="0%" stop-color="#AEC8DF" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#5B7A99" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#2E4258" stop-opacity="1"/>
+    </radialGradient>
+    <!-- Soft aurora blob overlay -->
+    <radialGradient id="aurora1" cx="25%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#D4C7DE" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#D4C7DE" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="aurora2" cx="80%" cy="75%" r="55%">
+      <stop offset="0%" stop-color="#C7DCCE" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#C7DCCE" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Inner orb gradient (soft, breathing) -->
+    <radialGradient id="orb" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="70%" stop-color="#F3F5F7" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#D6E0EA" stop-opacity="0.75"/>
+    </radialGradient>
+    <!-- Orb rim highlight -->
+    <filter id="softshadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.28"/>
+    </filter>
   </defs>
-  <rect width="64" height="64" fill="url(#bg)" />
-  <circle cx="32" cy="32" r="26" fill="rgba(255,255,255,0.9)" />
-  <text x="32" y="32" font-family="sans-serif" font-size="20" font-weight="bold" fill="#0284c7" text-anchor="middle" dominant-baseline="middle">5分</text>
+
+  <!-- Full-bleed background (required for iOS opaque icon) -->
+  <rect width="64" height="64" fill="url(#bg)"/>
+  <!-- Aurora overlays -->
+  <rect x="0" y="0" width="64" height="64" fill="url(#aurora1)"/>
+  <rect x="0" y="0" width="64" height="64" fill="url(#aurora2)"/>
+
+  <!-- Outer breathing halo ring -->
+  <circle cx="32" cy="32" r="26.88"
+    fill="none" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="0.512"/>
+
+  <!-- Mid halo (soft glow) -->
+  <circle cx="32" cy="32" r="25.92"
+    fill="#FFFFFF" fill-opacity="0.08"/>
+
+  <!-- Core breathing orb -->
+  <circle cx="32" cy="32" r="19.2" fill="url(#orb)"/>
+
+  <!-- Subtle inner accent dot — grounds the icon, echoes design's inner circle -->
+  <circle cx="32" cy="32" r="3.456" fill="#5B7A99" fill-opacity="0.35"/>
 </svg>
