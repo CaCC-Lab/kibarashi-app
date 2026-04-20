@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export type Mood = 'mist' | 'paper' | 'sage';
+export type Mood = 'blossom' | 'mist' | 'paper' | 'sage';
 export type FontSize = 'md' | 'lg';
 export type HomeVariant = 'cta' | 'steps' | 'mood';
 
@@ -15,7 +15,7 @@ export interface Appearance {
 const STORAGE_KEY = 'kiba-appearance';
 
 const DEFAULTS: Appearance = {
-  mood: 'mist',
+  mood: 'blossom',
   serif: false,
   fontSize: 'md',
   dark: false,

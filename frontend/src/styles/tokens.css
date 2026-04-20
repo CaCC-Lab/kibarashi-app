@@ -35,6 +35,21 @@
   --paper-aurora-2: #D6C4B0;
   --paper-aurora-3: #C9B896;
 
+  /* MOOD: blossom — warm pastel sunrise (matches the app icon) */
+  --blossom-bg: #FFF3EB;
+  --blossom-surface: #FFFDF8;
+  --blossom-surface-soft: #FDE7DF;
+  --blossom-ink: #3D2A2F;
+  --blossom-ink-2: #6E5359;
+  --blossom-ink-3: #A69086;
+  --blossom-line: #F5DAD2;
+  --blossom-accent: #C96F82;          /* dusty rose — primary accent */
+  --blossom-accent-soft: #FBDDE3;
+  --blossom-accent-ink: #5E283A;
+  --blossom-aurora-1: #FBD0C5;        /* peach */
+  --blossom-aurora-2: #E8D5E8;        /* lavender */
+  --blossom-aurora-3: #FFE8A8;        /* warm cream yellow */
+
   /* MOOD: sage — muted green */
   --sage-bg: #EEF1EC;
   --sage-surface: #F7F9F4;
@@ -122,6 +137,21 @@
 }
 
 /* Mood overrides */
+[data-mood="blossom"] {
+  --kb-bg: var(--blossom-bg);
+  --kb-surface: var(--blossom-surface);
+  --kb-surface-soft: var(--blossom-surface-soft);
+  --kb-ink: var(--blossom-ink);
+  --kb-ink-2: var(--blossom-ink-2);
+  --kb-ink-3: var(--blossom-ink-3);
+  --kb-line: var(--blossom-line);
+  --kb-accent: var(--blossom-accent);
+  --kb-accent-soft: var(--blossom-accent-soft);
+  --kb-accent-ink: var(--blossom-accent-ink);
+  --kb-aurora-1: var(--blossom-aurora-1);
+  --kb-aurora-2: var(--blossom-aurora-2);
+  --kb-aurora-3: var(--blossom-aurora-3);
+}
 [data-mood="paper"] {
   --kb-bg: var(--paper-bg);
   --kb-surface: var(--paper-surface);
