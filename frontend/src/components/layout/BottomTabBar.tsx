@@ -65,6 +65,7 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ activeTab, onTabChange }) =
                   ? 'text-primary-500'
                   : 'text-gray-400 dark:text-gray-500'
               }`}
+              style={isActive ? { color: 'var(--kb-accent)' } : undefined}
               aria-label={tab.label}
             >
               {tab.icon(isActive)}

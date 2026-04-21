@@ -37,8 +37,11 @@ const Header: React.FC<HeaderProps> = ({
         <div className="px-4 py-3 flex items-center justify-between">
           {/* ロゴ + 天気 */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
-              <span className="text-text-inverse font-bold text-sm">気</span>
+            <div
+              className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center"
+              style={{ background: 'var(--kb-accent)' }}
+            >
+              <span className="text-text-inverse font-bold text-sm" style={{ color: '#fff' }}>気</span>
             </div>
             <h1 className="text-lg font-bold text-text-primary dark:text-text-inverse">気晴らし</h1>
             {weatherIcon && weatherTemp !== undefined && (

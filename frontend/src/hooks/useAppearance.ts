@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 export type Mood = 'blossom' | 'mist' | 'paper' | 'sage';
 export type FontSize = 'md' | 'lg';
@@ -55,21 +55,64 @@ function applyToRoot(a: Appearance) {
   else root.classList.remove('dark');
 }
 
-export function useAppearance() {
-  const [appearance, setAppearance] = useState<Appearance>(readInitial);
+// ─── Shared store ──────────────────────────────────────────────────────────
+// Single source of truth so every component using useAppearance() reacts
+// to changes immediately (no stale snapshots between siblings).
 
-  useEffect(() => {
-    applyToRoot(appearance);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appearance));
-      localStorage.setItem('theme', appearance.dark ? 'dark' : 'light');
-    } catch {
-      // storage unavailable — appearance persists for session only
-    }
-  }, [appearance]);
+type Listener = () => void;
+
+let state: Appearance = /* hydrated on first read */ null as unknown as Appearance;
+const listeners = new Set<Listener>();
+
+function ensureHydrated() {
+  if (state === null || state === undefined) {
+    state = readInitial();
+    applyToRoot(state);
+  }
+}
+
+function subscribe(fn: Listener) {
+  ensureHydrated();
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+}
+
+function getSnapshot() {
+  ensureHydrated();
+  return state;
+}
+
+/**
+ * Server-side snapshot — used by React during SSR hydration so it doesn't
+ * try to touch window / localStorage. We just return DEFAULTS.
+ */
+function getServerSnapshot(): Appearance {
+  return DEFAULTS;
+}
+
+function setState(next: Appearance) {
+  state = next;
+  applyToRoot(next);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    localStorage.setItem('theme', next.dark ? 'dark' : 'light');
+  } catch {
+    // storage unavailable — appearance persists for session only
+  }
+  listeners.forEach((l) => l());
+}
+
+export function useAppearance() {
+  const appearance = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const update = <K extends keyof Appearance>(key: K, value: Appearance[K]) => {
-    setAppearance((prev) => ({ ...prev, [key]: value }));
+    setState({ ...state, [key]: value });
+  };
+
+  const setAppearance = (next: Appearance) => {
+    setState(next);
   };
 
   return { appearance, update, setAppearance };
@@ -80,5 +123,5 @@ export function useAppearance() {
  * Prevents a flash of wrong theme on first paint.
  */
 export function hydrateAppearanceFromStorage() {
-  applyToRoot(readInitial());
+  ensureHydrated();
 }
