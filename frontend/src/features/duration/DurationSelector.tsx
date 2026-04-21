@@ -62,7 +62,10 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
                   : 'border-primary-200 hover:border-primary-400'
               }
             `}
-            style={{ animationDelay: `${index * 100}ms` }}
+            style={{
+              animationDelay: `${index * 100}ms`,
+              ...(selected === option.id ? { borderColor: 'var(--kb-accent)' } : {}),
+            }}
             aria-pressed={selected === option.id}
             aria-describedby={`duration-${option.id}-desc`}
           >
@@ -87,7 +90,7 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
                       cx="32"
                       cy="32"
                       r="28"
-                      stroke={selected === option.id ? 'hsl(from var(--color-primary-500) h s l)' : 'hsl(from var(--color-text-muted) h s l)'}
+                      stroke={selected === option.id ? 'var(--kb-accent)' : 'hsl(from var(--color-text-muted) h s l)'}
                       strokeWidth="4"
                       fill="none"
                       strokeDasharray={`${(option.id / 30) * 176} 176`}
@@ -95,17 +98,23 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
                     />
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className={`text-lg font-bold transition-colors duration-200 ${
-                      selected === option.id ? 'text-primary-600' : 'text-text-primary'
-                    }`}>{option.id}分</span>
+                    <span
+                      className={`text-lg font-bold transition-colors duration-200 ${
+                        selected === option.id ? 'text-primary-600' : 'text-text-primary'
+                      }`}
+                      style={selected === option.id ? { color: 'var(--kb-accent)' } : undefined}
+                    >{option.id}分</span>
                   </div>
                 </div>
                 
                 <div className="text-center">
-                  <div className={`
+                  <div
+                    className={`
                     text-lg font-semibold mb-1 transition-colors duration-200
                     ${selected === option.id ? 'text-primary-600' : 'text-text-primary'}
-                  `}>
+                  `}
+                    style={selected === option.id ? { color: 'var(--kb-accent)' } : undefined}
+                  >
                     {option.label}
                   </div>
                   <p id={`duration-${option.id}-desc`} className="text-sm text-text-secondary">{option.description}</p>
@@ -116,7 +125,10 @@ const DurationSelector: React.FC<DurationSelectorProps> = ({ selected, onSelect 
             
             {selected === option.id && (
               <div className="absolute top-3 right-3 animate-scaleIn">
-                <div className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                <div
+                  className="w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--kb-accent)' }}
+                >
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>

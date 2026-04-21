@@ -215,41 +215,57 @@ function App() {
     );
   };
 
-  const renderBreadcrumb = () => (
-    <div className="flex items-center justify-center space-x-3 mb-4">
-      <button
-        onClick={() => setHomeStep('situation')}
-        className={`flex items-center space-x-1.5 ${homeStep === 'situation' ? 'text-primary-600' : 'text-gray-400'}`}
-      >
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
-          situation ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>1</span>
-        <span className="text-xs">場所</span>
-      </button>
-      <div className="w-6 h-0.5 bg-gray-300" />
-      <button
-        onClick={() => situation && setHomeStep('duration')}
-        disabled={!situation}
-        className={`flex items-center space-x-1.5 ${homeStep === 'duration' ? 'text-primary-600' : 'text-gray-400'} ${!situation && 'opacity-40'}`}
-      >
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
-          duration ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>2</span>
-        <span className="text-xs">時間</span>
-      </button>
-      <div className="w-6 h-0.5 bg-gray-300" />
-      <button
-        onClick={() => situation && duration && setHomeStep('suggestions')}
-        disabled={!situation || !duration}
-        className={`flex items-center space-x-1.5 ${homeStep === 'suggestions' ? 'text-primary-600' : 'text-gray-400'} ${(!situation || !duration) && 'opacity-40'}`}
-      >
-        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
-          homeStep === 'suggestions' ? 'bg-primary-500 text-white' : 'bg-gray-200'
-        }`}>3</span>
-        <span className="text-xs">提案</span>
-      </button>
-    </div>
-  );
+  const renderBreadcrumb = () => {
+    const activeLabelStyle = { color: 'var(--kb-accent)' };
+    const activeBubbleStyle = { background: 'var(--kb-accent)', color: '#fff' };
+    return (
+      <div className="flex items-center justify-center space-x-3 mb-4">
+        <button
+          onClick={() => setHomeStep('situation')}
+          className={`flex items-center space-x-1.5 ${homeStep === 'situation' ? 'text-primary-600' : 'text-gray-400'}`}
+          style={homeStep === 'situation' ? activeLabelStyle : undefined}
+        >
+          <span
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
+              situation ? 'bg-primary-500 text-white' : 'bg-gray-200'
+            }`}
+            style={situation ? activeBubbleStyle : undefined}
+          >1</span>
+          <span className="text-xs">場所</span>
+        </button>
+        <div className="w-6 h-0.5 bg-gray-300" />
+        <button
+          onClick={() => situation && setHomeStep('duration')}
+          disabled={!situation}
+          className={`flex items-center space-x-1.5 ${homeStep === 'duration' ? 'text-primary-600' : 'text-gray-400'} ${!situation && 'opacity-40'}`}
+          style={homeStep === 'duration' ? activeLabelStyle : undefined}
+        >
+          <span
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
+              duration ? 'bg-primary-500 text-white' : 'bg-gray-200'
+            }`}
+            style={duration ? activeBubbleStyle : undefined}
+          >2</span>
+          <span className="text-xs">時間</span>
+        </button>
+        <div className="w-6 h-0.5 bg-gray-300" />
+        <button
+          onClick={() => situation && duration && setHomeStep('suggestions')}
+          disabled={!situation || !duration}
+          className={`flex items-center space-x-1.5 ${homeStep === 'suggestions' ? 'text-primary-600' : 'text-gray-400'} ${(!situation || !duration) && 'opacity-40'}`}
+          style={homeStep === 'suggestions' ? activeLabelStyle : undefined}
+        >
+          <span
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
+              homeStep === 'suggestions' ? 'bg-primary-500 text-white' : 'bg-gray-200'
+            }`}
+            style={homeStep === 'suggestions' ? activeBubbleStyle : undefined}
+          >3</span>
+          <span className="text-xs">提案</span>
+        </button>
+      </div>
+    );
+  };
 
   if (ageGroupLoading) {
     return (
