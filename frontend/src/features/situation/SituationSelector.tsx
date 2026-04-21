@@ -80,14 +80,22 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
                   : 'border-primary-200 bg-surface-primary hover:border-primary-400 hover:bg-primary-50'
               }
             `}
-            style={{ animationDelay: `${index * 100}ms` }}
+            style={{
+              animationDelay: `${index * 100}ms`,
+              ...(selected === option.id
+                ? { borderColor: 'var(--kb-accent)', background: 'var(--kb-accent-soft)' }
+                : {}),
+            }}
             aria-pressed={selected === option.id}
             aria-describedby={`situation-${option.id}-desc`}
           >
-            <div className={`
+            <div
+              className={`
               flex flex-col items-center space-y-2 transition-colors duration-200
               ${selected === option.id ? 'text-primary-600' : 'text-text-secondary'}
-            `}>
+            `}
+              style={selected === option.id ? { color: 'var(--kb-accent-ink)' } : undefined}
+            >
               <div className={`transition-transform duration-200 ${
                 selected === option.id ? 'scale-110' : 'scale-100'
               }`}>
@@ -115,7 +123,10 @@ const SituationSelector: React.FC<SituationSelectorProps> = ({ selected, onSelec
             
             {selected === option.id && (
               <div className="absolute top-2 md:top-3 right-2 md:right-3 animate-scaleIn">
-                <div className="w-5 h-5 md:w-6 md:h-6 bg-primary-500 rounded-full flex items-center justify-center">
+                <div
+                  className="w-5 h-5 md:w-6 md:h-6 bg-primary-500 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--kb-accent)' }}
+                >
                   <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
