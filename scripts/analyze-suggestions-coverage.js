@@ -151,6 +151,10 @@ function printTable(cells) {
 async function main() {
   const outJson = getArg('--json', 'data/analysis/suggestion-coverage.json');
   const threshold = parseInt(getArg('--threshold', '3'), 10);
+  if (!Number.isInteger(threshold) || threshold < 1) {
+    console.error(`--threshold は1以上の整数 (指定: ${getArg('--threshold')})`);
+    process.exit(1);
+  }
 
   const supabase = getSupabase();
   console.log('[analyze] fetching suggestions_master...');

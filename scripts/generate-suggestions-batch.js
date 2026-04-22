@@ -88,7 +88,10 @@ function buildPrompt({ ageGroup, situation, duration, category, count }) {
 }
 
 async function callOllama(prompt) {
-  const baseUrl = (process.env.OLLAMA_BASE_URL || 'https://ollama.com/api').replace(/\/+$/, '');
+  // baseUrl は末尾 /api を削る（OLLAMA_BASE_URL=https://ollama.com/api でも動くよう正規化）
+  const baseUrl = (process.env.OLLAMA_BASE_URL || 'https://ollama.com')
+    .replace(/\/+$/, '')
+    .replace(/\/api$/, '');
   const model = process.env.OLLAMA_MODEL || 'gemma4:31b-cloud';
   const apiKey = process.env.OLLAMA_API_KEY || '';
   const timeout = parseInt(process.env.OLLAMA_TIMEOUT || '120000', 10);
@@ -259,10 +262,20 @@ async function main() {
     console.error('または: --from-gaps <path/to/coverage.json>');
     process.exit(1);
   }
+  const durationNum = parseInt(duration, 10);
+  if (![5, 15, 30].includes(durationNum)) {
+    console.error(`--duration は 5 / 15 / 30 のいずれか (指定: ${duration})`);
+    process.exit(1);
+  }
+  const category = getArg('--category');
+  if (category && !['認知的', '行動的'].includes(category)) {
+    console.error(`--category は 認知的 / 行動的 のいずれか (指定: ${category})`);
+    process.exit(1);
+  }
 
   await runSingle({
     ageGroup, situation, duration,
-    category: getArg('--category'),
+    category,
     count: getArg('--count'),
     provider,
   });

@@ -48,16 +48,21 @@
 
 ```sql
 ALTER TABLE suggestions_master
-  ADD COLUMN season text[] DEFAULT '{}'::text[],
-  ADD COLUMN weather text[] DEFAULT '{}'::text[],
-  ADD COLUMN mood text[] DEFAULT '{}'::text[],
-  ADD COLUMN part_of_day text[] DEFAULT '{}'::text[],
-  ADD COLUMN day_type text[] DEFAULT '{}'::text[];
+  ADD COLUMN season text[] NOT NULL DEFAULT '{}'::text[],
+  ADD COLUMN weather text[] NOT NULL DEFAULT '{}'::text[],
+  ADD COLUMN mood text[] NOT NULL DEFAULT '{}'::text[],
+  ADD COLUMN part_of_day text[] NOT NULL DEFAULT '{}'::text[],
+  ADD COLUMN day_type text[] NOT NULL DEFAULT '{}'::text[];
 
-CREATE INDEX idx_suggestions_master_season ON suggestions_master USING GIN (season);
-CREATE INDEX idx_suggestions_master_weather ON suggestions_master USING GIN (weather);
-CREATE INDEX idx_suggestions_master_mood ON suggestions_master USING GIN (mood);
+CREATE INDEX idx_suggestions_master_season      ON suggestions_master USING GIN (season);
+CREATE INDEX idx_suggestions_master_weather     ON suggestions_master USING GIN (weather);
+CREATE INDEX idx_suggestions_master_mood        ON suggestions_master USING GIN (mood);
+CREATE INDEX idx_suggestions_master_part_of_day ON suggestions_master USING GIN (part_of_day);
+CREATE INDEX idx_suggestions_master_day_type    ON suggestions_master USING GIN (day_type);
 ```
+
+`NOT NULL DEFAULT '{}'` により「NULL = 全条件マッチ」と「空配列 = 全条件マッチ」の
+2種類の表現が混在することを防ぐ。
 
 ### 4.2 既存データの扱い
 
@@ -69,7 +74,7 @@ CREATE INDEX idx_suggestions_master_mood ON suggestions_master USING GIN (mood);
 
 ### 5.1 クエリパラメータ（v1/v2 共通、追加はすべて optional）
 
-```
+```http
 GET /api/v1/suggestions?
     situation=workplace&
     duration=5&

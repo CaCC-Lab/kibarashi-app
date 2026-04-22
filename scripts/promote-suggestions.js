@@ -60,7 +60,7 @@ function coerceRow(c, specDefault) {
     age_groups: Array.isArray(c.age_groups) && c.age_groups.length > 0 ? c.age_groups : [specDefault.ageGroup],
     tags: Array.isArray(c.tags) ? c.tags : [],
     steps: Array.isArray(c.steps) ? c.steps : [],
-    guide: Array.isArray(c.steps) ? c.steps.join('') : '',
+    guide: Array.isArray(c.steps) ? c.steps.join('\n') : '',
     source: c.source || 'ai',
     is_public: typeof c.is_public === 'boolean' ? c.is_public : true,
     quality_score: typeof c.quality_score === 'number' ? c.quality_score : 3.0,
@@ -89,7 +89,17 @@ async function main() {
 
   const supabase = dryRun ? null : getSupabase();
   const committedDir = path.resolve('data/approved/committed');
-  if (!dryRun) fs.mkdirSync(committedDir, { recursive: true });
+  if (!dryRun) {
+    fs.mkdirSync(committedDir, { recursive: true });
+    // 投入前に退避先の書込可否を検証（INSERT後にrename失敗で二重投入を防ぐ）
+    try {
+      fs.accessSync(committedDir, fs.constants.W_OK);
+    } catch (err) {
+      console.error(`committedDir に書き込めません: ${committedDir}`);
+      console.error(`理由: ${err.message}`);
+      process.exit(1);
+    }
+  }
 
   let okFiles = 0, skippedFiles = 0;
   let okRows = 0, errRows = 0;

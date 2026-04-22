@@ -22,7 +22,7 @@ npm run suggestions:analyze -- --threshold 3
 
 ## 運用フロー
 
-```
+```text
   ┌─── analyze ───┐     ┌── generate ──┐     ┌── (human review) ──┐     ┌── promote ──┐
   │  coverage.json │ ─→  │  pending/*.json │ ─→ │  approved/*.json   │ ─→  │ suggestions_master │
   └────────────────┘     └─────────────────┘    └────────────────────┘     └────────────────────┘
