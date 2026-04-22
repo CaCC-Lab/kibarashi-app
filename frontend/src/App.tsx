@@ -2,7 +2,7 @@ import { useState, useCallback, lazy, Suspense, useEffect } from 'react';
 import MainLayout from './components/layout/MainLayout';
 import { TabId } from './components/layout/BottomTabBar';
 import Loading from './components/common/Loading';
-import { SituationId } from './types/situation';
+import { SituationId, getSituationsForAgeGroup } from './types/situation';
 import { useAgeGroup } from './hooks/useAgeGroup';
 import { useWeather } from './hooks/useWeather';
 import { useAppearance } from './hooks/useAppearance';
@@ -26,7 +26,7 @@ const HomeMood = lazy(() => import('./features/home/HomeMood'));
 type HomeStep = 'intro' | 'situation' | 'duration' | 'suggestions';
 
 function App() {
-  const { isFirstTimeUser, isLoading: ageGroupLoading } = useAgeGroup();
+  const { isFirstTimeUser, isLoading: ageGroupLoading, currentAgeGroup } = useAgeGroup();
   const { weather, position: geoPosition } = useWeather();
   const { appearance } = useAppearance();
 
@@ -76,6 +76,17 @@ function App() {
 
   // ホームの最初に表示すべきステップ（appearance.homeVariant によって切替）
   const homeStartStep: HomeStep = appearance.homeVariant === 'steps' ? 'situation' : 'intro';
+
+  // 年齢層が変わって今の選択肢に situation がいなくなったらリセット
+  useEffect(() => {
+    if (!situation) return;
+    const valid = getSituationsForAgeGroup(currentAgeGroup).some((s) => s.id === situation);
+    if (!valid) {
+      setSituation(null);
+      setDuration(null);
+      setHomeStep(homeStartStep);
+    }
+  }, [currentAgeGroup, situation, homeStartStep]);
 
   // タブ切替
   const handleTabChange = (tab: TabId) => {
