@@ -1,5 +1,6 @@
 import React from 'react';
-import { SituationId } from '../../types/situation';
+import { SituationId, getSituationsForAgeGroup } from '../../types/situation';
+import { useAgeGroup } from '../../hooks/useAgeGroup';
 
 interface HomeCTAProps {
   situation: SituationId | null;
@@ -8,12 +9,6 @@ interface HomeCTAProps {
   onDurationChange: (d: 5 | 15 | 30) => void;
   onQuickStart: () => void;
 }
-
-const SITUATIONS: Array<{ id: SituationId; label: string }> = [
-  { id: 'workplace', label: '職場' },
-  { id: 'home', label: '家' },
-  { id: 'outside', label: '外出先' },
-];
 
 const DURATIONS: Array<{ value: 5 | 15 | 30; label: string }> = [
   { value: 5, label: '5分' },
@@ -32,6 +27,9 @@ const HomeCTA: React.FC<HomeCTAProps> = ({
   onDurationChange,
   onQuickStart,
 }) => {
+  const { currentAgeGroup } = useAgeGroup();
+  const situations = getSituationsForAgeGroup(currentAgeGroup);
+
   return (
     <div
       className="relative w-full max-w-xl mx-auto"
@@ -114,8 +112,8 @@ const HomeCTA: React.FC<HomeCTAProps> = ({
         >
           今の状況（任意）
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {SITUATIONS.map((s) => {
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {situations.map((s) => {
             const on = situation === s.id;
             return (
               <button
@@ -123,7 +121,7 @@ const HomeCTA: React.FC<HomeCTAProps> = ({
                 type="button"
                 onClick={() => onSituationChange(s.id)}
                 style={{
-                  flex: 1, padding: '14px 10px', borderRadius: 16,
+                  flex: '1 1 0', minWidth: 80, padding: '14px 10px', borderRadius: 16,
                   background: on ? 'var(--kb-accent-soft)' : 'var(--kb-surface)',
                   border: `1px solid ${on ? 'var(--kb-accent)' : 'var(--kb-line)'}`,
                   color: on ? 'var(--kb-accent-ink)' : 'var(--kb-ink)',
