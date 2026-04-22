@@ -10,6 +10,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const { loadEnv } = require('./_lib/loadEnv');
+loadEnv();
 const { createClient } = require('@supabase/supabase-js');
 
 const AGE_GROUPS = [
@@ -51,13 +53,25 @@ async function fetchAll(supabase) {
   const pageSize = 1000;
   let from = 0;
   while (true) {
-    const { data, error } = await supabase
-      .from('suggestions_master')
-      .select('id, duration, category, situation, age_groups, quality_score, is_public')
-      .eq('is_public', true)
-      .range(from, from + pageSize - 1);
+    let data, error;
+    try {
+      ({ data, error } = await supabase
+        .from('suggestions_master')
+        .select('id, duration, category, situation, age_groups, quality_score, is_public')
+        .eq('is_public', true)
+        .range(from, from + pageSize - 1));
+    } catch (err) {
+      console.error('Supabase request threw:', err.message);
+      if (err.cause) console.error('  cause:', err.cause.code || '', err.cause.message || err.cause);
+      const url = process.env.SUPABASE_URL || '';
+      console.error(`  SUPABASE_URL: ${url.replace(/^(https?:\/\/[^.]+).*/, '$1…')}`);
+      console.error('  → URL の到達性、ネットワーク、credentials を確認してください');
+      process.exit(1);
+    }
     if (error) {
       console.error('Supabase query error:', error.message);
+      if (error.details) console.error('  details:', error.details);
+      if (error.hint) console.error('  hint:', error.hint);
       process.exit(1);
     }
     if (!data || data.length === 0) break;

@@ -19,6 +19,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const { loadEnv } = require('./_lib/loadEnv');
+loadEnv();
 
 const AGE_GROUP_LABEL = {
   office_worker: '20-40代の社会人',

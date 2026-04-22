@@ -9,6 +9,17 @@
   - 生成時: `OLLAMA_BASE_URL` / `OLLAMA_MODEL` / `OLLAMA_API_KEY` (provider=ollama の場合)
   - あるいは `GEMINI_API_KEY` (provider=gemini の場合)
 
+### 本番Supabaseに接続するには
+ローカルの `backend/.env` は `127.0.0.1:54321` を指している。本番を見るには:
+
+```bash
+vercel env pull .env.vercel          # 本番の環境変数を取得（要vercelログイン）
+npm run suggestions:analyze -- --threshold 3
+```
+
+`scripts/_lib/loadEnv.js` は `.env.vercel` を最優先で読むので、以降のコマンドは通常通り動く。
+`.env.vercel` は `.gitignore` 済み。
+
 ## 運用フロー
 
 ```

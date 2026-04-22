@@ -15,6 +15,8 @@
 
 const fs = require('fs');
 const path = require('path');
+const { loadEnv } = require('./_lib/loadEnv');
+loadEnv();
 const { createClient } = require('@supabase/supabase-js');
 
 function getArg(flag, fallback = null) {

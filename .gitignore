@@ -28,6 +28,8 @@ data/approved/
 
 # Environment files
 .env
+.env.vercel
+.env.production
 .env.local
 .env.development.local
 .env.test.local
