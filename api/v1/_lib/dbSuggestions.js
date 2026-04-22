@@ -27,6 +27,20 @@ function getSupabase() {
  * suggestions_master からランダムに3件取得
  * situation配列に含まれ、durationが一致するものを抽出
  */
+// v2 API が使う age_group エイリアスを DB の age_groups 値（v1 taxonomy）にマッピング
+// v2: job_hunting_new_grad / job_hunting_career / general
+// DB: job_seeker / career_changer / office_worker
+const AGE_GROUP_ALIAS = {
+  job_hunting_new_grad: 'job_seeker',
+  job_hunting_career: 'career_changer',
+  general: 'office_worker',
+};
+
+function normalizeAgeGroup(ageGroup) {
+  if (!ageGroup) return null;
+  return AGE_GROUP_ALIAS[ageGroup] || ageGroup;
+}
+
 async function getDbSuggestions(situation, duration, ageGroup) {
   const client = getSupabase();
   if (!client) return null;
@@ -42,9 +56,10 @@ async function getDbSuggestions(situation, duration, ageGroup) {
       .eq('duration', duration)
       .eq('is_public', true);
 
-    if (ageGroup) {
+    const dbAgeGroup = normalizeAgeGroup(ageGroup);
+    if (dbAgeGroup) {
       // age_groups 配列が指定の年齢層を含むものだけ返す
-      query = query.overlaps('age_groups', [ageGroup]);
+      query = query.overlaps('age_groups', [dbAgeGroup]);
     }
 
     const { data, error } = await query
@@ -93,4 +108,4 @@ function shuffleArray(array) {
   return shuffled;
 }
 
-module.exports = { getDbSuggestions };
+module.exports = { getDbSuggestions, normalizeAgeGroup, AGE_GROUP_ALIAS };
