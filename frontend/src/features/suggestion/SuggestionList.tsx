@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import SuggestionCard from './SuggestionCard';
 import SuggestionDetail from './SuggestionDetail';
 import { useSuggestions } from './useSuggestions';
@@ -45,11 +45,14 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
   const { currentAgeGroup } = useAgeGroup();
   const { weather } = useWeather();
 
-  // 文脈軸を計算（season / partOfDay / dayType は常時、weather / temperatureBand は useWeather から）
-  const contextAxes = computeContextAxes({
-    weatherCondition: weather?.condition,
-    temperature: weather?.temperature,
-  });
+  // 文脈軸を計算（weather が変わったときだけ再計算。useEffect の依存を安定させる）
+  const contextAxes = useMemo(
+    () => computeContextAxes({
+      weatherCondition: weather?.condition,
+      temperature: weather?.temperature,
+    }),
+    [weather?.condition, weather?.temperature]
+  );
   
   // A/Bテスト統合
   const { 
@@ -149,7 +152,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
     fetchSuggestions(situation, duration, currentAgeGroup, context, location, false, contextAxes);
-  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location]);
+  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location, contextAxes]);
 
   // 再取得関数（キャッシュをスキップ）
   const refetch = () => {
