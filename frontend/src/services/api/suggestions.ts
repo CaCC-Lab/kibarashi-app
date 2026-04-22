@@ -16,7 +16,7 @@ export async function fetchSuggestions(
   studentContext?: { concern?: string; subject?: string },
   location?: string,
   skipCache?: boolean,
-  axes?: ContextAxes & { mood?: string }
+  axes?: ContextAxes
 ): Promise<SuggestionsResponse> {
   // 強力なキャッシュバスターを実装
   const timestamp = Date.now();

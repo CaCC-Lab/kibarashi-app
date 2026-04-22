@@ -6,6 +6,7 @@ export type Weather = 'sunny' | 'cloudy' | 'rainy' | 'snowy';
 export type TemperatureBand = 'cold' | 'cool' | 'mild' | 'warm' | 'hot';
 export type PartOfDay = 'morning' | 'daytime' | 'evening' | 'night';
 export type DayType = 'weekday' | 'weekend';
+export type Mood = 'tired' | 'anxious' | 'irritated' | 'lonely' | 'bored' | 'sad' | 'calm';
 
 export interface ContextAxes {
   season?: Season;
@@ -13,6 +14,7 @@ export interface ContextAxes {
   temperatureBand?: TemperatureBand;
   partOfDay?: PartOfDay;
   dayType?: DayType;
+  mood?: Mood;
 }
 
 export function getSeason(date: Date = new Date()): Season {

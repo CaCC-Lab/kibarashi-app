@@ -69,15 +69,13 @@ async function getDbSuggestions(situation, duration, ageGroup, axes = {}) {
     }
 
     // 自動軸: 値が渡されていれば「空配列 OR overlaps(値)」で絞り込み
-    // マイグレーション未適用の環境で query が壊れないよう env var で opt-in
-    const axesEnabled = process.env.CONTEXT_AXES_ENABLED === 'true';
-    if (axesEnabled) {
-      for (const col of AXIS_COLUMNS) {
-        const value = axes[col];
-        if (value && typeof value === 'string') {
-          // PostgREST .or() 構文: eq.{} は空配列一致、ov.{val} は overlaps
-          query = query.or(`${col}.eq.{},${col}.ov.{${value}}`);
-        }
+    // 呼び出し側 (v1/suggestions.js) で CONTEXT_AXES_ENABLED=false のとき空 {} を渡すため、
+    // ここではフラグ判定せず値の有無だけで分岐
+    for (const col of AXIS_COLUMNS) {
+      const value = axes[col];
+      if (value && typeof value === 'string') {
+        // PostgREST .or() 構文: eq.{} は空配列一致、ov.{val} は overlaps
+        query = query.or(`${col}.eq.{},${col}.ov.{${value}}`);
       }
     }
 

@@ -27,7 +27,11 @@ function getOllamaClient() {
 module.exports = async (req, res) => {
   console.log('[SUGGESTIONS] Function invoked at:', new Date().toISOString());
   console.log('[SUGGESTIONS] Method:', req.method);
-  console.log('[SUGGESTIONS] Query params:', req.query);
+  // mood はプライバシーに関わるため、ログでは存在のみ示す（値は残さない）
+  {
+    const { mood: _mood, ...safeQuery } = req.query;
+    console.log('[SUGGESTIONS] Query params:', { ...safeQuery, mood: _mood ? '[redacted]' : undefined });
+  }
   
   // 環境変数の確認（デバッグ用）
   const hasOllamaUrl = !!process.env.OLLAMA_BASE_URL;
@@ -89,14 +93,16 @@ module.exports = async (req, res) => {
     const validPartOfDay = ['morning', 'daytime', 'evening', 'night'];
     const validDayType = ['weekday', 'weekend'];
     const validMood = ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'];
-    const axes = {
+    // CONTEXT_AXES_ENABLED=false のときは axes を空にしてキャッシュキーの分断も防ぐ
+    const axesEnabled = process.env.CONTEXT_AXES_ENABLED === 'true';
+    const axes = axesEnabled ? {
       season: validSeason.includes(season) ? season : undefined,
       weather: validWeather.includes(weather) ? weather : undefined,
       temperature_band: validTempBand.includes(temperatureBand) ? temperatureBand : undefined,
       part_of_day: validPartOfDay.includes(partOfDay) ? partOfDay : undefined,
       day_type: validDayType.includes(dayType) ? dayType : undefined,
       mood: validMood.includes(mood) ? mood : undefined,
-    };
+    } : {};
     
     let suggestions = null;
     let source = 'fallback';

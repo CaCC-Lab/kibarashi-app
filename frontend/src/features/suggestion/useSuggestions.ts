@@ -20,7 +20,7 @@ export const useSuggestions = () => {
     studentContext?: { concern?: string; subject?: string },
     location?: string,
     skipCache?: boolean,
-    axes?: ContextAxes & { mood?: string }
+    axes?: ContextAxes
   ) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
