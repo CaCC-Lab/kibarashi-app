@@ -65,20 +65,22 @@ module.exports = async (req, res) => {
     } = req.query;
     
     const durationNum = parseInt(duration);
-    
-    // 有効な値の検証
-    const validSituations = ['workplace', 'home', 'outside', 'job_hunting'];
+
+    // 有効な値の検証（フロントエンドの types/situation.tsx / types/ageGroup.ts と揃える）
+    const validSituations = ['workplace', 'home', 'outside', 'job_hunting', 'studying', 'school', 'commuting'];
     const validDurations = [5, 15, 30];
-    
+    const validAgeGroups = ['office_worker', 'student', 'middle_school', 'housewife', 'elderly', 'job_seeker', 'career_changer'];
+
     const normalizedSituation = validSituations.includes(situation) ? situation : 'workplace';
     const normalizedDuration = validDurations.includes(durationNum) ? durationNum : 5;
+    const normalizedAgeGroup = validAgeGroups.includes(ageGroup) ? ageGroup : 'office_worker';
     
     let suggestions = null;
     let source = 'fallback';
     let debugInfo = {};
     
     // キャッシュキーを生成
-    const cacheKey = cache.generateKey(normalizedSituation, normalizedDuration, ageGroup);
+    const cacheKey = cache.generateKey(normalizedSituation, normalizedDuration, normalizedAgeGroup);
     
     // skipCacheフラグをチェック
     const shouldSkipCache = skipCache === 'true' || skipCache === true;
@@ -101,7 +103,7 @@ module.exports = async (req, res) => {
     if (!suggestions) {
       try {
         console.log('[SUGGESTIONS] Cache miss, trying Supabase DB...');
-        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, ageGroup);
+        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup);
         if (dbResult && dbResult.length > 0) {
           suggestions = dbResult;
           source = 'database';
@@ -125,13 +127,13 @@ module.exports = async (req, res) => {
           console.log('[SUGGESTIONS] Request parameters:', {
             situation: normalizedSituation,
             duration: normalizedDuration,
-            ageGroup: ageGroup
+            ageGroup: normalizedAgeGroup
           });
-          
+
           suggestions = await client.generateSuggestions(
-            normalizedSituation, 
-            normalizedDuration, 
-            ageGroup
+            normalizedSituation,
+            normalizedDuration,
+            normalizedAgeGroup
           );
           source = 'ollama_api';
           debugInfo.ollama_success = true;
@@ -160,9 +162,9 @@ module.exports = async (req, res) => {
     if (!suggestions) {
       console.log('[SUGGESTIONS] Using fallback suggestions');
       suggestions = getFallbackSuggestions(
-        normalizedSituation, 
-        normalizedDuration, 
-        ageGroup
+        normalizedSituation,
+        normalizedDuration,
+        normalizedAgeGroup
       );
       console.log('[SUGGESTIONS] Fallback suggestions generated:', suggestions?.length || 0);
       
@@ -179,7 +181,7 @@ module.exports = async (req, res) => {
       metadata: {
         situation: normalizedSituation,
         duration: normalizedDuration,
-        ageGroup: ageGroup,
+        ageGroup: normalizedAgeGroup,
         location: req.query.location || 'Tokyo',
         timestamp: new Date().toISOString(),
         source: source,

@@ -27,6 +27,20 @@ function getSupabase() {
  * suggestions_master からランダムに3件取得
  * situation配列に含まれ、durationが一致するものを抽出
  */
+// v2 API が使う age_group エイリアスを DB の age_groups 値（v1 taxonomy）にマッピング
+// v2: job_hunting_new_grad / job_hunting_career / general
+// DB: job_seeker / career_changer / office_worker
+const AGE_GROUP_ALIAS = {
+  job_hunting_new_grad: 'job_seeker',
+  job_hunting_career: 'career_changer',
+  general: 'office_worker',
+};
+
+function normalizeAgeGroup(ageGroup) {
+  if (!ageGroup) return null;
+  return AGE_GROUP_ALIAS[ageGroup] || ageGroup;
+}
+
 async function getDbSuggestions(situation, duration, ageGroup) {
   const client = getSupabase();
   if (!client) return null;
@@ -34,13 +48,21 @@ async function getDbSuggestions(situation, duration, ageGroup) {
   try {
     const startTime = Date.now();
 
-    // situation配列にマッチ、duration一致、公開フラグ
-    const { data, error } = await client
+    // situation配列にマッチ、duration一致、公開フラグ、age_groupsが指定と重なる
+    let query = client
       .from('suggestions_master')
       .select('id, title, description, duration, category, steps')
       .contains('situation', [situation])
       .eq('duration', duration)
-      .eq('is_public', true)
+      .eq('is_public', true);
+
+    const dbAgeGroup = normalizeAgeGroup(ageGroup);
+    if (dbAgeGroup) {
+      // age_groups 配列が指定の年齢層を含むものだけ返す
+      query = query.overlaps('age_groups', [dbAgeGroup]);
+    }
+
+    const { data, error } = await query
       .order('quality_score', { ascending: false })
       .limit(20);
 
@@ -50,7 +72,7 @@ async function getDbSuggestions(situation, duration, ageGroup) {
     }
 
     if (!data || data.length === 0) {
-      console.log('[DB] No suggestions found for:', { situation, duration });
+      console.log('[DB] No suggestions found for:', { situation, duration, ageGroup });
       return null;
     }
 
@@ -86,4 +108,4 @@ function shuffleArray(array) {
   return shuffled;
 }
 
-module.exports = { getDbSuggestions };
+module.exports = { getDbSuggestions, normalizeAgeGroup, AGE_GROUP_ALIAS };
