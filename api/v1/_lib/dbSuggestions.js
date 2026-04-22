@@ -34,13 +34,20 @@ async function getDbSuggestions(situation, duration, ageGroup) {
   try {
     const startTime = Date.now();
 
-    // situation配列にマッチ、duration一致、公開フラグ
-    const { data, error } = await client
+    // situation配列にマッチ、duration一致、公開フラグ、age_groupsが指定と重なる
+    let query = client
       .from('suggestions_master')
       .select('id, title, description, duration, category, steps')
       .contains('situation', [situation])
       .eq('duration', duration)
-      .eq('is_public', true)
+      .eq('is_public', true);
+
+    if (ageGroup) {
+      // age_groups 配列が指定の年齢層を含むものだけ返す
+      query = query.overlaps('age_groups', [ageGroup]);
+    }
+
+    const { data, error } = await query
       .order('quality_score', { ascending: false })
       .limit(20);
 
@@ -50,7 +57,7 @@ async function getDbSuggestions(situation, duration, ageGroup) {
     }
 
     if (!data || data.length === 0) {
-      console.log('[DB] No suggestions found for:', { situation, duration });
+      console.log('[DB] No suggestions found for:', { situation, duration, ageGroup });
       return null;
     }
 
