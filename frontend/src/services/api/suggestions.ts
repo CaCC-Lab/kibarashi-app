@@ -2,6 +2,7 @@ import { apiClient } from './client';
 import { SuggestionsResponse } from './types';
 import { SituationId } from '../../types/situation';
 import { AgeGroup } from '../../types/ageGroup';
+import { ContextAxes } from '../../utils/contextAxes';
 
 // Suggestion型を他のファイルから使用できるように再エクスポート
 export type { Suggestion } from './types';
@@ -14,7 +15,8 @@ export async function fetchSuggestions(
   ageGroup?: AgeGroup,
   studentContext?: { concern?: string; subject?: string },
   location?: string,
-  skipCache?: boolean
+  skipCache?: boolean,
+  axes?: ContextAxes
 ): Promise<SuggestionsResponse> {
   // 強力なキャッシュバスターを実装
   const timestamp = Date.now();
@@ -56,7 +58,17 @@ export async function fetchSuggestions(
   if (skipCache) {
     params.set('skipCache', 'true');
   }
-  
+
+  // 自動計算された文脈軸
+  if (axes) {
+    if (axes.season) params.set('season', axes.season);
+    if (axes.weather) params.set('weather', axes.weather);
+    if (axes.temperatureBand) params.set('temperatureBand', axes.temperatureBand);
+    if (axes.partOfDay) params.set('partOfDay', axes.partOfDay);
+    if (axes.dayType) params.set('dayType', axes.dayType);
+    if (axes.mood) params.set('mood', axes.mood);
+  }
+
   const url = `/api/v1/suggestions?${params.toString()}`;
   
   const response = await apiClient.get<SuggestionsResponse>(url, {

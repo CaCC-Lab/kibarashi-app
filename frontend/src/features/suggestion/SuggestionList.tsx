@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SuggestionCard from './SuggestionCard';
 import SuggestionDetail from './SuggestionDetail';
 import { useSuggestions } from './useSuggestions';
@@ -14,6 +14,8 @@ import { useStudentABTest } from '../../hooks/useStudentABTest';
 import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
 import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
 import { contextAPI, ContextualData } from '../../services/contextAPI';
+import { useWeather } from '../../hooks/useWeather';
+import { computeContextAxes } from '../../utils/contextAxes';
 
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
@@ -41,6 +43,16 @@ interface SuggestionListProps {
 const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false, geoPosition }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
+  const { weather } = useWeather();
+  const weatherCondition = weather?.condition;
+  const weatherTemp = weather?.temperature;
+
+  // 文脈軸は fetch の直前に毎回計算する（memoize すると partOfDay/dayType/season が
+  // 時刻経過で古くなってしまう）。buildAxes は Date.now() を都度参照する。
+  const buildAxes = useCallback(
+    () => computeContextAxes({ weatherCondition, temperature: weatherTemp }),
+    [weatherCondition, weatherTemp]
+  );
   
   // A/Bテスト統合
   const { 
@@ -139,8 +151,8 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     // コンテキストを統合
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
-    fetchSuggestions(situation, duration, currentAgeGroup, context, location);
-  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location]);
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location, false, buildAxes());
+  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location, buildAxes]);
 
   // 再取得関数（キャッシュをスキップ）
   const refetch = () => {
@@ -162,7 +174,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
     // 「他の提案を見る」ボタンクリック時は必ずキャッシュをスキップ
-    fetchSuggestions(situation, duration, currentAgeGroup, context, location, true);
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location, true, buildAxes());
   };
 
   if (loading) {
