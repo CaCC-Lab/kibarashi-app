@@ -61,7 +61,13 @@ function validate(row) {
   if (![5, 15, 30].includes(row.duration)) errs.push(`duration 不正: ${row.duration}`);
   if (!['認知的', '行動的'].includes(row.category)) errs.push(`category 不正: ${row.category}`);
   if (!row.situation?.length) errs.push('situation 空');
+  else if (row.situation.some((s) => s == null || String(s).trim() === '')) {
+    errs.push('situation に空要素');
+  }
   if (!row.age_groups?.length) errs.push('age_groups 空');
+  else if (row.age_groups.some((a) => a == null || String(a).trim() === '')) {
+    errs.push('age_groups に空要素');
+  }
   if (!row.steps?.length) errs.push('steps 空');
   return errs;
 }

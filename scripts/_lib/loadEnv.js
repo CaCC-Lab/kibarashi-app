@@ -3,6 +3,56 @@
 const fs = require('fs');
 const path = require('path');
 
+/** 行末のインラインコメント（直前が空白の #）を除去。URL の #fragment は空白なしのため残る。 */
+function stripUnquotedInlineComment(val) {
+  return val.replace(/\s+#.*$/, '').trim();
+}
+
+function parseDoubleQuotedBody(s) {
+  let out = '';
+  let i = 1;
+  while (i < s.length) {
+    const c = s[i];
+    if (c === '\\') {
+      i++;
+      if (i >= s.length) break;
+      const n = s[i];
+      if (n === 'n') out += '\n';
+      else if (n === 'r') out += '\r';
+      else if (n === 't') out += '\t';
+      else if (n === '"') out += '"';
+      else if (n === '\\') out += '\\';
+      else out += '\\' + n;
+      i++;
+      continue;
+    }
+    if (c === '"') return { value: out, end: i };
+    out += c;
+    i++;
+  }
+  return null;
+}
+
+/**
+ * KEY= の右辺を解釈（dotenv に近い: 未引用値の末尾 # コメント、引用値の閉じ後の # コメント）
+ */
+function parseDotenvValue(raw) {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+
+  if (trimmed.startsWith("'")) {
+    const end = trimmed.indexOf("'", 1);
+    if (end !== -1) {
+      return trimmed.slice(1, end).replace(/[\s\r\n]+$/, '');
+    }
+  } else if (trimmed.startsWith('"')) {
+    const parsed = parseDoubleQuotedBody(trimmed);
+    if (parsed) return parsed.value.replace(/[\s\r\n]+$/, '');
+  }
+
+  return stripUnquotedInlineComment(trimmed).replace(/[\s\r\n]+$/, '');
+}
+
 function parseDotenv(content) {
   const out = {};
   for (const raw of content.split(/\r?\n/)) {
@@ -11,27 +61,7 @@ function parseDotenv(content) {
     const eq = line.indexOf('=');
     if (eq === -1) continue;
     const key = line.slice(0, eq).trim();
-    let val = line.slice(eq + 1).trim();
-    // 引用符で囲まれている場合は外す
-    const dbl = val.startsWith('"') && val.endsWith('"');
-    const sgl = val.startsWith("'") && val.endsWith("'");
-    if (dbl || sgl) {
-      val = val.slice(1, -1);
-      // ダブルクォートの場合はエスケープ列を展開（Vercel env pull が末尾に \n を付けるケースに対応）
-      // 順序依存のバグを避けるため単一パスで処理（\\n → \n にせず \\ を先に保護）
-      if (dbl) {
-        val = val.replace(/\\(.)/g, (_, c) => {
-          if (c === 'n') return '\n';
-          if (c === 'r') return '\r';
-          if (c === 't') return '\t';
-          if (c === '"') return '"';
-          if (c === '\\') return '\\';
-          return '\\' + c; // 未知のエスケープは保持
-        });
-      }
-    }
-    // キー/URLの末尾に残った制御文字を除去（JWT や URL に改行/空白が混入すると検証が落ちるため）
-    val = val.replace(/[\s\r\n]+$/, '');
+    const val = parseDotenvValue(line.slice(eq + 1));
     out[key] = val;
   }
   return out;

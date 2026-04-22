@@ -144,6 +144,10 @@ function parseJsonArray(text) {
   }
   if (Array.isArray(parsed)) return parsed;
   if (parsed && Array.isArray(parsed.suggestions)) return parsed.suggestions;
+  if (parsed && typeof parsed === 'object') {
+    const arrayKey = Object.keys(parsed).find((k) => Array.isArray(parsed[k]));
+    if (arrayKey) return parsed[arrayKey];
+  }
   throw new Error('JSON配列が抽出できませんでした');
 }
 
