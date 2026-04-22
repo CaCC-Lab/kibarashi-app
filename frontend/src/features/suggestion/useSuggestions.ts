@@ -3,6 +3,7 @@ import { fetchSuggestions, Suggestion } from '../../services/api/suggestions';
 import { SituationId } from '../../types/situation';
 import { AgeGroup } from '../../types/ageGroup';
 import { fallbackSuggestions } from './fallbackSuggestions';
+import { ContextAxes } from '../../utils/contextAxes';
 
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '120000');
 
@@ -18,7 +19,8 @@ export const useSuggestions = () => {
     ageGroup?: AgeGroup,
     studentContext?: { concern?: string; subject?: string },
     location?: string,
-    skipCache?: boolean
+    skipCache?: boolean,
+    axes?: ContextAxes & { mood?: string }
   ) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -42,7 +44,8 @@ export const useSuggestions = () => {
         ageGroup,
         studentContext,
         location,
-        skipCache
+        skipCache,
+        axes
       );
 
       const data = await Promise.race([fetchPromise, timeoutPromise]) as {

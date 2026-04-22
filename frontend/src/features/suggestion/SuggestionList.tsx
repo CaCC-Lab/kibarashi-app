@@ -14,6 +14,8 @@ import { useStudentABTest } from '../../hooks/useStudentABTest';
 import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
 import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
 import { contextAPI, ContextualData } from '../../services/contextAPI';
+import { useWeather } from '../../hooks/useWeather';
+import { computeContextAxes } from '../../utils/contextAxes';
 
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
@@ -41,6 +43,13 @@ interface SuggestionListProps {
 const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false, geoPosition }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
+  const { weather } = useWeather();
+
+  // 文脈軸を計算（season / partOfDay / dayType は常時、weather / temperatureBand は useWeather から）
+  const contextAxes = computeContextAxes({
+    weatherCondition: weather?.condition,
+    temperature: weather?.temperature,
+  });
   
   // A/Bテスト統合
   const { 
@@ -139,7 +148,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     // コンテキストを統合
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
-    fetchSuggestions(situation, duration, currentAgeGroup, context, location);
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location, false, contextAxes);
   }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location]);
 
   // 再取得関数（キャッシュをスキップ）
@@ -162,7 +171,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
     // 「他の提案を見る」ボタンクリック時は必ずキャッシュをスキップ
-    fetchSuggestions(situation, duration, currentAgeGroup, context, location, true);
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location, true, contextAxes);
   };
 
   if (loading) {

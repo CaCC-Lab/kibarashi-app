@@ -1,9 +1,27 @@
 # 提案軸拡張 Spec（季節・天気・気分・平日/週末）
 
-**Status**: Draft
+**Status**: Phase 1 実装中（PR: feat/suggestion-axes-phase1）
 **Author**: Claude Code (AI)
 **Created**: 2026-04-22
+**Updated**: 2026-04-23
 **Related Memory**: `project_api_vision.md`, `project_api_consumers.md`
+
+## 実装ステータス (2026-04-23)
+
+| 軸 | 現状 | Phase |
+|---|---|---|
+| season | 実装中 | Phase 1 |
+| weather | 実装中 | Phase 1 |
+| temperature_band | 実装中 | Phase 1 |
+| part_of_day | 実装中 | Phase 1 |
+| day_type (weekday/weekend) | 実装中 | Phase 1 |
+| mood | 実装中 | Phase 1 |
+| 祝日判定 | 未着手 | Phase 2 |
+| stress_level / energy_level / company | 未着手 | Phase 3（UI摩擦あり） |
+| 既存データへのバックフィル | 未着手 | Phase 4 |
+
+Phase 1 は「フロントで自動計算 → API に送る → DB で空配列とマッチ or 実値と overlaps」という
+軽量な仕組みのみ。UI 追加・既存データ更新は含まない。
 
 ## 1. 目的 (Why)
 

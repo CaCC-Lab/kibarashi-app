@@ -57,11 +57,18 @@ module.exports = async (req, res) => {
     console.log('[SUGGESTIONS] Processing request...');
     
     // パラメータの取得と検証
-    const { 
-      situation = 'workplace', 
-      duration = '5', 
+    const {
+      situation = 'workplace',
+      duration = '5',
       ageGroup = 'office_worker',
-      skipCache = 'false'
+      skipCache = 'false',
+      // 自動軸（フロントから計算済みの値が渡る。空なら未指定扱い）
+      season,
+      weather,
+      temperatureBand,
+      partOfDay,
+      dayType,
+      mood,
     } = req.query;
     
     const durationNum = parseInt(duration);
@@ -74,13 +81,38 @@ module.exports = async (req, res) => {
     const normalizedSituation = validSituations.includes(situation) ? situation : 'workplace';
     const normalizedDuration = validDurations.includes(durationNum) ? durationNum : 5;
     const normalizedAgeGroup = validAgeGroups.includes(ageGroup) ? ageGroup : 'office_worker';
+
+    // 自動軸の正規化（不正値は undefined に落として filter をスキップ）
+    const validSeason = ['spring', 'summer', 'autumn', 'winter'];
+    const validWeather = ['sunny', 'cloudy', 'rainy', 'snowy'];
+    const validTempBand = ['cold', 'cool', 'mild', 'warm', 'hot'];
+    const validPartOfDay = ['morning', 'daytime', 'evening', 'night'];
+    const validDayType = ['weekday', 'weekend'];
+    const validMood = ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'];
+    const axes = {
+      season: validSeason.includes(season) ? season : undefined,
+      weather: validWeather.includes(weather) ? weather : undefined,
+      temperature_band: validTempBand.includes(temperatureBand) ? temperatureBand : undefined,
+      part_of_day: validPartOfDay.includes(partOfDay) ? partOfDay : undefined,
+      day_type: validDayType.includes(dayType) ? dayType : undefined,
+      mood: validMood.includes(mood) ? mood : undefined,
+    };
     
     let suggestions = null;
     let source = 'fallback';
     let debugInfo = {};
     
-    // キャッシュキーを生成
-    const cacheKey = cache.generateKey(normalizedSituation, normalizedDuration, normalizedAgeGroup);
+    // キャッシュキーを生成（軸の有無もキーに反映して誤ヒットを防ぐ）
+    const axisKey = Object.entries(axes)
+      .filter(([, v]) => v)
+      .map(([k, v]) => `${k}=${v}`)
+      .sort()
+      .join('&');
+    const cacheKey = cache.generateKey(
+      normalizedSituation,
+      normalizedDuration,
+      axisKey ? `${normalizedAgeGroup}|${axisKey}` : normalizedAgeGroup
+    );
     
     // skipCacheフラグをチェック
     const shouldSkipCache = skipCache === 'true' || skipCache === true;
@@ -103,7 +135,7 @@ module.exports = async (req, res) => {
     if (!suggestions) {
       try {
         console.log('[SUGGESTIONS] Cache miss, trying Supabase DB...');
-        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup);
+        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup, axes);
         if (dbResult && dbResult.length > 0) {
           suggestions = dbResult;
           source = 'database';

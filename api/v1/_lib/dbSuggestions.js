@@ -41,7 +41,13 @@ function normalizeAgeGroup(ageGroup) {
   return AGE_GROUP_ALIAS[ageGroup] || ageGroup;
 }
 
-async function getDbSuggestions(situation, duration, ageGroup) {
+// 自動取得可能な軸のフィルタリング仕様:
+//   - DB側: 空配列 = 「どの値にもマッチする汎用提案」
+//   - 渡された軸値がある行 = マッチ、空配列の行 = 常にマッチ
+// Supabase/PostgREST の .or() で (空配列 OR overlaps) を表現する。
+const AXIS_COLUMNS = ['season', 'weather', 'temperature_band', 'part_of_day', 'day_type', 'mood'];
+
+async function getDbSuggestions(situation, duration, ageGroup, axes = {}) {
   const client = getSupabase();
   if (!client) return null;
 
@@ -60,6 +66,19 @@ async function getDbSuggestions(situation, duration, ageGroup) {
     if (dbAgeGroup) {
       // age_groups 配列が指定の年齢層を含むものだけ返す
       query = query.overlaps('age_groups', [dbAgeGroup]);
+    }
+
+    // 自動軸: 値が渡されていれば「空配列 OR overlaps(値)」で絞り込み
+    // マイグレーション未適用の環境で query が壊れないよう env var で opt-in
+    const axesEnabled = process.env.CONTEXT_AXES_ENABLED === 'true';
+    if (axesEnabled) {
+      for (const col of AXIS_COLUMNS) {
+        const value = axes[col];
+        if (value && typeof value === 'string') {
+          // PostgREST .or() 構文: eq.{} は空配列一致、ov.{val} は overlaps
+          query = query.or(`${col}.eq.{},${col}.ov.{${value}}`);
+        }
+      }
     }
 
     const { data, error } = await query
