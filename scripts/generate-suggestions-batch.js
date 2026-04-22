@@ -162,7 +162,7 @@ function normalize(items, spec) {
     steps: Array.isArray(x.steps) ? x.steps.slice(0, 6).map((s) => String(s).trim()) : [],
     source: 'ai',
     quality_score: 3.0,
-    is_public: false,
+    is_public: true,
   })).filter((x) => x.title && x.steps.length >= 2);
 }
 
