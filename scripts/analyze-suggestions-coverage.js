@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const { loadEnv } = require('./_lib/loadEnv');
 loadEnv();
-const { createClient } = require('@supabase/supabase-js');
+const { getArg, getSupabase } = require('./_lib/common');
 
 const AGE_GROUPS = [
   'office_worker', 'student', 'middle_school', 'housewife',
@@ -31,22 +31,6 @@ const AGE_GROUP_SITUATIONS = {
 
 const DURATIONS = [5, 15, 30];
 const CATEGORIES = ['認知的', '行動的'];
-
-function getArg(flag, fallback = null) {
-  const idx = process.argv.indexOf(flag);
-  if (idx === -1) return fallback;
-  return process.argv[idx + 1] ?? fallback;
-}
-
-function getSupabase() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) {
-    console.error('Error: SUPABASE_URL と SUPABASE_SERVICE_ROLE_KEY (または SUPABASE_SERVICE_KEY) が必要です');
-    process.exit(1);
-  }
-  return createClient(url, key, { auth: { persistSession: false } });
-}
 
 async function fetchAll(supabase) {
   const all = [];

@@ -18,8 +18,16 @@ function parseDotenv(content) {
     if (dbl || sgl) {
       val = val.slice(1, -1);
       // ダブルクォートの場合はエスケープ列を展開（Vercel env pull が末尾に \n を付けるケースに対応）
+      // 順序依存のバグを避けるため単一パスで処理（\\n → \n にせず \\ を先に保護）
       if (dbl) {
-        val = val.replace(/\\n/g, '\n').replace(/\\r/g, '\r').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+        val = val.replace(/\\(.)/g, (_, c) => {
+          if (c === 'n') return '\n';
+          if (c === 'r') return '\r';
+          if (c === 't') return '\t';
+          if (c === '"') return '"';
+          if (c === '\\') return '\\';
+          return '\\' + c; // 未知のエスケープは保持
+        });
       }
     }
     // キー/URLの末尾に残った制御文字を除去（JWT や URL に改行/空白が混入すると検証が落ちるため）

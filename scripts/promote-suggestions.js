@@ -12,29 +12,17 @@
 //
 // 環境変数:
 //   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (または SUPABASE_SERVICE_KEY)
+//
+// 二重投入対策:
+//   INSERT 前にファイルを committed/ に `.inflight` サフィックスで移動する。
+//   INSERT 成功後にサフィックスを外して `.json` に戻す。再実行時は data/approved/ の
+//   直下のみ走査するため、`.inflight` のまま残ったファイルは再処理されない。
 
 const fs = require('fs');
 const path = require('path');
 const { loadEnv } = require('./_lib/loadEnv');
 loadEnv();
-const { createClient } = require('@supabase/supabase-js');
-
-function getArg(flag, fallback = null) {
-  const idx = process.argv.indexOf(flag);
-  if (idx === -1) return fallback;
-  return process.argv[idx + 1] ?? fallback;
-}
-function hasFlag(flag) { return process.argv.includes(flag); }
-
-function getSupabase() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) {
-    console.error('SUPABASE_URL と SUPABASE_SERVICE_ROLE_KEY が必要です');
-    process.exit(1);
-  }
-  return createClient(url, key, { auth: { persistSession: false } });
-}
+const { getArg, hasFlag, getSupabase } = require('./_lib/common');
 
 function listTargetFiles() {
   const file = getArg('--file');
@@ -91,7 +79,6 @@ async function main() {
   const committedDir = path.resolve('data/approved/committed');
   if (!dryRun) {
     fs.mkdirSync(committedDir, { recursive: true });
-    // 投入前に退避先の書込可否を検証（INSERT後にrename失敗で二重投入を防ぐ）
     try {
       fs.accessSync(committedDir, fs.constants.W_OK);
     } catch (err) {
@@ -105,12 +92,17 @@ async function main() {
   let okRows = 0, errRows = 0;
 
   for (const file of files) {
+    const base = path.basename(file);
+    const inflightPath = path.join(committedDir, base + '.inflight');
+    const finalPath = path.join(committedDir, base);
+    let movedToInflight = false;
+
     try {
       const payload = JSON.parse(fs.readFileSync(file, 'utf8'));
       const specDefault = payload.spec || {};
       const candidates = Array.isArray(payload.candidates) ? payload.candidates : [];
       if (candidates.length === 0) {
-        console.log(`  ${path.basename(file)}: 候補0件、スキップ`);
+        console.log(`  ${base}: 候補0件、スキップ`);
         skippedFiles += 1;
         continue;
       }
@@ -120,7 +112,7 @@ async function main() {
       for (const [i, r] of rows.entries()) {
         const errs = validate(r);
         if (errs.length) {
-          console.warn(`  [${path.basename(file)}][${i}] 無効: ${errs.join(', ')}`);
+          console.warn(`  [${base}][${i}] 無効: ${errs.join(', ')}`);
           errRows += 1;
         } else {
           validRows.push(r);
@@ -128,28 +120,49 @@ async function main() {
       }
 
       if (validRows.length === 0) {
-        console.log(`  ${path.basename(file)}: 有効候補0件、スキップ`);
+        console.log(`  ${base}: 有効候補0件、スキップ`);
         skippedFiles += 1;
         continue;
       }
 
       if (dryRun) {
-        console.log(`  ${path.basename(file)}: ${validRows.length} 件 INSERT 予定`);
+        console.log(`  ${base}: ${validRows.length} 件 INSERT 予定`);
         okRows += validRows.length;
-      } else {
-        const { data, error } = await supabase.from('suggestions_master').insert(validRows).select('id');
-        if (error) {
-          console.error(`  ${path.basename(file)}: 失敗 — ${error.message}`);
-          errRows += validRows.length;
-          continue;
-        }
-        console.log(`  ${path.basename(file)}: ${data.length} 件 INSERT`);
-        okRows += data.length;
-        fs.renameSync(file, path.join(committedDir, path.basename(file)));
+        okFiles += 1;
+        continue;
       }
+
+      // 1) INSERT前に inflight へ退避（以降 data/approved/ 直下からは見えなくなる）
+      fs.renameSync(file, inflightPath);
+      movedToInflight = true;
+
+      // 2) INSERT
+      const { data, error } = await supabase.from('suggestions_master').insert(validRows).select('id');
+      if (error) {
+        // INSERT失敗: inflight を元の位置に戻して再処理可能にする
+        try { fs.renameSync(inflightPath, file); } catch (_) {
+          console.warn(`  ${base}: rollback失敗、${inflightPath} を手動で戻してください`);
+        }
+        console.error(`  ${base}: 失敗 — ${error.message}`);
+        errRows += validRows.length;
+        continue;
+      }
+
+      // 3) INSERT 成功: サフィックスを外して .json に戻す（失敗してもDBは正、再実行は起きない）
+      try {
+        fs.renameSync(inflightPath, finalPath);
+      } catch (renameErr) {
+        console.warn(`  ${base}: rename 失敗 (${renameErr.message})、inflight のまま残ります (DBは投入済み)`);
+      }
+      console.log(`  ${base}: ${data.length} 件 INSERT`);
+      okRows += data.length;
       okFiles += 1;
     } catch (err) {
-      console.error(`  ${path.basename(file)}: 例外 — ${err.message}`);
+      // inflight に移動済みで例外が出た場合はロールバックを試みる（未INSERTの場合のみ）
+      if (movedToInflight && fs.existsSync(inflightPath) && !fs.existsSync(file)) {
+        try { fs.renameSync(inflightPath, file); } catch (_) { /* best-effort */ }
+      }
+      console.error(`  ${base}: 例外 — ${err.message}`);
       skippedFiles += 1;
     }
   }

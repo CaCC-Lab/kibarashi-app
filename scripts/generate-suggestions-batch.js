@@ -21,6 +21,7 @@ const fs = require('fs');
 const path = require('path');
 const { loadEnv } = require('./_lib/loadEnv');
 loadEnv();
+const { getArg, hasFlag } = require('./_lib/common');
 
 const AGE_GROUP_LABEL = {
   office_worker: '20-40代の社会人',
@@ -41,16 +42,6 @@ const SITUATION_LABEL = {
   commuting: '通学中・電車やバスの中',
   job_hunting: '就活・転職活動の合間（面接前や書類作成の疲れなど）',
 };
-
-function getArg(flag, fallback = null) {
-  const idx = process.argv.indexOf(flag);
-  if (idx === -1) return fallback;
-  return process.argv[idx + 1] ?? fallback;
-}
-
-function hasFlag(flag) {
-  return process.argv.includes(flag);
-}
 
 function buildPrompt({ ageGroup, situation, duration, category, count }) {
   const target = AGE_GROUP_LABEL[ageGroup] || ageGroup;
