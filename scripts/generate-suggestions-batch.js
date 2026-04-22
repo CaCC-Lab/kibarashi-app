@@ -93,24 +93,27 @@ async function callOllama(prompt) {
   const headers = { 'Content-Type': 'application/json' };
   if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
 
-  const res = await fetch(`${baseUrl}/api/chat`, {
-    method: 'POST',
-    headers,
-    signal: controller.signal,
-    body: JSON.stringify({
-      model,
-      messages: [
-        { role: 'system', content: 'あなたは気晴らし提案の専門家です。回答は JSON 配列のみ。' },
-        { role: 'user', content: prompt },
-      ],
-      stream: false,
-      options: { temperature: 0.9, num_predict: 6144 },
-    }),
-  });
-  clearTimeout(timeoutId);
-  if (!res.ok) throw new Error(`Ollama ${res.status}: ${res.statusText}`);
-  const json = await res.json();
-  return json?.message?.content || '';
+  try {
+    const res = await fetch(`${baseUrl}/api/chat`, {
+      method: 'POST',
+      headers,
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: 'あなたは気晴らし提案の専門家です。回答は JSON 配列のみ。' },
+          { role: 'user', content: prompt },
+        ],
+        stream: false,
+        options: { temperature: 0.9, num_predict: 6144 },
+      }),
+    });
+    if (!res.ok) throw new Error(`Ollama ${res.status}: ${res.statusText}`);
+    const json = await res.json();
+    return json?.message?.content || '';
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 async function callGemini(prompt) {
