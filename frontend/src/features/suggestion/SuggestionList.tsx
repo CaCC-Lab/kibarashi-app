@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import SuggestionCard from './SuggestionCard';
 import SuggestionDetail from './SuggestionDetail';
 import { useSuggestions } from './useSuggestions';
@@ -44,14 +44,14 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
   const { weather } = useWeather();
+  const weatherCondition = weather?.condition;
+  const weatherTemp = weather?.temperature;
 
-  // 文脈軸を計算（weather が変わったときだけ再計算。useEffect の依存を安定させる）
-  const contextAxes = useMemo(
-    () => computeContextAxes({
-      weatherCondition: weather?.condition,
-      temperature: weather?.temperature,
-    }),
-    [weather?.condition, weather?.temperature]
+  // 文脈軸は fetch の直前に毎回計算する（memoize すると partOfDay/dayType/season が
+  // 時刻経過で古くなってしまう）。buildAxes は Date.now() を都度参照する。
+  const buildAxes = useCallback(
+    () => computeContextAxes({ weatherCondition, temperature: weatherTemp }),
+    [weatherCondition, weatherTemp]
   );
   
   // A/Bテスト統合
@@ -151,8 +151,8 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     // コンテキストを統合
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
-    fetchSuggestions(situation, duration, currentAgeGroup, context, location, false, contextAxes);
-  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location, contextAxes]);
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location, false, buildAxes());
+  }, [situation, duration, currentAgeGroup, fetchSuggestions, isStudentOptimized, testGroup, isJobSeekerOptimized, isCareerChangerOptimized, location, buildAxes]);
 
   // 再取得関数（キャッシュをスキップ）
   const refetch = () => {
@@ -174,7 +174,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
     const context = studentContext || jobSeekerContext || careerChangerContext;
     
     // 「他の提案を見る」ボタンクリック時は必ずキャッシュをスキップ
-    fetchSuggestions(situation, duration, currentAgeGroup, context, location, true, contextAxes);
+    fetchSuggestions(situation, duration, currentAgeGroup, context, location, true, buildAxes());
   };
 
   if (loading) {
