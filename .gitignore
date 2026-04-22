@@ -21,8 +21,15 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Suggestion pipeline artifacts (local only, not committed)
+data/analysis/
+data/pending/
+data/approved/
+
 # Environment files
 .env
+.env.vercel
+.env.production
 .env.local
 .env.development.local
 .env.test.local
