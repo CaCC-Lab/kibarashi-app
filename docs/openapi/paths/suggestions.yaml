@@ -17,6 +17,50 @@ get:
         type: string
         enum: ['student', 'adult', 'senior']
         default: 'adult'
+    # 自動文脈軸（Phase 1 / すべて optional）
+    # CONTEXT_AXES_ENABLED=true のときのみ絞り込みに使用。既存提案は空配列で後方互換。
+    - name: season
+      in: query
+      description: 季節（任意）
+      required: false
+      schema:
+        type: string
+        enum: ['spring', 'summer', 'autumn', 'winter']
+    - name: weather
+      in: query
+      description: 天気（任意）
+      required: false
+      schema:
+        type: string
+        enum: ['sunny', 'cloudy', 'rainy', 'snowy']
+    - name: temperatureBand
+      in: query
+      description: 気温帯（任意）。cold=<10, cool=10-16, mild=17-22, warm=23-27, hot=28+（℃）
+      required: false
+      schema:
+        type: string
+        enum: ['cold', 'cool', 'mild', 'warm', 'hot']
+    - name: partOfDay
+      in: query
+      description: 時間帯（任意）。morning=5-10, daytime=11-16, evening=17-20, night=21-4
+      required: false
+      schema:
+        type: string
+        enum: ['morning', 'daytime', 'evening', 'night']
+    - name: dayType
+      in: query
+      description: 平日/週末（任意）。祝日判定は Phase 2 予定。
+      required: false
+      schema:
+        type: string
+        enum: ['weekday', 'weekend']
+    - name: mood
+      in: query
+      description: 気分（任意）。心理情報のためサーバログではマスクされる。
+      required: false
+      schema:
+        type: string
+        enum: ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm']
   responses:
     '200':
       description: 提案の取得に成功

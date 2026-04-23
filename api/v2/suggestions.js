@@ -65,7 +65,14 @@ module.exports = async (req, res) => {
       situation = 'workplace',
       duration = '5',
       ageGroup = 'office_worker',
-      skipCache = 'false'
+      skipCache = 'false',
+      // 自動軸（外部API利用者が任意で渡す）
+      season,
+      weather,
+      temperatureBand,
+      partOfDay,
+      dayType,
+      mood,
     } = req.query;
 
     const durationNum = parseInt(duration);
@@ -73,15 +80,43 @@ module.exports = async (req, res) => {
     const validDurations = [5, 15, 30];
     const validAgeGroups = ['office_worker', 'job_hunting_new_grad', 'job_hunting_career', 'student', 'general'];
 
+    // 自動軸の値域（v1 と揃える）
+    const validSeason = ['spring', 'summer', 'autumn', 'winter'];
+    const validWeather = ['sunny', 'cloudy', 'rainy', 'snowy'];
+    const validTempBand = ['cold', 'cool', 'mild', 'warm', 'hot'];
+    const validPartOfDay = ['morning', 'daytime', 'evening', 'night'];
+    const validDayType = ['weekday', 'weekend'];
+    const validMood = ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'];
+
     const normalizedSituation = validSituations.includes(situation) ? situation : 'workplace';
     const normalizedDuration = validDurations.includes(durationNum) ? durationNum : 5;
     const normalizedAgeGroup = validAgeGroups.includes(ageGroup) ? ageGroup : 'office_worker';
 
+    // 軸は CONTEXT_AXES_ENABLED のときだけ有効化（v1 と同じフラグ）
+    const axesEnabled = process.env.CONTEXT_AXES_ENABLED === 'true';
+    const axes = axesEnabled ? {
+      season: validSeason.includes(season) ? season : undefined,
+      weather: validWeather.includes(weather) ? weather : undefined,
+      temperature_band: validTempBand.includes(temperatureBand) ? temperatureBand : undefined,
+      part_of_day: validPartOfDay.includes(partOfDay) ? partOfDay : undefined,
+      day_type: validDayType.includes(dayType) ? dayType : undefined,
+      mood: validMood.includes(mood) ? mood : undefined,
+    } : {};
+
     let suggestions = null;
     let source = 'fallback';
 
-    // Cache check
-    const cacheKey = cache.generateKey(normalizedSituation, normalizedDuration, normalizedAgeGroup);
+    // Cache check（軸値もキャッシュキーに反映して誤ヒットを防ぐ）
+    const axisKey = Object.entries(axes)
+      .filter(([, v]) => v)
+      .map(([k, v]) => `${k}=${v}`)
+      .sort()
+      .join('&');
+    const cacheKey = cache.generateKey(
+      normalizedSituation,
+      normalizedDuration,
+      axisKey ? `${normalizedAgeGroup}|${axisKey}` : normalizedAgeGroup
+    );
     const shouldSkipCache = skipCache === 'true';
 
     if (!shouldSkipCache) {
@@ -95,7 +130,7 @@ module.exports = async (req, res) => {
     // DB first
     if (!suggestions) {
       try {
-        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup);
+        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup, axes);
         if (dbResult && dbResult.length > 0) {
           suggestions = dbResult;
           source = 'database';
