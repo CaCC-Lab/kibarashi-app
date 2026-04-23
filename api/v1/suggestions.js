@@ -4,6 +4,7 @@ const { OllamaClient } = require('./_lib/ollama.js');
 const { getDbSuggestions } = require('./_lib/dbSuggestions.js');
 const { getFallbackSuggestions } = require('./_lib/fallback.js');
 const { getCache } = require('./_lib/cache.js');
+const { buildAxes, buildAxisKey } = require('./_lib/contextAxes.js');
 
 let ollamaClient = null;
 let lastClientRefresh = 0;
@@ -86,34 +87,15 @@ module.exports = async (req, res) => {
     const normalizedDuration = validDurations.includes(durationNum) ? durationNum : 5;
     const normalizedAgeGroup = validAgeGroups.includes(ageGroup) ? ageGroup : 'office_worker';
 
-    // 自動軸の正規化（不正値は undefined に落として filter をスキップ）
-    const validSeason = ['spring', 'summer', 'autumn', 'winter'];
-    const validWeather = ['sunny', 'cloudy', 'rainy', 'snowy'];
-    const validTempBand = ['cold', 'cool', 'mild', 'warm', 'hot'];
-    const validPartOfDay = ['morning', 'daytime', 'evening', 'night'];
-    const validDayType = ['weekday', 'weekend'];
-    const validMood = ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'];
-    // CONTEXT_AXES_ENABLED=false のときは axes を空にしてキャッシュキーの分断も防ぐ
-    const axesEnabled = process.env.CONTEXT_AXES_ENABLED === 'true';
-    const axes = axesEnabled ? {
-      season: validSeason.includes(season) ? season : undefined,
-      weather: validWeather.includes(weather) ? weather : undefined,
-      temperature_band: validTempBand.includes(temperatureBand) ? temperatureBand : undefined,
-      part_of_day: validPartOfDay.includes(partOfDay) ? partOfDay : undefined,
-      day_type: validDayType.includes(dayType) ? dayType : undefined,
-      mood: validMood.includes(mood) ? mood : undefined,
-    } : {};
+    // 自動軸の正規化（v1/v2 共有）— CONTEXT_AXES_ENABLED=false なら {} が返る
+    const axes = buildAxes({ season, weather, temperatureBand, partOfDay, dayType, mood });
     
     let suggestions = null;
     let source = 'fallback';
     let debugInfo = {};
     
-    // キャッシュキーを生成（軸の有無もキーに反映して誤ヒットを防ぐ）
-    const axisKey = Object.entries(axes)
-      .filter(([, v]) => v)
-      .map(([k, v]) => `${k}=${v}`)
-      .sort()
-      .join('&');
+    // キャッシュキーを生成（mood は buildAxisKey 内でハッシュ化されて平文でログに出ない）
+    const axisKey = buildAxisKey(axes);
     const cacheKey = cache.generateKey(
       normalizedSituation,
       normalizedDuration,

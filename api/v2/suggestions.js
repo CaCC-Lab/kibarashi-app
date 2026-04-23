@@ -10,6 +10,7 @@ const { updateUsageLog } = require('./_lib/usageLogger.js');
 const { getFallbackSuggestions } = require('../v1/_lib/fallback.js');
 const { getDbSuggestions } = require('../v1/_lib/dbSuggestions.js');
 const { getCache } = require('../v1/_lib/cache.js');
+const { buildAxes, buildAxisKey } = require('../v1/_lib/contextAxes.js');
 
 let ollamaClient = null;
 let lastClientRefresh = 0;
@@ -65,7 +66,14 @@ module.exports = async (req, res) => {
       situation = 'workplace',
       duration = '5',
       ageGroup = 'office_worker',
-      skipCache = 'false'
+      skipCache = 'false',
+      // 自動軸（外部API利用者が任意で渡す）
+      season,
+      weather,
+      temperatureBand,
+      partOfDay,
+      dayType,
+      mood,
     } = req.query;
 
     const durationNum = parseInt(duration);
@@ -77,11 +85,19 @@ module.exports = async (req, res) => {
     const normalizedDuration = validDurations.includes(durationNum) ? durationNum : 5;
     const normalizedAgeGroup = validAgeGroups.includes(ageGroup) ? ageGroup : 'office_worker';
 
+    // 自動軸の正規化（v1/v2 共有）— CONTEXT_AXES_ENABLED=false なら {} が返る
+    const axes = buildAxes({ season, weather, temperatureBand, partOfDay, dayType, mood });
+
     let suggestions = null;
     let source = 'fallback';
 
-    // Cache check
-    const cacheKey = cache.generateKey(normalizedSituation, normalizedDuration, normalizedAgeGroup);
+    // Cache check（mood は buildAxisKey 内でハッシュ化）
+    const axisKey = buildAxisKey(axes);
+    const cacheKey = cache.generateKey(
+      normalizedSituation,
+      normalizedDuration,
+      axisKey ? `${normalizedAgeGroup}|${axisKey}` : normalizedAgeGroup
+    );
     const shouldSkipCache = skipCache === 'true';
 
     if (!shouldSkipCache) {
@@ -95,7 +111,7 @@ module.exports = async (req, res) => {
     // DB first
     if (!suggestions) {
       try {
-        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup);
+        const dbResult = await getDbSuggestions(normalizedSituation, normalizedDuration, normalizedAgeGroup, axes);
         if (dbResult && dbResult.length > 0) {
           suggestions = dbResult;
           source = 'database';
