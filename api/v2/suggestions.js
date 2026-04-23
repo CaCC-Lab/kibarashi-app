@@ -10,6 +10,7 @@ const { updateUsageLog } = require('./_lib/usageLogger.js');
 const { getFallbackSuggestions } = require('../v1/_lib/fallback.js');
 const { getDbSuggestions } = require('../v1/_lib/dbSuggestions.js');
 const { getCache } = require('../v1/_lib/cache.js');
+const { buildAxes, buildAxisKey } = require('../v1/_lib/contextAxes.js');
 
 let ollamaClient = null;
 let lastClientRefresh = 0;
@@ -80,38 +81,18 @@ module.exports = async (req, res) => {
     const validDurations = [5, 15, 30];
     const validAgeGroups = ['office_worker', 'job_hunting_new_grad', 'job_hunting_career', 'student', 'general'];
 
-    // 自動軸の値域（v1 と揃える）
-    const validSeason = ['spring', 'summer', 'autumn', 'winter'];
-    const validWeather = ['sunny', 'cloudy', 'rainy', 'snowy'];
-    const validTempBand = ['cold', 'cool', 'mild', 'warm', 'hot'];
-    const validPartOfDay = ['morning', 'daytime', 'evening', 'night'];
-    const validDayType = ['weekday', 'weekend'];
-    const validMood = ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'];
-
     const normalizedSituation = validSituations.includes(situation) ? situation : 'workplace';
     const normalizedDuration = validDurations.includes(durationNum) ? durationNum : 5;
     const normalizedAgeGroup = validAgeGroups.includes(ageGroup) ? ageGroup : 'office_worker';
 
-    // 軸は CONTEXT_AXES_ENABLED のときだけ有効化（v1 と同じフラグ）
-    const axesEnabled = process.env.CONTEXT_AXES_ENABLED === 'true';
-    const axes = axesEnabled ? {
-      season: validSeason.includes(season) ? season : undefined,
-      weather: validWeather.includes(weather) ? weather : undefined,
-      temperature_band: validTempBand.includes(temperatureBand) ? temperatureBand : undefined,
-      part_of_day: validPartOfDay.includes(partOfDay) ? partOfDay : undefined,
-      day_type: validDayType.includes(dayType) ? dayType : undefined,
-      mood: validMood.includes(mood) ? mood : undefined,
-    } : {};
+    // 自動軸の正規化（v1/v2 共有）— CONTEXT_AXES_ENABLED=false なら {} が返る
+    const axes = buildAxes({ season, weather, temperatureBand, partOfDay, dayType, mood });
 
     let suggestions = null;
     let source = 'fallback';
 
-    // Cache check（軸値もキャッシュキーに反映して誤ヒットを防ぐ）
-    const axisKey = Object.entries(axes)
-      .filter(([, v]) => v)
-      .map(([k, v]) => `${k}=${v}`)
-      .sort()
-      .join('&');
+    // Cache check（mood は buildAxisKey 内でハッシュ化）
+    const axisKey = buildAxisKey(axes);
     const cacheKey = cache.generateKey(
       normalizedSituation,
       normalizedDuration,

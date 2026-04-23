@@ -3,6 +3,12 @@ get:
   description: |
     指定された状況と利用可能時間に基づいて、3つの気晴らし提案を返します。
     提案はGemini APIを使用して生成され、フォールバックデータも用意されています。
+
+    **文脈軸（Phase 1）**: `season` / `weather` / `temperatureBand` / `partOfDay` /
+    `dayType` / `mood` は optional。サーバの環境変数 `CONTEXT_AXES_ENABLED=true`
+    の環境でのみ絞り込みに使用されます。未サポート値は **400 ではなく無視**され
+    軸なしクエリとして処理されます（後方互換のため）。
+    `mood` は心理情報のため、サーバログ上では値そのものではなくハッシュ化された形で扱われます。
   operationId: getSuggestions
   tags:
     - suggestions
@@ -17,8 +23,7 @@ get:
         type: string
         enum: ['student', 'adult', 'senior']
         default: 'adult'
-    # 自動文脈軸（Phase 1 / すべて optional）
-    # CONTEXT_AXES_ENABLED=true のときのみ絞り込みに使用。既存提案は空配列で後方互換。
+    # 自動文脈軸（Phase 1 / すべて optional）— 詳細は operation description 参照
     - name: season
       in: query
       description: 季節（任意）
