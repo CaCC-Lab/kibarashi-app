@@ -50,7 +50,7 @@ const HomeMood: React.FC<HomeMoodProps> = ({ selected, onSelect }) => {
             margin: '0 0 28px',
           }}
         >
-          それに合わせた5分を提案します
+          それに合わせた気晴らしを提案します
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
