@@ -73,7 +73,7 @@ const HomeCTA: React.FC<HomeCTAProps> = ({
             margin: '0 0 32px', lineHeight: 1.7,
           }}
         >
-          5分の気晴らしを用意しました。<br />気が向いたら、押してみてください。
+          {duration ?? 5}分の気晴らしを用意しました。<br />気が向いたら、押してみてください。
         </p>
       </div>
 
