@@ -45,7 +45,11 @@ function normalizeAgeGroup(ageGroup) {
 //   - DB側: 空配列 = 「どの値にもマッチする汎用提案」
 //   - 渡された軸値がある行 = マッチ、空配列の行 = 常にマッチ
 // Supabase/PostgREST の .or() で (空配列 OR overlaps) を表現する。
-const AXIS_COLUMNS = ['season', 'weather', 'temperature_band', 'part_of_day', 'day_type', 'mood', 'intent', 'seasonal_events'];
+const AXIS_COLUMNS = [
+  'season', 'weather', 'temperature_band', 'part_of_day', 'day_type',
+  'mood', 'intent', 'seasonal_events',
+  'energy_level', 'social_context', 'time_pressure',
+];
 
 async function getDbSuggestions(situation, duration, ageGroup, axes = {}) {
   const client = getSupabase();

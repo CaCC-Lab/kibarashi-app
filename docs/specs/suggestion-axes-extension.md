@@ -20,8 +20,8 @@
 | **介入タイプ軸（activating/calming/mindful/problem_solving）** | 計画中 | **Phase 3** |
 | **is_universal フラグ（汎用かAI不確実かの曖昧解消）** | 計画中 | **Phase 3** |
 | 祝日判定（japanese-holidays + day_type 拡張） | 計画中 | Phase 3 |
-| seasonal_event 拡張テーブル（梅雨・年度・年末年始） | 計画中 | Phase 4 |
-| エネルギーレベル軸 / 同居軸 / 時間圧迫軸 | 未着手（UI摩擦あり） | Phase 5 |
+| seasonal_event 拡張テーブル（梅雨・年度・年末年始） | ✅ デプロイ済 (PR #43) | Phase 4 |
+| エネルギー軸 / 社会的文脈軸 / 時間圧迫軸 + HomeState UI | 実装中 | Phase 5 |
 
 ## Phase 3 スコープ（Codex / Cursor レビュー反映）
 

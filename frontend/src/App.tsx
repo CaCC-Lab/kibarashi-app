@@ -11,7 +11,8 @@ import { DebugModeToggle } from './components/debug/DebugModeToggle';
 import { BadgeEngine } from './services/gamification/badgeEngine';
 import { MissionGenerator } from './services/gamification/missionGenerator';
 import BadgeNotification from './features/badge/BadgeNotification';
-import type { MoodId } from './features/home/HomeMood';
+import type { MoodId, HomeStateAnswers } from './features/home/HomeState';
+import type { EnergyLevel, SocialContext, TimePressure } from './utils/contextAxes';
 
 const SituationSelector = lazy(() => import('./features/situation/SituationSelector'));
 const DurationSelector = lazy(() => import('./features/duration/DurationSelector'));
@@ -20,7 +21,7 @@ const FavoritesList = lazy(() => import('./features/favorites/FavoritesList'));
 const HistoryList = lazy(() => import('./features/history/HistoryList'));
 const Settings = lazy(() => import('./features/settings/Settings'));
 const HomeCTA = lazy(() => import('./features/home/HomeCTA'));
-const HomeMood = lazy(() => import('./features/home/HomeMood'));
+const HomeState = lazy(() => import('./features/home/HomeState'));
 // const CustomSuggestionList = lazy(() => import('./features/custom/CustomSuggestionList'));
 
 type HomeStep = 'intro' | 'situation' | 'duration' | 'suggestions';
@@ -39,6 +40,9 @@ function App() {
   const [situation, setSituation] = useState<SituationId | null>(null);
   const [duration, setDuration] = useState<5 | 15 | 30 | null>(null);
   const [mood, setMood] = useState<MoodId | null>(null);
+  const [energyLevel, setEnergyLevel] = useState<EnergyLevel | null>(null);
+  const [socialContext, setSocialContext] = useState<SocialContext | null>(null);
+  const [timePressure, setTimePressure] = useState<TimePressure | null>(null);
 
   // GPS位置情報のみで場所を管理（手動選択は廃止）
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -97,6 +101,9 @@ function App() {
       setSituation(null);
       setDuration(null);
       setMood(null);
+      setEnergyLevel(null);
+      setSocialContext(null);
+      setTimePressure(null);
     }
     setActiveTab(tab);
   };
@@ -117,6 +124,9 @@ function App() {
     setSituation(null);
     setDuration(null);
     setMood(null);
+    setEnergyLevel(null);
+    setSocialContext(null);
+    setTimePressure(null);
     setHomeStep(homeStartStep);
   };
 
@@ -135,9 +145,22 @@ function App() {
     setHomeStep('suggestions');
   };
 
-  const handleMoodSelect = (m: MoodId | null) => {
-    setMood(m);
-    // 気分型は状況/時間を既定値で埋めて直接提案へ
+  const handleStateSubmit = (answers: HomeStateAnswers) => {
+    setMood(answers.mood);
+    setEnergyLevel(answers.energyLevel);
+    setSocialContext(answers.socialContext);
+    setTimePressure(answers.timePressure);
+    // state 型は状況/時間を既定値で埋めて直接提案へ
+    setSituation(situation ?? 'home');
+    setDuration(duration ?? 5);
+    setHomeStep('suggestions');
+  };
+
+  const handleStateSkip = () => {
+    setMood(null);
+    setEnergyLevel(null);
+    setSocialContext(null);
+    setTimePressure(null);
     setSituation(situation ?? 'home');
     setDuration(duration ?? 5);
     setHomeStep('suggestions');
@@ -187,7 +210,11 @@ function App() {
               />
             )}
             {appearance.homeVariant === 'mood' && (
-              <HomeMood selected={mood} onSelect={handleMoodSelect} />
+              <HomeState
+                selected={{ mood, energyLevel, socialContext, timePressure }}
+                onSubmit={handleStateSubmit}
+                onSkip={handleStateSkip}
+              />
             )}
           </Suspense>
         </div>
@@ -209,7 +236,16 @@ function App() {
               <DurationSelector selected={duration} onSelect={handleDurationSelect} />
             )}
             {homeStep === 'suggestions' && situation && duration && (
-              <SuggestionList situation={situation} duration={duration} debugMode={debugMode} geoPosition={geoPosition} mood={mood} />
+              <SuggestionList
+                situation={situation}
+                duration={duration}
+                debugMode={debugMode}
+                geoPosition={geoPosition}
+                mood={mood}
+                energyLevel={energyLevel}
+                socialContext={socialContext}
+                timePressure={timePressure}
+              />
             )}
           </Suspense>
         </div>

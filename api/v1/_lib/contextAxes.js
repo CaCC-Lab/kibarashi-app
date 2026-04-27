@@ -19,6 +19,9 @@ const VALID = {
   mood: ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'],
   intent: ['activating', 'calming', 'mindful', 'problem_solving'],
   seasonal_events: ['rainy_season', 'gw', 'obon', 'year_end_new_year', 'fiscal_year_change', 'pollen_high', 'heat_wave'],
+  energy_level: ['low', 'medium', 'high'],
+  social_context: ['alone', 'with_others'],
+  time_pressure: ['relaxed', 'pressed'],
 };
 
 /**
@@ -40,6 +43,9 @@ function buildAxes(input = {}) {
     mood: pick('mood', input.mood),
     intent: pick('intent', input.intent),
     seasonal_events: pick('seasonal_events', input.seasonalEvent),
+    energy_level: pick('energy_level', input.energyLevel),
+    social_context: pick('social_context', input.socialContext),
+    time_pressure: pick('time_pressure', input.timePressure),
   };
 }
 

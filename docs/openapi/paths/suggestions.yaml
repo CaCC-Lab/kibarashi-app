@@ -80,6 +80,27 @@ get:
       schema:
         type: string
         enum: ['rainy_season', 'gw', 'obon', 'year_end_new_year', 'fiscal_year_change', 'pollen_high', 'heat_wave']
+    - name: energyLevel
+      in: query
+      description: エネルギーレベル（任意 / Phase 5）。HomeState の「元気度」回答。
+      required: false
+      schema:
+        type: string
+        enum: ['low', 'medium', 'high']
+    - name: socialContext
+      in: query
+      description: 社会的文脈（任意 / Phase 5）。一人/他者と のどちらか。
+      required: false
+      schema:
+        type: string
+        enum: ['alone', 'with_others']
+    - name: timePressure
+      in: query
+      description: 時間圧迫（任意 / Phase 5）。relaxed=余裕、pressed=急ぎ。
+      required: false
+      schema:
+        type: string
+        enum: ['relaxed', 'pressed']
   responses:
     '200':
       description: 提案の取得に成功
