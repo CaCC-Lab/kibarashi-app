@@ -69,6 +69,9 @@ export async function fetchSuggestions(
     if (axes.mood) params.set('mood', axes.mood);
     if (axes.intent) params.set('intent', axes.intent);
     if (axes.seasonalEvent) params.set('seasonalEvent', axes.seasonalEvent);
+    if (axes.energyLevel) params.set('energyLevel', axes.energyLevel);
+    if (axes.socialContext) params.set('socialContext', axes.socialContext);
+    if (axes.timePressure) params.set('timePressure', axes.timePressure);
   }
 
   const url = `/api/v1/suggestions?${params.toString()}`;

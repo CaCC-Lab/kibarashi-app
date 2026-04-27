@@ -17,6 +17,9 @@ export type SeasonalEventCode =
   | 'fiscal_year_change'
   | 'pollen_high'
   | 'heat_wave';
+export type EnergyLevel = 'low' | 'medium' | 'high';
+export type SocialContext = 'alone' | 'with_others';
+export type TimePressure = 'relaxed' | 'pressed';
 
 export interface ContextAxes {
   season?: Season;
@@ -27,6 +30,9 @@ export interface ContextAxes {
   mood?: Mood;
   intent?: Intent;
   seasonalEvent?: SeasonalEventCode;
+  energyLevel?: EnergyLevel;
+  socialContext?: SocialContext;
+  timePressure?: TimePressure;
 }
 
 export function getSeason(date: Date = new Date()): Season {

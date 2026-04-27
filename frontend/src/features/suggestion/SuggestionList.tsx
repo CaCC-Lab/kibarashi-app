@@ -16,7 +16,7 @@ import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
 import { contextAPI, ContextualData } from '../../services/contextAPI';
 import { useWeather } from '../../hooks/useWeather';
 import { useSeasonalEvents } from '../../hooks/useSeasonalEvents';
-import { computeContextAxes, mapHomeMoodToAxis, type SeasonalEventCode } from '../../utils/contextAxes';
+import { computeContextAxes, mapHomeMoodToAxis, type SeasonalEventCode, type EnergyLevel, type SocialContext, type TimePressure } from '../../utils/contextAxes';
 
 // 複数イベントが重なる場合の優先順位（より「特別感」が高いものを先に）
 const SEASONAL_EVENT_PRIORITY: SeasonalEventCode[] = [
@@ -44,8 +44,12 @@ interface SuggestionListProps {
   location?: string;
   debugMode?: boolean;
   geoPosition?: { lat: number; lon: number } | null;
-  // HomeMood で選んだ気分。DB の Mood enum にマップして API に送る。
+  // HomeMood/HomeState で選んだ気分。DB の Mood enum にマップして API に送る。
   mood?: string | null;
+  // Phase 5: HomeState で選んだ追加の状態
+  energyLevel?: EnergyLevel | null;
+  socialContext?: SocialContext | null;
+  timePressure?: TimePressure | null;
 }
 
 /**
@@ -61,7 +65,7 @@ interface SuggestionListProps {
  * - 選択肢を一覧で表示し、興味を持ったものの詳細を確認できる
  * - ネットワークエラー等で失敗しても、ユーザーがあきらめずに済む
  */
-const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false, geoPosition, mood }) => {
+const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false, geoPosition, mood, energyLevel, socialContext, timePressure }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
   const { weather } = useWeather();
@@ -81,8 +85,11 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
       ...computeContextAxes({ weatherCondition, temperature: weatherTemp }),
       mood: mapHomeMoodToAxis(mood),
       seasonalEvent: pickPrimaryEvent(seasonalEventKey ? seasonalEventKey.split(',') : []),
+      energyLevel: energyLevel ?? undefined,
+      socialContext: socialContext ?? undefined,
+      timePressure: timePressure ?? undefined,
     }),
-    [weatherCondition, weatherTemp, mood, seasonalEventKey]
+    [weatherCondition, weatherTemp, mood, seasonalEventKey, energyLevel, socialContext, timePressure]
   );
   
   // A/Bテスト統合
