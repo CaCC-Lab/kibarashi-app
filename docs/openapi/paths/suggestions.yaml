@@ -54,18 +54,25 @@ get:
         enum: ['morning', 'daytime', 'evening', 'night']
     - name: dayType
       in: query
-      description: 平日/週末（任意）。祝日判定は Phase 2 予定。
+      description: 平日/週末/祝日（任意）。祝日判定は japanese-holidays ライブラリで自動。
       required: false
       schema:
         type: string
-        enum: ['weekday', 'weekend']
+        enum: ['weekday', 'weekend', 'holiday']
     - name: mood
       in: query
-      description: 気分（任意）。心理情報のためサーバログではマスクされる。
+      description: 気分（任意）。心理情報のためサーバログではハッシュ化される。
       required: false
       schema:
         type: string
         enum: ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm']
+    - name: intent
+      in: query
+      description: 介入タイプ（任意）。activating=元気回復、calming=落ち着き、mindful=今に集中、problem_solving=思考整理。
+      required: false
+      schema:
+        type: string
+        enum: ['activating', 'calming', 'mindful', 'problem_solving']
   responses:
     '200':
       description: 提案の取得に成功

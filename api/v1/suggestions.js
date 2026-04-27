@@ -74,6 +74,7 @@ module.exports = async (req, res) => {
       partOfDay,
       dayType,
       mood,
+      intent,
     } = req.query;
     
     const durationNum = parseInt(duration);
@@ -88,7 +89,7 @@ module.exports = async (req, res) => {
     const normalizedAgeGroup = validAgeGroups.includes(ageGroup) ? ageGroup : 'office_worker';
 
     // 自動軸の正規化（v1/v2 共有）— CONTEXT_AXES_ENABLED=false なら {} が返る
-    const axes = buildAxes({ season, weather, temperatureBand, partOfDay, dayType, mood });
+    const axes = buildAxes({ season, weather, temperatureBand, partOfDay, dayType, mood, intent });
     
     let suggestions = null;
     let source = 'fallback';

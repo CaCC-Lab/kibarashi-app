@@ -13,14 +13,70 @@
 | 6軸スキーマ + GIN インデックス | ✅ 本番適用済 | Phase 1 |
 | API v1/v2 で軸クエリ受理 | ✅ デプロイ済 | Phase 1 |
 | フロント自動計算 + 配信 | ✅ デプロイ済 | Phase 1 |
-| `CONTEXT_AXES_ENABLED=true` 本番セット | ✅ 適用済 (2026-04-27) | Phase 1 |
-| **既存提案へのAI軸タグ付け** | ✅ ツール実装、運用待ち | **Phase 2** |
-| **新規生成時の軸タグ自動付与** | ✅ 実装済（プロンプトに axes を組込） | **Phase 2** |
-| 祝日判定（japanese-holidays） | 未着手 | Phase 3 |
-| stress_level / energy_level / company | 未着手 | Phase 4（UI摩擦あり） |
+| `CONTEXT_AXES_ENABLED=true` 本番セット | ✅ 適用済 | Phase 1 |
+| 既存提案へのAI軸タグ付け（323/390 = 83%） | ✅ 適用済 | Phase 2 |
+| 新規生成時の軸タグ自動付与 | ✅ 実装済 | Phase 2 |
+| HomeMood → mood 軸の配線 | ✅ デプロイ済 (PR #40) | Phase 2 |
+| **介入タイプ軸（activating/calming/mindful/problem_solving）** | 計画中 | **Phase 3** |
+| **is_universal フラグ（汎用かAI不確実かの曖昧解消）** | 計画中 | **Phase 3** |
+| 祝日判定（japanese-holidays + day_type 拡張） | 計画中 | Phase 3 |
+| seasonal_event 拡張テーブル（梅雨・年度・年末年始） | 計画中 | Phase 4 |
+| エネルギーレベル軸 / 同居軸 / 時間圧迫軸 | 未着手（UI摩擦あり） | Phase 5 |
 
-Phase 1 完了: スキーマ・API・フロント配線・本番有効化まで一通り通った。
-Phase 2 完了基準: 既存390件の半数以上に軸タグを付与し、軸を変えると返ってくる提案が変わることを実機で確認。
+## Phase 3 スコープ（Codex / Cursor レビュー反映）
+
+両bot共通の指摘:
+- 軸選定は概ね妥当。だが「実行可能性」と「介入タイプ」が見落とし
+- 空配列フォールバックの曖昧性（汎用 vs AI不確実）が A/B 検証でノイズに
+- 多値タグの過適用がノイズ化（特に mood/weather）
+
+### Phase 3 で対応する3項目（UIフリクション 0 のものから）
+
+#### 3-1: 介入タイプ軸 `intent` (Cursor指摘)
+- 値域: `activating` / `calming` / `mindful` / `problem_solving`
+- 既存提案を AI で再分類（既存の tag-suggestions-axes.js の延長）
+- 「説明責任」が立つ軸: ユーザーに「なぜこの提案？」を返せる
+
+#### 3-2: `is_universal` フラグ (Cursor指摘)
+- boolean カラム追加。AI タグ時に「明示的に汎用」と「自信なくて空」を区別
+- レコメンドスコアの後段で「汎用は減点」「AI不確実は除外」のような扱い分けが可能に
+
+#### 3-3: 祝日対応 `day_type` 拡張
+- 既存 `day_type` enum に `holiday` を追加
+- フロントで `japanese-holidays` 等のライブラリで祝日判定
+- 連休中・GW・年末年始の特殊体験提供への第一歩
+
+### Phase 3 で扱わない（理由付き）
+
+- **エネルギーレベル軸**: ユーザー明示入力が必要 → HomeMood と同等のUI追加が必要 → 摩擦大
+- **同居軸 / 社会的孤立**: プライバシー配慮が複雑、UIで聞きにくい
+- **時間圧迫軸**: duration で部分的に表現済み、追加価値が不明確
+- **seasonal_event**: テーブル追加が必要、Phase 4 に分離
+
+### マイグレーション計画
+
+```sql
+ALTER TABLE suggestions_master
+  ADD COLUMN IF NOT EXISTS intent text[] NOT NULL DEFAULT '{}'::text[],
+  ADD COLUMN IF NOT EXISTS is_universal boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_suggestions_master_intent ON suggestions_master USING GIN (intent);
+
+-- day_type の既存値を変更しない。新値 'holiday' を許容する CHECK は加えない
+-- （PostgreSQL の text[] には enum 制約がないため、validation は API 側で行う）
+```
+
+### API変更
+- `intent` クエリパラメータ追加（v1/v2 共通）
+- `day_type=holiday` を valid 値に追加
+
+### フロント変更
+- `dayType` 計算ヘルパーに祝日判定追加（`japanese-holidays` パッケージ）
+- intent は当初フロントから送らず、サーバ後段スコア用にDBに持つだけでもOK
+
+### 完了基準
+- 既存390件のうち200件以上に `intent` 軸が付与される
+- 「祝日に開いたとき特別な提案」が動くことを実機確認
+- A/B で「汎用提案だらけ」状態と「文脈特化が混ざる」状態のヒット内容差が見える
 
 ## 1. 目的 (Why)
 

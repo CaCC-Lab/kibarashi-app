@@ -15,8 +15,9 @@ const VALID = {
   weather: ['sunny', 'cloudy', 'rainy', 'snowy'],
   temperature_band: ['cold', 'cool', 'mild', 'warm', 'hot'],
   part_of_day: ['morning', 'daytime', 'evening', 'night'],
-  day_type: ['weekday', 'weekend'],
+  day_type: ['weekday', 'weekend', 'holiday'],
   mood: ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'],
+  intent: ['activating', 'calming', 'mindful', 'problem_solving'],
 };
 
 /**
@@ -36,6 +37,7 @@ function buildAxes(input = {}) {
     part_of_day: pick('part_of_day', input.partOfDay),
     day_type: pick('day_type', input.dayType),
     mood: pick('mood', input.mood),
+    intent: pick('intent', input.intent),
   };
 }
 

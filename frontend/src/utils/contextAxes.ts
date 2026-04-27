@@ -1,12 +1,14 @@
-// 提案軸（season / part_of_day / day_type / temperature_band / weather）の計算
+// 提案軸（season / part_of_day / day_type / temperature_band / weather / mood / intent）の計算
 // 仕様: docs/specs/suggestion-axes-extension.md
+import { isHoliday } from 'japanese-holidays';
 
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
 export type Weather = 'sunny' | 'cloudy' | 'rainy' | 'snowy';
 export type TemperatureBand = 'cold' | 'cool' | 'mild' | 'warm' | 'hot';
 export type PartOfDay = 'morning' | 'daytime' | 'evening' | 'night';
-export type DayType = 'weekday' | 'weekend';
+export type DayType = 'weekday' | 'weekend' | 'holiday';
 export type Mood = 'tired' | 'anxious' | 'irritated' | 'lonely' | 'bored' | 'sad' | 'calm';
+export type Intent = 'activating' | 'calming' | 'mindful' | 'problem_solving';
 
 export interface ContextAxes {
   season?: Season;
@@ -15,6 +17,7 @@ export interface ContextAxes {
   partOfDay?: PartOfDay;
   dayType?: DayType;
   mood?: Mood;
+  intent?: Intent;
 }
 
 export function getSeason(date: Date = new Date()): Season {
@@ -34,8 +37,12 @@ export function getPartOfDay(date: Date = new Date()): PartOfDay {
 }
 
 export function getDayType(date: Date = new Date()): DayType {
+  // 祝日（振替休日含む）が最優先。
+  // 注: 祝日に開いた時、現状ほぼ全ての提案は day_type=[] (=どの値にもマッチ) なので
+  // DB ヒット率は維持される。day_type=['weekday'] のみタグ済の少数提案だけが
+  // 祝日にヒットしなくなる。Phase 2 再タグ付け時に holiday を含める運用で解消可能。
+  if (isHoliday(date)) return 'holiday';
   const d = date.getDay();
-  // 祝日判定は Phase 2 で japanese-holidays 等を導入予定
   return d === 0 || d === 6 ? 'weekend' : 'weekday';
 }
 
