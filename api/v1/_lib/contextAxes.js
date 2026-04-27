@@ -18,6 +18,7 @@ const VALID = {
   day_type: ['weekday', 'weekend', 'holiday'],
   mood: ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'],
   intent: ['activating', 'calming', 'mindful', 'problem_solving'],
+  seasonal_events: ['rainy_season', 'gw', 'obon', 'year_end_new_year', 'fiscal_year_change', 'pollen_high', 'heat_wave'],
 };
 
 /**
@@ -38,6 +39,7 @@ function buildAxes(input = {}) {
     day_type: pick('day_type', input.dayType),
     mood: pick('mood', input.mood),
     intent: pick('intent', input.intent),
+    seasonal_events: pick('seasonal_events', input.seasonalEvent),
   };
 }
 

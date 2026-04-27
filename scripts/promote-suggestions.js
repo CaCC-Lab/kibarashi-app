@@ -62,6 +62,7 @@ function coerceRow(c, specDefault) {
     day_type: coerceAxisColumn('day_type', c.day_type),
     mood: coerceAxisColumn('mood', c.mood),
     intent: coerceAxisColumn('intent', c.intent),
+    seasonal_events: coerceAxisColumn('seasonal_events', c.seasonal_events),
     is_universal: c.is_universal === true,
     source: c.source || 'ai',
     is_public: typeof c.is_public === 'boolean' ? c.is_public : true,

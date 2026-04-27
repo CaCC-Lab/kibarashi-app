@@ -9,6 +9,14 @@ export type PartOfDay = 'morning' | 'daytime' | 'evening' | 'night';
 export type DayType = 'weekday' | 'weekend' | 'holiday';
 export type Mood = 'tired' | 'anxious' | 'irritated' | 'lonely' | 'bored' | 'sad' | 'calm';
 export type Intent = 'activating' | 'calming' | 'mindful' | 'problem_solving';
+export type SeasonalEventCode =
+  | 'rainy_season'
+  | 'gw'
+  | 'obon'
+  | 'year_end_new_year'
+  | 'fiscal_year_change'
+  | 'pollen_high'
+  | 'heat_wave';
 
 export interface ContextAxes {
   season?: Season;
@@ -18,6 +26,7 @@ export interface ContextAxes {
   dayType?: DayType;
   mood?: Mood;
   intent?: Intent;
+  seasonalEvent?: SeasonalEventCode;
 }
 
 export function getSeason(date: Date = new Date()): Season {

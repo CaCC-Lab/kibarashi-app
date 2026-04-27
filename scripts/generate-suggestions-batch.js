@@ -78,6 +78,7 @@ function buildPrompt({ ageGroup, situation, duration, category, count }) {
       "day_type": [],
       "mood": [],
       "intent": [],
+      "seasonal_events": [],
       "is_universal": false
     }
   }
@@ -96,6 +97,7 @@ function buildPrompt({ ageGroup, situation, duration, category, count }) {
 - day_type: weekday / weekend / holiday
 - mood: tired / anxious / irritated / lonely / bored / sad / calm
 - intent: activating / calming / mindful / problem_solving（介入タイプ。1〜2個推奨）
+- seasonal_events: rainy_season / gw / obon / year_end_new_year / fiscal_year_change / pollen_high / heat_wave（特定期間に強くフィットする提案のみ、汎用なら空配列）
 - is_universal: true なら「いつでも誰でも適切な普遍提案」を明言（不確実なら false）
 `;
 }
