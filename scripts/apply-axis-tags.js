@@ -59,9 +59,11 @@ function validateAxes(axes) {
 
 function pickAxes(axes) {
   // 既知の軸カラム + is_universal だけを抽出（余分なキーをDBに送らない）
+  // is_universal は false→true への昇格のみ送る（true→false の上書き事故を防ぐ）。
+  // 明示的に false を送りたい場合は別途 --allow-universal-downgrade を将来検討。
   const out = {};
   for (const col of ARRAY_COLUMNS) out[col] = axes[col];
-  if (typeof axes.is_universal === 'boolean') out.is_universal = axes.is_universal;
+  if (axes.is_universal === true) out.is_universal = true;
   return out;
 }
 

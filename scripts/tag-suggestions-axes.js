@@ -155,7 +155,10 @@ async function fetchTargets(supabase, { limit, onlyUntagged }) {
     process.exit(1);
   }
   if (!onlyUntagged) return data;
+  // 「未タグ」=「全配列カラムが空 かつ is_universal=false」
+  // is_universal=true は明示的に汎用と判断済みなので再タグ付け対象外
   const untagged = data.filter((r) =>
+    !r.is_universal &&
     Object.keys(VALID).every((c) => !Array.isArray(r[c]) || r[c].length === 0)
   );
   return limit ? untagged.slice(0, limit) : untagged;

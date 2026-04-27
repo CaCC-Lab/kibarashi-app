@@ -37,7 +37,10 @@ export function getPartOfDay(date: Date = new Date()): PartOfDay {
 }
 
 export function getDayType(date: Date = new Date()): DayType {
-  // 祝日（振替休日含む）が最優先
+  // 祝日（振替休日含む）が最優先。
+  // 注: 祝日に開いた時、現状ほぼ全ての提案は day_type=[] (=どの値にもマッチ) なので
+  // DB ヒット率は維持される。day_type=['weekday'] のみタグ済の少数提案だけが
+  // 祝日にヒットしなくなる。Phase 2 再タグ付け時に holiday を含める運用で解消可能。
   if (isHoliday(date)) return 'holiday';
   const d = date.getDay();
   return d === 0 || d === 6 ? 'weekend' : 'weekday';
