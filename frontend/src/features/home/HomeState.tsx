@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import type { Mood as DbMood, EnergyLevel, SocialContext, TimePressure } from '../../utils/contextAxes';
+import React, { useEffect, useState } from 'react';
+import type { EnergyLevel, SocialContext, TimePressure } from '../../utils/contextAxes';
 
 // HomeMood の MoodId を維持しつつ、3軸（energy/social/time）を追加した state survey 画面
 // 仕様: docs/specs/suggestion-axes-extension.md (Phase 5 案A)
@@ -48,6 +48,13 @@ const TIME_PRESSURES: Array<{ id: TimePressure; label: string }> = [
 
 const HomeState: React.FC<HomeStateProps> = ({ selected, onSubmit, onSkip }) => {
   const [draft, setDraft] = useState<HomeStateAnswers>(selected);
+
+  // 親が selected をリセット（タブ切替など）した場合は draft も同期する
+  // useState 初期化は1回きりなので、props 変更を反映するには useEffect が必要
+  useEffect(() => {
+    setDraft(selected);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected.mood, selected.energyLevel, selected.socialContext, selected.timePressure]);
 
   const update = <K extends keyof HomeStateAnswers>(key: K, value: HomeStateAnswers[K]) => {
     // 同じ値を再タップしたら解除
@@ -98,6 +105,7 @@ const HomeState: React.FC<HomeStateProps> = ({ selected, onSubmit, onSkip }) => 
               <button
                 key={m.id}
                 type="button"
+                aria-pressed={draft.mood === m.id}
                 onClick={() => update('mood', m.id)}
                 style={buttonStyle(draft.mood === m.id)}
               >
@@ -115,7 +123,13 @@ const HomeState: React.FC<HomeStateProps> = ({ selected, onSubmit, onSkip }) => 
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             {ENERGIES.map((e) => (
-              <button key={e.id} type="button" onClick={() => update('energyLevel', e.id)} style={buttonStyle(draft.energyLevel === e.id)}>
+              <button
+                key={e.id}
+                type="button"
+                aria-pressed={draft.energyLevel === e.id}
+                onClick={() => update('energyLevel', e.id)}
+                style={buttonStyle(draft.energyLevel === e.id)}
+              >
                 {e.label}
               </button>
             ))}
@@ -129,7 +143,13 @@ const HomeState: React.FC<HomeStateProps> = ({ selected, onSubmit, onSkip }) => 
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             {SOCIALS.map((s) => (
-              <button key={s.id} type="button" onClick={() => update('socialContext', s.id)} style={buttonStyle(draft.socialContext === s.id)}>
+              <button
+                key={s.id}
+                type="button"
+                aria-pressed={draft.socialContext === s.id}
+                onClick={() => update('socialContext', s.id)}
+                style={buttonStyle(draft.socialContext === s.id)}
+              >
                 {s.label}
               </button>
             ))}
@@ -143,7 +163,13 @@ const HomeState: React.FC<HomeStateProps> = ({ selected, onSubmit, onSkip }) => 
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             {TIME_PRESSURES.map((t) => (
-              <button key={t.id} type="button" onClick={() => update('timePressure', t.id)} style={buttonStyle(draft.timePressure === t.id)}>
+              <button
+                key={t.id}
+                type="button"
+                aria-pressed={draft.timePressure === t.id}
+                onClick={() => update('timePressure', t.id)}
+                style={buttonStyle(draft.timePressure === t.id)}
+              >
                 {t.label}
               </button>
             ))}
@@ -185,6 +211,4 @@ const HomeState: React.FC<HomeStateProps> = ({ selected, onSubmit, onSkip }) => 
   );
 };
 
-// 既存の MoodId と DB の Mood enum を区別するため
-export type { DbMood };
 export default HomeState;
