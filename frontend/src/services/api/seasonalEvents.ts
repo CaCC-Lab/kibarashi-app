@@ -17,14 +17,19 @@ interface SeasonalEventsResponse {
   source: 'database' | 'fallback';
 }
 
-export async function fetchActiveSeasonalEvents(date?: string): Promise<SeasonalEvent[]> {
+export interface SeasonalEventsFetchResult {
+  events: SeasonalEvent[];
+  ok: boolean; // false なら呼び出し側でキャッシュせず再試行可能
+}
+
+export async function fetchActiveSeasonalEvents(date?: string): Promise<SeasonalEventsFetchResult> {
   const url = date ? `/api/v1/seasonal-events?date=${encodeURIComponent(date)}` : '/api/v1/seasonal-events';
   try {
     const res = await apiClient.get<SeasonalEventsResponse>(url);
-    return res?.activeEvents ?? [];
+    return { events: res?.activeEvents ?? [], ok: true };
   } catch (err) {
-    // ネットワーク失敗時は空配列で続行（Phase 4 機能はオプション扱い）
+    // ネットワーク失敗時は空配列を返しつつ ok=false で失敗を通知
     console.warn('[seasonalEvents] fetch failed:', err);
-    return [];
+    return { events: [], ok: false };
   }
 }

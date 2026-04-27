@@ -42,6 +42,7 @@ INSERT INTO seasonal_events (code, name_ja, start_date, end_date, description) V
   ('rainy_season',       '梅雨',              '2027-06-08', '2027-07-19', NULL),
   ('gw',                 'ゴールデンウィーク', '2027-04-29', '2027-05-05', NULL),
   ('obon',               'お盆',              '2027-08-13', '2027-08-16', NULL),
+  ('year_end_new_year',  '年末年始',          '2027-12-28', '2028-01-03', NULL),
   ('fiscal_year_change', '年度替わり',        '2027-03-15', '2027-04-15', NULL),
   ('pollen_high',        '花粉ピーク',        '2027-02-15', '2027-04-30', NULL),
   ('heat_wave',          '猛暑期',            '2027-07-20', '2027-08-31', NULL)
