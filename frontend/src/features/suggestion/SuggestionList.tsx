@@ -15,7 +15,7 @@ import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
 import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
 import { contextAPI, ContextualData } from '../../services/contextAPI';
 import { useWeather } from '../../hooks/useWeather';
-import { computeContextAxes } from '../../utils/contextAxes';
+import { computeContextAxes, mapHomeMoodToAxis } from '../../utils/contextAxes';
 
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
@@ -25,6 +25,8 @@ interface SuggestionListProps {
   location?: string;
   debugMode?: boolean;
   geoPosition?: { lat: number; lon: number } | null;
+  // HomeMood で選んだ気分。DB の Mood enum にマップして API に送る。
+  mood?: string | null;
 }
 
 /**
@@ -40,7 +42,7 @@ interface SuggestionListProps {
  * - 選択肢を一覧で表示し、興味を持ったものの詳細を確認できる
  * - ネットワークエラー等で失敗しても、ユーザーがあきらめずに済む
  */
-const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false, geoPosition }) => {
+const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, location, debugMode = false, geoPosition, mood }) => {
   const { suggestions, loading, error, fetchSuggestions } = useSuggestions();
   const { currentAgeGroup } = useAgeGroup();
   const { weather } = useWeather();
@@ -49,9 +51,13 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
 
   // 文脈軸は fetch の直前に毎回計算する（memoize すると partOfDay/dayType/season が
   // 時刻経過で古くなってしまう）。buildAxes は Date.now() を都度参照する。
+  // mood は HomeMood の選択値を DB の Mood enum にマップして付与する。
   const buildAxes = useCallback(
-    () => computeContextAxes({ weatherCondition, temperature: weatherTemp }),
-    [weatherCondition, weatherTemp]
+    () => ({
+      ...computeContextAxes({ weatherCondition, temperature: weatherTemp }),
+      mood: mapHomeMoodToAxis(mood),
+    }),
+    [weatherCondition, weatherTemp, mood]
   );
   
   // A/Bテスト統合

@@ -6,6 +6,7 @@ import {
   getTemperatureBand,
   normalizeWeatherCondition,
   computeContextAxes,
+  mapHomeMoodToAxis,
 } from './contextAxes';
 
 describe('contextAxes', () => {
@@ -75,6 +76,31 @@ describe('contextAxes', () => {
     it('null/undefined は undefined', () => {
       expect(normalizeWeatherCondition(null)).toBeUndefined();
       expect(normalizeWeatherCondition(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('mapHomeMoodToAxis', () => {
+    it.each([
+      ['tired', 'tired'],
+      ['anxious', 'anxious'],
+      ['bored', 'bored'],
+    ])('HomeMoodの %s はそのまま DB Mood に通る', (input, expected) => {
+      expect(mapHomeMoodToAxis(input)).toBe(expected);
+    });
+
+    it('foggy は tired にマップ（モヤモヤ≒疲れ）', () => {
+      expect(mapHomeMoodToAxis('foggy')).toBe('tired');
+    });
+
+    it('null/undefined/空文字は undefined', () => {
+      expect(mapHomeMoodToAxis(null)).toBeUndefined();
+      expect(mapHomeMoodToAxis(undefined)).toBeUndefined();
+      expect(mapHomeMoodToAxis('')).toBeUndefined();
+    });
+
+    it('未知の値は undefined', () => {
+      expect(mapHomeMoodToAxis('unknown')).toBeUndefined();
+      expect(mapHomeMoodToAxis('happy')).toBeUndefined();
     });
   });
 
