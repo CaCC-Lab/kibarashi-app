@@ -73,6 +73,13 @@ get:
       schema:
         type: string
         enum: ['activating', 'calming', 'mindful', 'problem_solving']
+    - name: seasonalEvent
+      in: query
+      description: 当日アクティブな季節イベント（任意）。フロントは /api/v1/seasonal-events で取得。
+      required: false
+      schema:
+        type: string
+        enum: ['rainy_season', 'gw', 'obon', 'year_end_new_year', 'fiscal_year_change', 'pollen_high', 'heat_wave']
   responses:
     '200':
       description: 提案の取得に成功

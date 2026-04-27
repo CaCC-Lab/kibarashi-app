@@ -15,7 +15,26 @@ import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
 import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
 import { contextAPI, ContextualData } from '../../services/contextAPI';
 import { useWeather } from '../../hooks/useWeather';
-import { computeContextAxes, mapHomeMoodToAxis } from '../../utils/contextAxes';
+import { useSeasonalEvents } from '../../hooks/useSeasonalEvents';
+import { computeContextAxes, mapHomeMoodToAxis, type SeasonalEventCode } from '../../utils/contextAxes';
+
+// 複数イベントが重なる場合の優先順位（より「特別感」が高いものを先に）
+const SEASONAL_EVENT_PRIORITY: SeasonalEventCode[] = [
+  'year_end_new_year',
+  'gw',
+  'obon',
+  'rainy_season',
+  'heat_wave',
+  'fiscal_year_change',
+  'pollen_high',
+];
+
+function pickPrimaryEvent(eventCodes: string[]): SeasonalEventCode | undefined {
+  for (const code of SEASONAL_EVENT_PRIORITY) {
+    if (eventCodes.includes(code)) return code;
+  }
+  return undefined;
+}
 
 // コンポーネントのプロパティ定義
 // なぜこの構造か：ユーザーが選択した状況と時間に基づいて、最適な提案を表示するため
@@ -48,16 +67,22 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
   const { weather } = useWeather();
   const weatherCondition = weather?.condition;
   const weatherTemp = weather?.temperature;
+  const { events: seasonalEvents } = useSeasonalEvents();
+  const seasonalEventCodes = seasonalEvents.map((e) => e.code);
+  // useCallback の依存に効くよう join 文字列で安定化
+  const seasonalEventKey = seasonalEventCodes.slice().sort().join(',');
 
   // 文脈軸は fetch の直前に毎回計算する（memoize すると partOfDay/dayType/season が
   // 時刻経過で古くなってしまう）。buildAxes は Date.now() を都度参照する。
   // mood は HomeMood の選択値を DB の Mood enum にマップして付与する。
+  // seasonalEvent は当日アクティブなイベント群から優先度順に1つだけ選ぶ。
   const buildAxes = useCallback(
     () => ({
       ...computeContextAxes({ weatherCondition, temperature: weatherTemp }),
       mood: mapHomeMoodToAxis(mood),
+      seasonalEvent: pickPrimaryEvent(seasonalEventKey ? seasonalEventKey.split(',') : []),
     }),
-    [weatherCondition, weatherTemp, mood]
+    [weatherCondition, weatherTemp, mood, seasonalEventKey]
   );
   
   // A/Bテスト統合

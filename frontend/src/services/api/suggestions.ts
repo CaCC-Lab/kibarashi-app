@@ -67,6 +67,8 @@ export async function fetchSuggestions(
     if (axes.partOfDay) params.set('partOfDay', axes.partOfDay);
     if (axes.dayType) params.set('dayType', axes.dayType);
     if (axes.mood) params.set('mood', axes.mood);
+    if (axes.intent) params.set('intent', axes.intent);
+    if (axes.seasonalEvent) params.set('seasonalEvent', axes.seasonalEvent);
   }
 
   const url = `/api/v1/suggestions?${params.toString()}`;
