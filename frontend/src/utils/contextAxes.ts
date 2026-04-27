@@ -55,6 +55,15 @@ export function normalizeWeatherCondition(condition: string | undefined | null):
   return undefined;
 }
 
+// HomeMood の MoodId（'tired' | 'foggy' | 'anxious' | 'bored'）を DB 側 Mood enum に変換。
+// 'foggy'（モヤモヤ）は DB に対応値が無いため 'tired' にマップ（低エネルギー系として近い）。
+export function mapHomeMoodToAxis(mood: string | null | undefined): Mood | undefined {
+  if (!mood) return undefined;
+  if (mood === 'tired' || mood === 'anxious' || mood === 'bored') return mood;
+  if (mood === 'foggy') return 'tired';
+  return undefined;
+}
+
 export function computeContextAxes(params: {
   now?: Date;
   weatherCondition?: string | null;

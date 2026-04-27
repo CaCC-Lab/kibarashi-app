@@ -209,7 +209,7 @@ function App() {
               <DurationSelector selected={duration} onSelect={handleDurationSelect} />
             )}
             {homeStep === 'suggestions' && situation && duration && (
-              <SuggestionList situation={situation} duration={duration} debugMode={debugMode} geoPosition={geoPosition} />
+              <SuggestionList situation={situation} duration={duration} debugMode={debugMode} geoPosition={geoPosition} mood={mood} />
             )}
           </Suspense>
         </div>
