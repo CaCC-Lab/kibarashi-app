@@ -136,16 +136,20 @@ async function fetchTargets(supabase, { limit, onlyUntagged }) {
     .select('id, title, description, duration, category, steps, season, weather, temperature_band, part_of_day, day_type, mood')
     .eq('is_public', true)
     .order('created_at', { ascending: false });
-  if (limit) query = query.limit(limit);
+  // --only-untagged のときは DB 側で limit せず、クライアント絞り込み後に limit を適用する
+  // （DB 側で limit すると未タグ行が limit に届かず空 batch になり Phase 2 ループが止まる）
+  if (limit && !onlyUntagged) query = query.limit(limit);
+
   const { data, error } = await query;
   if (error) {
     console.error('[tag] fetch error:', error.message);
     process.exit(1);
   }
   if (!onlyUntagged) return data;
-  return data.filter((r) =>
+  const untagged = data.filter((r) =>
     Object.keys(VALID).every((c) => !Array.isArray(r[c]) || r[c].length === 0)
   );
+  return limit ? untagged.slice(0, limit) : untagged;
 }
 
 async function main() {
@@ -165,7 +169,7 @@ async function main() {
   let okCount = 0;
   for (const [i, row] of rows.entries()) {
     try {
-      console.log(`  [${i + 1}/${rows.length}] ${row.title.slice(0, 30)}`);
+      console.log(`  [${i + 1}/${rows.length}] ${String(row.title || '').slice(0, 30)}`);
       const text = provider === 'gemini' ? await callGemini(buildPrompt(row)) : await callOllama(buildPrompt(row));
       const axes = normalize(parseJson(text));
       tagged.push({ id: row.id, title: row.title, axes });

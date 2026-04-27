@@ -32,6 +32,11 @@ function listFiles() {
 
 function validateAxes(axes) {
   const errs = [];
+  // 既知キー以外（誤入力など）が混じっていたら拒否（DBの未知列指定で SQL エラーを防ぐ）
+  const known = new Set(Object.keys(VALID));
+  for (const k of Object.keys(axes || {})) {
+    if (!known.has(k)) errs.push(`未知のキー: ${k}`);
+  }
   for (const col of Object.keys(VALID)) {
     if (!Array.isArray(axes[col])) {
       errs.push(`${col} が配列ではない`);
@@ -42,6 +47,17 @@ function validateAxes(axes) {
     }
   }
   return errs;
+}
+
+function pickAxes(axes) {
+  // 既知の軸カラムだけを抽出（余分なキーをDBに送らない）
+  const out = {};
+  for (const col of Object.keys(VALID)) out[col] = axes[col];
+  return out;
+}
+
+function isAllEmpty(axes) {
+  return Object.keys(VALID).every((c) => Array.isArray(axes[c]) && axes[c].length === 0);
 }
 
 async function main() {
@@ -102,14 +118,26 @@ async function main() {
       movedToInflight = true;
 
       // 1行ずつ UPDATE（PostgRESTのバルクUPDATEは値が異なるため）
-      let fileOk = 0, fileErr = 0;
+      let fileOk = 0, fileErr = 0, fileSkip = 0;
       for (const t of valid) {
-        const { error } = await supabase
+        // 既存タグを誤って空に上書きしないよう、全空 axes は skip
+        if (isAllEmpty(t.axes)) {
+          console.log(`    id=${t.id}: 全軸が空のためスキップ（既存タグ保護）`);
+          fileSkip += 1;
+          continue;
+        }
+        const safeAxes = pickAxes(t.axes);
+        // .select('id') を付けて UPDATE が実際に対象行に当たったかを検出
+        const { data, error } = await supabase
           .from('suggestions_master')
-          .update(t.axes)
-          .eq('id', t.id);
+          .update(safeAxes)
+          .eq('id', t.id)
+          .select('id');
         if (error) {
           console.error(`    id=${t.id}: ${error.message}`);
+          fileErr += 1;
+        } else if (!Array.isArray(data) || data.length === 0) {
+          console.warn(`    id=${t.id}: UPDATE 対象なし（id が DB に存在しない可能性）`);
           fileErr += 1;
         } else {
           fileOk += 1;
@@ -118,13 +146,26 @@ async function main() {
 
       okRows += fileOk;
       errRows += fileErr;
-      try {
-        fs.renameSync(inflightPath, path.join(committedDir, base));
-      } catch (e) {
-        console.warn(`  ${base}: rename 失敗 (${e.message})、inflight のまま残ります`);
+      // 全件失敗ならソースを approved/ に戻して再処理可能にする
+      // 部分成功時のみ committed/ に確定（promote-suggestions と挙動を揃える）
+      if (fileOk > 0) {
+        try {
+          fs.renameSync(inflightPath, path.join(committedDir, base));
+        } catch (e) {
+          console.warn(`  ${base}: rename 失敗 (${e.message})、inflight のまま残ります`);
+        }
+        console.log(`  ${base}: ${fileOk}/${valid.length} 件 UPDATE${fileSkip ? ` (skip ${fileSkip})` : ''}${fileErr ? ` (err ${fileErr})` : ''}`);
+        okFiles += 1;
+      } else {
+        // 全失敗: inflight を approved/ に戻す
+        try {
+          fs.renameSync(inflightPath, file);
+          console.warn(`  ${base}: 全件失敗のため approved/ に差し戻しました`);
+        } catch (e) {
+          console.warn(`  ${base}: ロールバック失敗 (${e.message}) — ${inflightPath} を手動で戻してください`);
+        }
+        skippedFiles += 1;
       }
-      console.log(`  ${base}: ${fileOk}/${valid.length} 件 UPDATE`);
-      okFiles += 1;
     } catch (err) {
       if (movedToInflight && fs.existsSync(inflightPath) && !fs.existsSync(file)) {
         try { fs.renameSync(inflightPath, file); } catch { /* best effort */ }

@@ -22,6 +22,7 @@ const path = require('path');
 const { loadEnv } = require('./_lib/loadEnv');
 loadEnv();
 const { getArg, hasFlag } = require('./_lib/common');
+const { VALID: AXIS_VALID } = require('../api/v1/_lib/contextAxes');
 
 const AGE_GROUP_LABEL = {
   office_worker: '20-40代の社会人',
@@ -164,14 +165,7 @@ function parseJsonArray(text) {
   throw new Error('JSON配列が抽出できませんでした');
 }
 
-const AXIS_VALID = {
-  season: ['spring', 'summer', 'autumn', 'winter'],
-  weather: ['sunny', 'cloudy', 'rainy', 'snowy'],
-  temperature_band: ['cold', 'cool', 'mild', 'warm', 'hot'],
-  part_of_day: ['morning', 'daytime', 'evening', 'night'],
-  day_type: ['weekday', 'weekend'],
-  mood: ['tired', 'anxious', 'irritated', 'lonely', 'bored', 'sad', 'calm'],
-};
+// AXIS_VALID は api/v1/_lib/contextAxes.js から import 済み（重複定義を避けるため）
 
 function normalizeAxes(axes) {
   const out = {};
