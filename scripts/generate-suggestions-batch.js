@@ -76,7 +76,9 @@ function buildPrompt({ ageGroup, situation, duration, category, count }) {
       "temperature_band": [],
       "part_of_day": [],
       "day_type": [],
-      "mood": []
+      "mood": [],
+      "intent": [],
+      "is_universal": false
     }
   }
 ]
@@ -91,8 +93,10 @@ function buildPrompt({ ageGroup, situation, duration, category, count }) {
 - weather: sunny / cloudy / rainy / snowy
 - temperature_band: cold / cool / mild / warm / hot
 - part_of_day: morning / daytime / evening / night
-- day_type: weekday / weekend
+- day_type: weekday / weekend / holiday
 - mood: tired / anxious / irritated / lonely / bored / sad / calm
+- intent: activating / calming / mindful / problem_solving（介入タイプ。1〜2個推奨）
+- is_universal: true なら「いつでも誰でも適切な普遍提案」を明言（不確実なら false）
 `;
 }
 
@@ -177,20 +181,24 @@ function normalizeAxes(axes) {
 }
 
 function normalize(items, spec) {
-  return items.map((x) => ({
-    title: String(x.title || '').slice(0, 40).trim(),
-    description: String(x.description || '').slice(0, 120).trim(),
-    duration: spec.duration,
-    category: ['認知的', '行動的'].includes(x.category) ? x.category : (spec.category || '認知的'),
-    situation: [spec.situation],
-    age_groups: [spec.ageGroup],
-    tags: Array.isArray(x.tags) ? x.tags.slice(0, 5).map((t) => String(t).slice(0, 20)) : [],
-    steps: Array.isArray(x.steps) ? x.steps.slice(0, 6).map((s) => String(s).trim()) : [],
-    ...normalizeAxes(x.axes),
-    source: 'ai',
-    quality_score: 3.0,
-    is_public: true,
-  })).filter((x) => x.title && x.steps.length >= 2);
+  return items.map((x) => {
+    const axes = normalizeAxes(x.axes);
+    return {
+      title: String(x.title || '').slice(0, 40).trim(),
+      description: String(x.description || '').slice(0, 120).trim(),
+      duration: spec.duration,
+      category: ['認知的', '行動的'].includes(x.category) ? x.category : (spec.category || '認知的'),
+      situation: [spec.situation],
+      age_groups: [spec.ageGroup],
+      tags: Array.isArray(x.tags) ? x.tags.slice(0, 5).map((t) => String(t).slice(0, 20)) : [],
+      steps: Array.isArray(x.steps) ? x.steps.slice(0, 6).map((s) => String(s).trim()) : [],
+      ...axes,
+      is_universal: x.axes?.is_universal === true,
+      source: 'ai',
+      quality_score: 3.0,
+      is_public: true,
+    };
+  }).filter((x) => x.title && x.steps.length >= 2);
 }
 
 async function generateOne(spec, provider) {

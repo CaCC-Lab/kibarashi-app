@@ -46,6 +46,9 @@ describe('contextAxes', () => {
     it('土曜は weekend', () => expect(getDayType(new Date(2026, 3, 18))).toBe('weekend'));
     it('月曜は weekday', () => expect(getDayType(new Date(2026, 3, 20))).toBe('weekday'));
     it('金曜は weekday', () => expect(getDayType(new Date(2026, 3, 17))).toBe('weekday'));
+    it('祝日（昭和の日 4/29）は holiday', () => expect(getDayType(new Date(2026, 3, 29))).toBe('holiday'));
+    it('元日（1/1）は holiday', () => expect(getDayType(new Date(2026, 0, 1))).toBe('holiday'));
+    it('GW (5/5 こどもの日) は holiday', () => expect(getDayType(new Date(2026, 4, 5))).toBe('holiday'));
   });
 
   describe('getTemperatureBand', () => {

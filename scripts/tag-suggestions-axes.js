@@ -38,12 +38,18 @@ function buildPrompt(row) {
 - part_of_day: ${VALID.part_of_day.join(' / ')}（複数可。一日中OKなら空配列）
 - day_type: ${VALID.day_type.join(' / ')}（複数可。両方OKなら空配列）
 - mood: ${VALID.mood.join(' / ')}（複数可。汎用なら空配列）
+- intent: ${VALID.intent.join(' / ')}（介入タイプ。activating=元気回復、calming=落ち着き、mindful=今に集中、problem_solving=思考整理。複数可、不明なら空配列）
+
+【is_universal フラグ】
+true = 「いつ・どこで・誰でも・どんな気分でも」適切な普遍的な提案だと明確に判断できる場合のみ
+false = 文脈依存の提案、または判断に迷う場合（=空配列軸が多くても is_universal=true にしない）
 
 【判定方針】
-- 該当が明確な場合のみ値を入れる。迷ったら空配列（=どの値にもマッチする汎用提案として扱われる）
+- 該当が明確な場合のみ値を入れる。迷ったら空配列（=どの値にもマッチする）
 - 「散歩」「外で深呼吸」など屋外限定 → weather に sunny/cloudy 等を入れる
 - 「就寝前」「朝起きて」など時間帯限定 → part_of_day に night/morning を入れる
-- 「リラックス」「瞑想」など普遍的 → 全部空配列
+- 「リラックス」「瞑想」など普遍的 → 軸は全部空 + is_universal=true
+- intent は提案の核となる介入タイプを1〜2個
 
 【出力】
 必ず以下の JSON のみを返してください。説明文は不要。
@@ -54,7 +60,9 @@ function buildPrompt(row) {
   "temperature_band": [],
   "part_of_day": [],
   "day_type": [],
-  "mood": []
+  "mood": [],
+  "intent": [],
+  "is_universal": false
 }
 `;
 }
@@ -127,13 +135,14 @@ function normalize(parsed) {
     const raw = Array.isArray(parsed[col]) ? parsed[col] : [];
     out[col] = raw.filter((v) => VALID[col].includes(v));
   }
+  out.is_universal = parsed.is_universal === true;
   return out;
 }
 
 async function fetchTargets(supabase, { limit, onlyUntagged }) {
   let query = supabase
     .from('suggestions_master')
-    .select('id, title, description, duration, category, steps, season, weather, temperature_band, part_of_day, day_type, mood')
+    .select('id, title, description, duration, category, steps, season, weather, temperature_band, part_of_day, day_type, mood, intent, is_universal')
     .eq('is_public', true)
     .order('created_at', { ascending: false });
   // --only-untagged のときは DB 側で limit せず、クライアント絞り込み後に limit を適用する

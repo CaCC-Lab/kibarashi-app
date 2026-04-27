@@ -30,14 +30,18 @@ function listFiles() {
   return fs.readdirSync(dir).filter((f) => f.endsWith('.json')).map((f) => path.join(dir, f));
 }
 
+// is_universal は配列ではなく boolean なので、配列カラムから分離して扱う
+const ARRAY_COLUMNS = Object.keys(VALID);
+const SCALAR_COLUMNS = ['is_universal'];
+
 function validateAxes(axes) {
   const errs = [];
   // 既知キー以外（誤入力など）が混じっていたら拒否（DBの未知列指定で SQL エラーを防ぐ）
-  const known = new Set(Object.keys(VALID));
+  const known = new Set([...ARRAY_COLUMNS, ...SCALAR_COLUMNS]);
   for (const k of Object.keys(axes || {})) {
     if (!known.has(k)) errs.push(`未知のキー: ${k}`);
   }
-  for (const col of Object.keys(VALID)) {
+  for (const col of ARRAY_COLUMNS) {
     if (!Array.isArray(axes[col])) {
       errs.push(`${col} が配列ではない`);
       continue;
@@ -46,18 +50,27 @@ function validateAxes(axes) {
       if (!VALID[col].includes(v)) errs.push(`${col} に不正値: ${v}`);
     }
   }
+  // is_universal は省略可、ある場合は boolean
+  if ('is_universal' in (axes || {}) && typeof axes.is_universal !== 'boolean') {
+    errs.push(`is_universal が boolean ではない: ${typeof axes.is_universal}`);
+  }
   return errs;
 }
 
 function pickAxes(axes) {
-  // 既知の軸カラムだけを抽出（余分なキーをDBに送らない）
+  // 既知の軸カラム + is_universal だけを抽出（余分なキーをDBに送らない）
   const out = {};
-  for (const col of Object.keys(VALID)) out[col] = axes[col];
+  for (const col of ARRAY_COLUMNS) out[col] = axes[col];
+  if (typeof axes.is_universal === 'boolean') out.is_universal = axes.is_universal;
   return out;
 }
 
 function isAllEmpty(axes) {
-  return Object.keys(VALID).every((c) => Array.isArray(axes[c]) && axes[c].length === 0);
+  // 「全配列が空」かつ「is_universal も false/未指定」のときのみ skip 対象
+  // is_universal=true は明示的な変更なので skip しない
+  const arraysEmpty = ARRAY_COLUMNS.every((c) => Array.isArray(axes[c]) && axes[c].length === 0);
+  const universalUnset = !axes.is_universal;
+  return arraysEmpty && universalUnset;
 }
 
 async function main() {
