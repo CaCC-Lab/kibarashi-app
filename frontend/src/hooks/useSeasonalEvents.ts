@@ -3,18 +3,15 @@
 // 取得に失敗した場合はキャッシュせず、次のマウント時に再試行する。
 import { useEffect, useState } from 'react';
 import { fetchActiveSeasonalEvents, SeasonalEvent } from '../services/api/seasonalEvents';
+import { todayStr } from '../utils/dateUtils';
 
 let cachedEvents: SeasonalEvent[] | null = null;
 let cachedDate: string | null = null;
 const subscribers = new Set<(events: SeasonalEvent[]) => void>();
 let inflight: Promise<SeasonalEvent[]> | null = null;
 
-function todayIso(): string {
-  return new Date().toISOString().slice(0, 10);
-}
-
 async function refresh(force = false): Promise<SeasonalEvent[]> {
-  const today = todayIso();
+  const today = todayStr();
   if (!force && cachedDate === today && cachedEvents) return cachedEvents;
   if (inflight) return inflight;
   inflight = fetchActiveSeasonalEvents(today)

@@ -34,7 +34,9 @@ module.exports = async (req, res) => {
   if (dateRaw && !isValidIsoDate(dateRaw)) {
     return res.status(400).json({ error: 'date must be YYYY-MM-DD' });
   }
-  date = dateRaw || new Date().toISOString().slice(0, 10);
+  // デフォルト日付は JST（Asia/Tokyo）。toISOString() は UTC を返すため
+  // JST 0:00〜9:00 は前日扱いになる問題を避ける。
+  date = dateRaw || new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tokyo' }).format(new Date());
 
   const client = getSupabase();
   if (!client) {
@@ -71,7 +73,8 @@ module.exports = async (req, res) => {
       source: 'database',
     });
   } catch (err) {
+    // 内部詳細はサーバログだけに残し、クライアントには汎用メッセージのみ返す
     console.error('[seasonal-events] unexpected:', err.message);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'internal_error' });
   }
 };
