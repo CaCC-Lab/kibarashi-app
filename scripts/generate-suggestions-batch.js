@@ -22,6 +22,7 @@ const path = require('path');
 const { loadEnv } = require('./_lib/loadEnv');
 loadEnv();
 const { getArg, hasFlag } = require('./_lib/common');
+const { VALID: AXIS_VALID } = require('../api/v1/_lib/contextAxes');
 
 const AGE_GROUP_LABEL = {
   office_worker: '20-40代の社会人',
@@ -68,13 +69,30 @@ function buildPrompt({ ageGroup, situation, duration, category, count }) {
     "description": "簡潔な説明（50文字以内）",
     "category": "認知的" または "行動的",
     "steps": ["ステップ1", "ステップ2", "ステップ3", "ステップ4", "ステップ5"],
-    "tags": ["短いタグ1", "短いタグ2"]
+    "tags": ["短いタグ1", "短いタグ2"],
+    "axes": {
+      "season": [],
+      "weather": [],
+      "temperature_band": [],
+      "part_of_day": [],
+      "day_type": [],
+      "mood": []
+    }
   }
 ]
 
 - steps は 3〜6 ステップ
 - tags は 1〜3 個（例: 呼吸法, 瞑想, 軽い運動）
 - title は具体的な動詞で始める（例: 「3分だけ窓の外を眺める」）
+
+【axes の値域と判定方針】
+迷ったら空配列（=どの値にもマッチする汎用提案）。明確に該当する場合のみ値を入れる。
+- season: spring / summer / autumn / winter
+- weather: sunny / cloudy / rainy / snowy
+- temperature_band: cold / cool / mild / warm / hot
+- part_of_day: morning / daytime / evening / night
+- day_type: weekday / weekend
+- mood: tired / anxious / irritated / lonely / bored / sad / calm
 `;
 }
 
@@ -147,6 +165,17 @@ function parseJsonArray(text) {
   throw new Error('JSON配列が抽出できませんでした');
 }
 
+// AXIS_VALID は api/v1/_lib/contextAxes.js から import 済み（重複定義を避けるため）
+
+function normalizeAxes(axes) {
+  const out = {};
+  for (const col of Object.keys(AXIS_VALID)) {
+    const raw = Array.isArray(axes?.[col]) ? axes[col] : [];
+    out[col] = raw.filter((v) => AXIS_VALID[col].includes(v));
+  }
+  return out;
+}
+
 function normalize(items, spec) {
   return items.map((x) => ({
     title: String(x.title || '').slice(0, 40).trim(),
@@ -157,6 +186,7 @@ function normalize(items, spec) {
     age_groups: [spec.ageGroup],
     tags: Array.isArray(x.tags) ? x.tags.slice(0, 5).map((t) => String(t).slice(0, 20)) : [],
     steps: Array.isArray(x.steps) ? x.steps.slice(0, 6).map((s) => String(s).trim()) : [],
+    ...normalizeAxes(x.axes),
     source: 'ai',
     quality_score: 3.0,
     is_public: true,

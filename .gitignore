@@ -25,6 +25,7 @@ lerna-debug.log*
 data/analysis/
 data/pending/
 data/approved/
+data/axis-tags/
 
 # Environment files
 .env

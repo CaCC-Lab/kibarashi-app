@@ -23,6 +23,7 @@ const path = require('path');
 const { loadEnv } = require('./_lib/loadEnv');
 loadEnv();
 const { getArg, hasFlag, getSupabase } = require('./_lib/common');
+const { VALID: AXIS_VALID } = require('../api/v1/_lib/contextAxes');
 
 function listTargetFiles() {
   const file = getArg('--file');
@@ -37,6 +38,11 @@ function listTargetFiles() {
     .map((f) => path.join(dir, f));
 }
 
+function coerceAxisColumn(col, value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter((v) => AXIS_VALID[col].includes(v));
+}
+
 function coerceRow(c, specDefault) {
   const duration = c.duration ?? specDefault.duration;
   return {
@@ -49,6 +55,12 @@ function coerceRow(c, specDefault) {
     tags: Array.isArray(c.tags) ? c.tags : [],
     steps: Array.isArray(c.steps) ? c.steps : [],
     guide: Array.isArray(c.steps) ? c.steps.join('\n') : '',
+    season: coerceAxisColumn('season', c.season),
+    weather: coerceAxisColumn('weather', c.weather),
+    temperature_band: coerceAxisColumn('temperature_band', c.temperature_band),
+    part_of_day: coerceAxisColumn('part_of_day', c.part_of_day),
+    day_type: coerceAxisColumn('day_type', c.day_type),
+    mood: coerceAxisColumn('mood', c.mood),
     source: c.source || 'ai',
     is_public: typeof c.is_public === 'boolean' ? c.is_public : true,
     quality_score: typeof c.quality_score === 'number' ? c.quality_score : 3.0,
