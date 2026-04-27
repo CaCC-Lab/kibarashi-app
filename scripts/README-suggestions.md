@@ -68,5 +68,24 @@ npm run suggestions:promote
 - age_groups / situation がズレていないか（LLMは誤分類することがある）
 
 ## スキーマ拡張との関係
-新軸（season/weather/mood/part_of_day/day_type）は `docs/specs/suggestion-axes-extension.md` で設計中。
-これが入ると `generate-suggestions-batch.js` と `promote-suggestions.js` にも対応フィールドを追加する予定。
+新軸（season/weather/temperature_band/part_of_day/day_type/mood）は Phase 1 で導入済み
+（`docs/specs/suggestion-axes-extension.md`）。`generate-suggestions-batch.js` は AI に軸タグも
+出力させ、`promote-suggestions.js` は対応カラムを INSERT に含める。
+
+## 既存提案への軸タグ付け（Phase 2）
+
+```bash
+# 1. AIで軸を提案（DBは変更しない、JSONに出力）
+npm run suggestions:tag-axes -- --only-untagged --limit 50 --provider ollama
+# → data/axis-tags/pending/<timestamp>.json
+
+# 2. 人手レビュー → OK のファイルを data/axis-tags/approved/ へ移動
+
+# 3. DBに UPDATE を適用
+npm run suggestions:apply-axes -- --dry-run    # 件数確認
+npm run suggestions:apply-axes                 # 本番適用
+# → data/axis-tags/approved/committed/ へ退避
+```
+
+判定方針: 迷ったら空配列（=どの軸値にもマッチする汎用提案）。
+明確に屋外限定・夜間限定など条件がある場合のみ値を入れる。

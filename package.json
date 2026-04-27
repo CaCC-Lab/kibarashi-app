@@ -38,7 +38,9 @@
     "validate:openapi": "node scripts/validate-openapi.js",
     "suggestions:analyze": "node scripts/analyze-suggestions-coverage.js",
     "suggestions:generate": "node scripts/generate-suggestions-batch.js",
-    "suggestions:promote": "node scripts/promote-suggestions.js"
+    "suggestions:promote": "node scripts/promote-suggestions.js",
+    "suggestions:tag-axes": "node scripts/tag-suggestions-axes.js",
+    "suggestions:apply-axes": "node scripts/apply-axis-tags.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

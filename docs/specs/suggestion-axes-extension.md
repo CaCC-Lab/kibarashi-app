@@ -6,22 +6,21 @@
 **Updated**: 2026-04-23
 **Related Memory**: `project_api_vision.md`, `project_api_consumers.md`
 
-## 実装ステータス (2026-04-23)
+## 実装ステータス (2026-04-27)
 
-| 軸 | 現状 | Phase |
+| 項目 | 現状 | Phase |
 |---|---|---|
-| season | 実装中 | Phase 1 |
-| weather | 実装中 | Phase 1 |
-| temperature_band | 実装中 | Phase 1 |
-| part_of_day | 実装中 | Phase 1 |
-| day_type (weekday/weekend) | 実装中 | Phase 1 |
-| mood | 実装中 | Phase 1 |
-| 祝日判定 | 未着手 | Phase 2 |
-| stress_level / energy_level / company | 未着手 | Phase 3（UI摩擦あり） |
-| 既存データへのバックフィル | 未着手 | Phase 4 |
+| 6軸スキーマ + GIN インデックス | ✅ 本番適用済 | Phase 1 |
+| API v1/v2 で軸クエリ受理 | ✅ デプロイ済 | Phase 1 |
+| フロント自動計算 + 配信 | ✅ デプロイ済 | Phase 1 |
+| `CONTEXT_AXES_ENABLED=true` 本番セット | ✅ 適用済 (2026-04-27) | Phase 1 |
+| **既存提案へのAI軸タグ付け** | ✅ ツール実装、運用待ち | **Phase 2** |
+| **新規生成時の軸タグ自動付与** | ✅ 実装済（プロンプトに axes を組込） | **Phase 2** |
+| 祝日判定（japanese-holidays） | 未着手 | Phase 3 |
+| stress_level / energy_level / company | 未着手 | Phase 4（UI摩擦あり） |
 
-Phase 1 は「フロントで自動計算 → API に送る → DB で空配列とマッチ or 実値と overlaps」という
-軽量な仕組みのみ。UI 追加・既存データ更新は含まない。
+Phase 1 完了: スキーマ・API・フロント配線・本番有効化まで一通り通った。
+Phase 2 完了基準: 既存390件の半数以上に軸タグを付与し、軸を変えると返ってくる提案が変わることを実機で確認。
 
 ## 1. 目的 (Why)
 
