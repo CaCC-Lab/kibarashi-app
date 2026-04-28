@@ -4,12 +4,10 @@ import SuggestionDetail from './SuggestionDetail';
 import { useSuggestions } from './useSuggestions';
 import Loading from '../../components/common/Loading';
 import ErrorMessage from '../../components/common/ErrorMessage';
-import GlobalAudioControls from '../audio/GlobalAudioControls';
 // import ContextDisplay from '../../components/context/ContextDisplay';
 import type { Suggestion } from '../../services/api/suggestions';
 import { SituationId } from '../../types/situation';
 import { useAgeGroup } from '../../hooks/useAgeGroup';
-import { useFeature } from '../config/featureFlags';
 import { useStudentABTest } from '../../hooks/useStudentABTest';
 import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
 import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
@@ -133,7 +131,6 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
   });
   
   // フィーチャーフラグ
-  const isVoiceGuideEnabled = useFeature('enhancedVoiceGuide');
   
   // コンテキストデータの管理
   const [, setContextData] = useState<ContextualData | null>(null);
@@ -245,7 +242,7 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
   // ステップ3: 提案詳細表示
   // なぜこの機能が必要か：
   // - ユーザーはまず一覧から興味を持った提案を選び、詳細を確認したい
-  // - 詳細画面では具体的な手順や音声ガイドを提供
+  // - 詳細画面では具体的な手順とタイマーを提供
   // - 一覧に戻る機能も必須（選び直したい場合があるため）
   if (selectedSuggestion) {
     return (
@@ -275,13 +272,6 @@ const SuggestionList: React.FC<SuggestionListProps> = ({ situation, duration, lo
           {duration}分でできる気晴らしです
         </p>
       </div>
-
-      {/* グローバル音声コントロール */}
-      {isVoiceGuideEnabled && (
-        <div className="mb-6">
-          <GlobalAudioControls />
-        </div>
-      )}
 
       {/* 提案カードのグリッド表示 */}
       {/* なぜグリッドか：3つの提案を均等に並べ、比較しやすくするため */}

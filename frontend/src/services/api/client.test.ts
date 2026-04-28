@@ -43,8 +43,8 @@ describe('apiClient', () => {
 
     it('POSTリクエストでデータを送信できる', async () => {
       const testData = {
-        text: 'テスト音声',
-        voiceSettings: { speed: 1.0 }
+        text: 'テストペイロード',
+        options: { foo: 'bar' }
       };
 
       mockFetch.mockResolvedValueOnce({

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import FavoriteButton from '../../components/favorites/FavoriteButton';
 import DataSourceBadge, { DataSource } from '../../components/common/DataSourceBadge';
-import { VoiceGuidePlayer } from '../audio/VoiceGuidePlayer';
-import { useFeature } from '../config/featureFlags';
 import { useStudentABTest } from '../../hooks/useStudentABTest';
 import { useHousewifeABTest } from '../../hooks/useHousewifeABTest';
 import { useJobSeekerABTest } from '../../hooks/useJobSeekerABTest';
 import { useCareerChangerABTest } from '../../hooks/useCareerChangerABTest';
-import { Suggestion, VoiceGuideScript } from '../../services/api/types';
+import { Suggestion } from '../../services/api/types';
 
 interface SuggestionCardProps {
   id: string;
@@ -16,7 +14,6 @@ interface SuggestionCardProps {
   duration: number;
   category: '認知的' | '行動的';
   steps?: string[];
-  voiceGuideScript?: VoiceGuideScript;
   ageGroup?: string;
   dataSource?: DataSource;
   apiKeyIndex?: number;
@@ -32,7 +29,6 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
   duration,
   category,
   steps,
-  voiceGuideScript,
   ageGroup,
   dataSource,
   apiKeyIndex,
@@ -78,10 +74,6 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
       // Career changer A/B test metric tracked
     }
   });
-  
-  // フィーチャーフラグによる音声ガイド機能の制御
-  const isVoiceGuideEnabled = useFeature('enhancedVoiceGuide');
-  const shouldShowVoiceGuide = isVoiceGuideEnabled && voiceGuideScript;
   
   // A/Bテストメトリクストラッキング付きのonStartハンドラー
   const handleStart = () => {
@@ -290,30 +282,6 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({
             </div>
           )}
         </div>
-
-        {/* 音声ガイドプレイヤー */}
-        {shouldShowVoiceGuide && (
-          <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-500">
-            <div className="flex items-center space-x-2 mb-3">
-              <svg className="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
-                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 14.142M9 9a3 3 0 013 3v3a3 3 0 01-6 0V9a3 3 0 013-3z" />
-              </svg>
-              <h4 className="font-medium text-gray-700 dark:text-gray-200">音声ガイド付き</h4>
-            </div>
-            <VoiceGuidePlayer 
-              voiceGuideScript={voiceGuideScript}
-              suggestionId={id}
-              onError={(error) => {
-                console.warn('Voice guide error:', error);
-                // エラー時は静かに無視（ユーザー体験を阻害しない）
-              }}
-              onComplete={() => {
-                // 音声ガイド完了時の処理（必要に応じて）
-              }}
-            />
-          </div>
-        )}
 
         {/* 学生向け最適化コンテンツ */}
         {shouldRender('studentFeature') && (ageGroup === 'student' || ageGroup === 'middle_school') && (

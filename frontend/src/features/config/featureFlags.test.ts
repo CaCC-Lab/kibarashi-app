@@ -48,7 +48,8 @@ describe('Feature Flags', () => {
     });
 
     it('無効な機能に対してfalseを返す', () => {
-      expect(FeatureFlagManager.isFeatureEnabled('voiceAutoPlay')).toBe(false);
+      // 存在しない機能名は常に無効
+      expect(FeatureFlagManager.isFeatureEnabled('nonexistent-feature')).toBe(false);
     });
 
     it('有効な機能に対してtrueを返す', () => {
@@ -108,22 +109,15 @@ describe('Feature Flags', () => {
   describe('FeatureFlagManager.getAllFeatureStates', () => {
     it('すべての機能の状態を返す', () => {
       const status = FeatureFlagManager.getAllFeatureStates();
-      
-      expect(status).toHaveProperty('enhancedVoiceGuide');
-      expect(status).toHaveProperty('voiceAutoPlay');
-      expect(status).toHaveProperty('offlineVoiceCache');
-      expect(status).toHaveProperty('voiceSpeedControl');
-      expect(status).toHaveProperty('subtitles');
+
       expect(status).toHaveProperty('a11yKeyboardShortcuts');
     });
 
     it('各機能の状態を正しく返す', () => {
       const status = FeatureFlagManager.getAllFeatureStates();
-      
+
       // a11yKeyboardShortcutsは有効（依存関係なし）
       expect(status.a11yKeyboardShortcuts).toBe(true);
-      // voiceAutoPlayは無効
-      expect(status.voiceAutoPlay).toBe(false);
     });
 
     it('ユーザーオーバーライドを反映する', () => {
@@ -169,11 +163,6 @@ describe('Feature Flags', () => {
 
   describe('Feature definitions', () => {
     it('必要な機能が定義されている', () => {
-      expect(features).toHaveProperty('enhancedVoiceGuide');
-      expect(features).toHaveProperty('voiceAutoPlay');
-      expect(features).toHaveProperty('offlineVoiceCache');
-      expect(features).toHaveProperty('voiceSpeedControl');
-      expect(features).toHaveProperty('subtitles');
       expect(features).toHaveProperty('a11yKeyboardShortcuts');
     });
 
@@ -211,8 +200,8 @@ describe('Feature Flags', () => {
       const originalEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';
       
-      // 無効な機能は本番でも無効
-      expect(FeatureFlagManager.isFeatureEnabled('voiceAutoPlay')).toBe(false);
+      // 存在しない機能は本番でも無効
+      expect(FeatureFlagManager.isFeatureEnabled('nonexistent-feature')).toBe(false);
       
       process.env.NODE_ENV = originalEnv;
     });

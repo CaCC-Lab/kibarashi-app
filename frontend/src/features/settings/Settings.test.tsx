@@ -14,9 +14,6 @@ vi.mock('../../components/ageGroup/AgeGroupSelector', () => ({
     <button onClick={() => onSelect('student')}>年齢層を選択</button>
   ),
 }));
-vi.mock('./components/TTSSettings', () => ({
-  TTSSettings: () => <div>TTS設定</div>,
-}));
 vi.mock('./components/ClearDataDialog', () => ({
   ClearDataDialog: ({ showClearConfirm, onCancel, onConfirm }: {
     showClearConfirm: string | null;

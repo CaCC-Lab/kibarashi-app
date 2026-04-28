@@ -6,7 +6,6 @@ import { useAppearance } from '../../hooks/useAppearance';
 import { AppDataManager } from '../../services/storage/appDataManager';
 import { AgeGroupSelector } from '../../components/ageGroup/AgeGroupSelector';
 import { AgeGroup } from '../../types/ageGroup';
-import { TTSSettings } from './components/TTSSettings';
 import { ClearDataDialog } from './components/ClearDataDialog';
 import { AppearanceSettings } from './components/AppearanceSettings';
 
@@ -19,20 +18,12 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const { clearHistory } = useHistory();
   const { updateAgeGroup } = useAgeGroup();
   const { appearance, update: updateAppearance } = useAppearance();
-  const [defaultTTS, setDefaultTTS] = useState<'gemini' | 'browser'>(
-    localStorage.getItem('defaultTTS') as 'gemini' | 'browser' || 'gemini'
-  );
   const [showClearConfirm, setShowClearConfirm] = useState<'favorites' | 'history' | 'all' | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const showMessage = (text: string) => {
     setMessage(text);
     setTimeout(() => setMessage(null), 3000);
-  };
-
-  const handleTTSChange = (value: 'gemini' | 'browser') => {
-    setDefaultTTS(value);
-    localStorage.setItem('defaultTTS', value);
   };
 
   const handleAgeGroupChange = (newAgeGroup: AgeGroup) => {
@@ -126,11 +117,6 @@ const Settings: React.FC<SettingsProps> = ({ onBack }) => {
         {/* 外観 */}
         <section>
           <AppearanceSettings appearance={appearance} onChange={updateAppearance} />
-        </section>
-
-        {/* 音声ガイド */}
-        <section>
-          <TTSSettings defaultTTS={defaultTTS} onTTSChange={handleTTSChange} />
         </section>
 
         {/* データ管理 */}

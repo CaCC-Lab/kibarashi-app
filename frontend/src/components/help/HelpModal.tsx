@@ -27,18 +27,6 @@ const HELP_SECTIONS: HelpSection[] = [
     ]
   },
   {
-    id: 'voice-guide',
-    title: '音声ガイド',
-    icon: '🔊',
-    description: '提案を音声で読み上げ、目を休めながら実践',
-    details: [
-      '各提案の「音声で聞く」ボタンで再生',
-      '自然な日本語音声で読み上げ',
-      '目を閉じてリラックスしながら聞けます',
-      '音声なしでも十分活用できます'
-    ]
-  },
-  {
     id: 'location-change',
     title: '場所変更',
     icon: '📍',
@@ -194,18 +182,6 @@ const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                   </div>
                 )}
 
-                {currentSection.id === 'voice-guide' && (
-                  <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                    <h4 className="font-medium text-text-primary dark:text-text-inverse mb-2">
-                      🔇 音声が出ない場合
-                    </h4>
-                    <ul className="text-sm text-text-secondary dark:text-gray-300 space-y-1">
-                      <li>• ブラウザの音声設定をご確認ください</li>
-                      <li>• 一時的なサーバー問題の可能性があります</li>
-                      <li>• 文字での提案でも十分効果的です</li>
-                    </ul>
-                  </div>
-                )}
               </div>
             )}
           </div>
