@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import SuggestionDetail from './SuggestionDetail';
 import type { Suggestion } from '@/types';
 
@@ -8,7 +8,7 @@ import type { Suggestion } from '@/types';
  * 
  * 設計思想：
  * - モックを使用せず、実際のコンポーネントの動作を検証
- * - 音声再生機能、アニメーション、インタラクションを確認
+ * - タイマー、アニメーション、インタラクションを確認
  */
 describe('SuggestionDetail', () => {
   let onBackCallCount = 0;
@@ -124,83 +124,6 @@ describe('SuggestionDetail', () => {
 
       expect(screen.getByText('開始')).toBeInTheDocument();
       expect(screen.getByText('リセット')).toBeInTheDocument();
-
-      // 音声ガイドのチェックボックスが表示される
-      expect(screen.getByText('音声ガイドを使用する')).toBeInTheDocument();
-      expect(screen.getByRole('checkbox')).toBeInTheDocument();
-    });
-  });
-
-  describe('音声ガイド機能', () => {
-    it('音声ガイドのチェックボックスが表示される', () => {
-      render(
-        <SuggestionDetail 
-          id={mockSuggestion.id}
-          title={mockSuggestion.title}
-          description={mockSuggestion.description}
-          duration={mockSuggestion.duration}
-          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
-          category={mockSuggestion.category}
-          situation="workplace"
-          onBack={() => { onBackCallCount++; }}
-        />
-      );
-
-      expect(screen.getByText('音声ガイドを使用する')).toBeInTheDocument();
-      const checkbox = screen.getByRole('checkbox');
-      expect(checkbox).toBeInTheDocument();
-      expect(checkbox).not.toBeChecked(); // デフォルトはオフ
-    });
-
-    it('音声ガイドのチェックボックスをクリックすると有効になる', () => {
-      render(
-        <SuggestionDetail 
-          id={mockSuggestion.id}
-          title={mockSuggestion.title}
-          description={mockSuggestion.description}
-          duration={mockSuggestion.duration}
-          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
-          category={mockSuggestion.category}
-          situation="workplace"
-          onBack={() => { onBackCallCount++; }}
-        />
-      );
-
-      const checkbox = screen.getByRole('checkbox');
-      fireEvent.click(checkbox);
-      expect(checkbox).toBeChecked();
-    });
-
-    it('音声ガイドが有効な場合、開始ボタンクリック時に音声準備中またはエラーが表示される', async () => {
-      render(
-        <SuggestionDetail 
-          id={mockSuggestion.id}
-          title={mockSuggestion.title}
-          description={mockSuggestion.description}
-          duration={mockSuggestion.duration}
-          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
-          category={mockSuggestion.category}
-          situation="workplace"
-          onBack={() => { onBackCallCount++; }}
-        />
-      );
-
-      // 音声ガイドを有効にする
-      const checkbox = screen.getByRole('checkbox');
-      fireEvent.click(checkbox);
-
-      // 開始ボタンをクリック
-      const startButton = screen.getByText('開始');
-      fireEvent.click(startButton);
-
-      // 音声準備中またはエラーメッセージの表示を確認
-      await waitFor(() => {
-        const preparingText = screen.queryByText('音声準備中...');
-        const errorText = screen.queryByText(/音声の生成に失敗しました|Gemini音声は利用できません/);
-        const pauseButton = screen.queryByText('一時停止');
-        // 音声準備中、エラー、またはタイマー開始（一時停止ボタン表示）のいずれかが表示される
-        expect(preparingText || errorText || pauseButton).toBeTruthy();
-      }, { timeout: 2000 });
     });
   });
 
@@ -332,25 +255,6 @@ describe('SuggestionDetail', () => {
   });
 
   describe('アクセシビリティ', () => {
-    it('音声ガイドのチェックボックスに適切なラベルが設定されている', () => {
-      render(
-        <SuggestionDetail 
-          id={mockSuggestion.id}
-          title={mockSuggestion.title}
-          description={mockSuggestion.description}
-          duration={mockSuggestion.duration}
-          guide={mockSuggestion.steps ? mockSuggestion.steps.join('\n') : mockSuggestion.description}
-          category={mockSuggestion.category}
-          situation="workplace"
-          onBack={() => { onBackCallCount++; }}
-        />
-      );
-
-      const checkbox = screen.getByRole('checkbox');
-      expect(checkbox).toBeInTheDocument();
-      expect(screen.getByText('音声ガイドを使用する')).toBeInTheDocument();
-    });
-
     it('ボタンが適切にクリック可能である', () => {
       render(
         <SuggestionDetail 

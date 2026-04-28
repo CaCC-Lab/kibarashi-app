@@ -43,8 +43,8 @@ describe('apiClient', () => {
 
     it('POSTリクエストでデータを送信できる', async () => {
       const testData = {
-        text: 'テスト音声',
-        voiceSettings: { speed: 1.0 }
+        text: 'テストペイロード',
+        options: { foo: 'bar' }
       };
 
       mockFetch.mockResolvedValueOnce({
@@ -53,7 +53,7 @@ describe('apiClient', () => {
         json: async () => ({ success: true }),
       });
 
-      const response = await apiClient.post('/api/v1/tts', testData);
+      const response = await apiClient.post('/api/v1/echo', testData);
       expect(response).toBeDefined();
 
       // fetchが正しいbodyで呼ばれたことを確認

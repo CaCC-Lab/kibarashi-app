@@ -25,41 +25,6 @@ export interface Feature {
  * 利用可能な機能フラグ
  */
 export const features: Record<string, Feature> = {
-  enhancedVoiceGuide: {
-    enabled: import.meta.env.VITE_ENHANCED_VOICE === 'true',
-    rolloutPercentage: 100,
-    description: '音声ガイド機能（SSML対応、セグメント分割）',
-    dependencies: []
-  },
-  
-  voiceAutoPlay: {
-    enabled: false,
-    rolloutPercentage: 0,
-    description: '音声の自動再生（ユーザー許可後）',
-    dependencies: ['enhancedVoiceGuide']
-  },
-  
-  offlineVoiceCache: {
-    enabled: import.meta.env.VITE_OFFLINE_VOICE === 'true',
-    rolloutPercentage: 50,
-    description: 'Service Workerによる音声キャッシュ',
-    dependencies: ['enhancedVoiceGuide']
-  },
-  
-  voiceSpeedControl: {
-    enabled: true,
-    rolloutPercentage: 100,
-    description: '音声再生速度の調整機能',
-    dependencies: ['enhancedVoiceGuide']
-  },
-  
-  subtitles: {
-    enabled: true,
-    rolloutPercentage: 100,
-    description: '音声ガイドの字幕表示',
-    dependencies: ['enhancedVoiceGuide']
-  },
-  
   a11yKeyboardShortcuts: {
     enabled: true,
     rolloutPercentage: 100,
@@ -184,7 +149,7 @@ class FeatureFlagManager {
  * フィーチャーフラグのカスタムフック
  * 
  * 使用例：
- * const isVoiceEnabled = useFeature('enhancedVoiceGuide');
+ * const enabled = useFeature('a11yKeyboardShortcuts');
  */
 export function useFeature(featureName: string): boolean {
   const [enabled, setEnabled] = useState(() => 
