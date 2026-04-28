@@ -48,8 +48,18 @@ describe('Feature Flags', () => {
     });
 
     it('無効な機能に対してfalseを返す', () => {
-      // 存在しない機能名は常に無効
-      expect(FeatureFlagManager.isFeatureEnabled('nonexistent-feature')).toBe(false);
+      const disabledFeatureKey = '__test_disabled_feature__';
+      features[disabledFeatureKey] = {
+        enabled: false,
+        rolloutPercentage: 100,
+        description: 'テスト用（レジストリ上は無効）',
+        dependencies: []
+      };
+      try {
+        expect(FeatureFlagManager.isFeatureEnabled(disabledFeatureKey)).toBe(false);
+      } finally {
+        delete features[disabledFeatureKey];
+      }
     });
 
     it('有効な機能に対してtrueを返す', () => {
