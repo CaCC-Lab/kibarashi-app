@@ -53,7 +53,7 @@ describe('apiClient', () => {
         json: async () => ({ success: true }),
       });
 
-      const response = await apiClient.post('/api/v1/tts', testData);
+      const response = await apiClient.post('/api/v1/echo', testData);
       expect(response).toBeDefined();
 
       // fetchが正しいbodyで呼ばれたことを確認
